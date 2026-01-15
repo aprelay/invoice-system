@@ -1,0 +1,1532 @@
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { serveStatic } from 'hono/cloudflare-workers'
+
+type Bindings = {
+  DROPBOX_ACCESS_TOKEN: string
+  MICROSOFT_CLIENT_ID: string
+  MICROSOFT_TENANT_ID: string
+  MICROSOFT_CLIENT_SECRET: string
+  MICROSOFT_SENDER_EMAIL: string
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+
+// Enable CORS for API routes
+app.use('/api/*', cors())
+
+// Serve static files
+app.use('/static/*', serveStatic({ root: './public' }))
+
+// Main invoice page
+app.get('/', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Invoice System</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          }
+          .invoice-preview {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+        </style>
+    </head>
+    <body class="bg-gray-50">
+        <div class="bg-blue-600 text-white py-4 px-6 mb-6 shadow-md">
+            <div class="container mx-auto max-w-6xl flex justify-between items-center">
+                <h1 class="text-2xl font-bold">
+                    <i class="fas fa-file-invoice mr-2"></i>
+                    Invoice System
+                </h1>
+                <a href="/setup-guide" target="_blank" 
+                   class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
+                    <i class="fab fa-dropbox mr-2"></i>
+                    Dropbox Setup Guide
+                </a>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-8 max-w-6xl">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Left side: Form -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-file-invoice mr-2 text-blue-600"></i>
+                        Create Service Notice
+                    </h2>
+                    
+                    <form id="invoiceForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
+                            <input type="text" id="companyName" value="" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name</label>
+                            <input type="text" id="customerName" value="Ap" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Work Order Number
+                                <button type="button" onclick="randomizeWorkOrder()" 
+                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
+                                    <i class="fas fa-dice mr-1"></i>Random
+                                </button>
+                            </label>
+                            <input type="text" id="workOrder" value="PO-28551" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Reference Number
+                                <button type="button" onclick="randomizeReference()" 
+                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
+                                    <i class="fas fa-dice mr-1"></i>Random
+                                </button>
+                            </label>
+                            <input type="text" id="reference" value="SVC-2025-2294" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Service Description
+                                <button type="button" onclick="randomizeService()" 
+                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
+                                    <i class="fas fa-dice mr-1"></i>Random
+                                </button>
+                            </label>
+                            <input type="text" id="service" value="Heating System Maintenance" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Due Date</label>
+                            <input type="date" id="dueDate" value="2026-01-23" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Email</label>
+                            <input type="email" id="contactEmail" value="ap@rgbmechanical.com" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-link mr-2 text-indigo-600"></i>
+                                Custom Service Details URL (Optional)
+                            </label>
+                            <input type="url" id="customUrl" placeholder="https://your-website.com/invoice/details" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm">
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Enter your custom URL where customers can view full invoice details. If empty, button will link to Dropbox file.
+                            </p>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                                Email Recipients (Office 365)
+                            </label>
+                            <textarea id="emailRecipients" rows="3" placeholder="Enter email addresses, one per line:&#10;john@example.com&#10;mary@company.com&#10;team@business.com"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Enter one email address per line
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-200">
+                            <button type="button" onclick="randomizeAll()" 
+                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
+                                <i class="fas fa-dice mr-2"></i>Randomize All Fields
+                            </button>
+
+                            <button type="button" onclick="updatePreview()" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
+                                <i class="fas fa-eye mr-2"></i>Update Preview
+                            </button>
+                            
+                            <button type="button" onclick="sendToDropbox()" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
+                                <i class="fab fa-dropbox mr-2"></i>Send to Dropbox
+                            </button>
+
+                            <button type="button" onclick="sendToEmail()" 
+                                    class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
+                                <i class="fas fa-envelope mr-2"></i>Send to Email (Office 365)
+                            </button>
+
+                            <button type="button" onclick="sendToBoth()" 
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i>Send to Dropbox + Email
+                            </button>
+                        </div>
+
+                        <div id="status" class="hidden mt-4 p-4 rounded-lg"></div>
+                    </form>
+                </div>
+
+                <!-- Right side: Preview -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Preview</h2>
+                    <div id="invoicePreview" class="invoice-preview bg-white rounded-lg overflow-hidden">
+                        <!-- Preview content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>
+            // Service descriptions library
+            const services = [
+                'Heating System Maintenance',
+                'Air Conditioning Repair',
+                'HVAC Installation',
+                'Furnace Inspection',
+                'Duct Cleaning Service',
+                'Thermostat Replacement',
+                'Boiler Maintenance',
+                'Heat Pump Installation',
+                'Emergency HVAC Repair',
+                'Air Quality Assessment',
+                'Commercial HVAC Service',
+                'Residential Cooling System Repair',
+                'Preventive Maintenance Check',
+                'Refrigeration System Service',
+                'Ventilation System Upgrade',
+                'Plumbing Inspection',
+                'Water Heater Installation',
+                'Pipe Leak Repair',
+                'Drain Cleaning Service',
+                'Electrical System Inspection'
+            ];
+
+            // Generate random work order number
+            function randomizeWorkOrder() {
+                const randomNum = Math.floor(Math.random() * 90000) + 10000;
+                document.getElementById('workOrder').value = 'PO-' + randomNum;
+                updatePreview();
+            }
+
+            // Generate random reference number
+            function randomizeReference() {
+                const year = 2025;
+                const randomNum = Math.floor(Math.random() * 9000) + 1000;
+                document.getElementById('reference').value = 'SVC-' + year + '-' + randomNum;
+                updatePreview();
+            }
+
+            // Generate random service description
+            function randomizeService() {
+                const randomService = services[Math.floor(Math.random() * services.length)];
+                document.getElementById('service').value = randomService;
+                updatePreview();
+            }
+
+            // Randomize all three fields
+            function randomizeAll() {
+                randomizeWorkOrder();
+                randomizeReference();
+                randomizeService();
+            }
+
+            // Initialize preview on page load
+            window.addEventListener('DOMContentLoaded', updatePreview);
+
+            function updatePreview() {
+                const companyName = document.getElementById('companyName').value;
+                const customerName = document.getElementById('customerName').value;
+                const workOrder = document.getElementById('workOrder').value;
+                const reference = document.getElementById('reference').value;
+                const service = document.getElementById('service').value;
+                const dueDate = document.getElementById('dueDate').value;
+                const contactEmail = document.getElementById('contactEmail').value;
+
+                const formattedDate = new Date(dueDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                document.getElementById('invoicePreview').innerHTML = \`
+                    <div class="bg-blue-600 text-white text-center py-8 px-4">
+                        <h1 class="text-3xl font-bold mb-2">\${companyName}</h1>
+                        <p class="text-lg">Service Completion Notice</p>
+                    </div>
+
+                    <div class="p-8">
+                        <p class="text-gray-700 mb-6">Hi \${customerName},</p>
+                        
+                        <p class="text-gray-700 mb-4">
+                            Thank you for your business. This notice confirms completion of work under 
+                            <strong>Work Order \${workOrder}</strong> (Reference: \${reference}).
+                        </p>
+
+                        <div class="bg-gray-50 border-l-4 border-blue-600 p-4 mb-6">
+                            <p class="text-sm font-semibold text-gray-600 mb-2">SERVICE</p>
+                            <p class="text-lg text-gray-800">\${service}</p>
+                        </div>
+
+                        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-600 mb-1">Due Date</p>
+                            <p class="text-2xl font-bold text-blue-600">\${formattedDate}</p>
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <button class="bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-200">
+                                View Service Details
+                            </button>
+                        </div>
+
+                        <p class="text-sm text-gray-600 text-center mb-6">
+                            Click above to view complete service details, itemized charges, and payment information
+                            for \${workOrder}.
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-800 text-white text-center py-6 px-4">
+                        <p class="font-semibold mb-2">\${companyName}</p>
+                        <p class="text-sm">Questions? Contact us at <a href="mailto:\${contactEmail}" class="text-blue-300 hover:underline">\${contactEmail}</a></p>
+                    </div>
+                \`;
+            }
+
+            async function sendToDropbox() {
+                const statusDiv = document.getElementById('status');
+                statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+                statusDiv.textContent = 'Sending to Dropbox...';
+                statusDiv.classList.remove('hidden');
+
+                try {
+                    const data = {
+                        companyName: document.getElementById('companyName').value,
+                        customerName: document.getElementById('customerName').value,
+                        workOrder: document.getElementById('workOrder').value,
+                        reference: document.getElementById('reference').value,
+                        service: document.getElementById('service').value,
+                        dueDate: document.getElementById('dueDate').value,
+                        contactEmail: document.getElementById('contactEmail').value
+                    };
+
+                    const response = await axios.post('/api/dropbox/upload', data);
+
+                    if (response.data.success) {
+                        statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                        statusDiv.innerHTML = \`
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    <strong>Successfully sent to Dropbox!</strong>
+                                    <p class="text-sm mt-1">File: \${response.data.filename}</p>
+                                </div>
+                                \${response.data.shareUrl ? \`
+                                    <a href="\${response.data.shareUrl}" target="_blank" 
+                                       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                                        <i class="fas fa-external-link-alt mr-1"></i>View
+                                    </a>
+                                \` : ''}
+                            </div>
+                        \`;
+                    } else {
+                        throw new Error(response.data.error || 'Upload failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to send to Dropbox. Please check your API token.'}
+                    \`;
+                }
+            }
+
+            // Send invoice to Office 365 email
+            async function sendToEmail() {
+                const statusDiv = document.getElementById('status');
+                const emailRecipients = document.getElementById('emailRecipients').value.trim();
+
+                if (!emailRecipients) {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 text-yellow-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>No Recipients:</strong> Please enter at least one email address
+                    \`;
+                    statusDiv.classList.remove('hidden');
+                    return;
+                }
+
+                statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+                statusDiv.textContent = 'Uploading to Dropbox and sending email...';
+                statusDiv.classList.remove('hidden');
+
+                try {
+                    const data = {
+                        companyName: document.getElementById('companyName').value,
+                        customerName: document.getElementById('customerName').value,
+                        workOrder: document.getElementById('workOrder').value,
+                        reference: document.getElementById('reference').value,
+                        service: document.getElementById('service').value,
+                        dueDate: document.getElementById('dueDate').value,
+                        contactEmail: document.getElementById('contactEmail').value,
+                        customUrl: document.getElementById('customUrl').value.trim(),
+                        recipients: emailRecipients.split('\\n').filter(e => e.trim())
+                    };
+
+                    // Step 1: Upload to Dropbox first to get the share URL
+                    const dropboxResponse = await axios.post('/api/dropbox/upload', data);
+
+                    if (!dropboxResponse.data.success) {
+                        throw new Error('Dropbox upload failed: ' + dropboxResponse.data.error);
+                    }
+
+                    // Step 2: Send email with Dropbox link
+                    const emailData = {
+                        ...data,
+                        dropboxShareUrl: dropboxResponse.data.shareUrl,
+                        dropboxFilename: dropboxResponse.data.filename
+                    };
+
+                    const response = await axios.post('/api/email/send', emailData);
+
+                    if (response.data.success) {
+                        statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                        statusDiv.innerHTML = \`
+                            <div>
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <strong>Email sent successfully!</strong>
+                                <p class="text-sm mt-1">Sent to \${response.data.recipientCount} recipient(s)</p>
+                                <p class="text-xs mt-1 text-gray-600">Subject: \${response.data.subject}</p>
+                                <p class="text-xs mt-1 text-gray-600"><i class="fab fa-dropbox mr-1"></i>Also saved to Dropbox: \${dropboxResponse.data.filename}</p>
+                            </div>
+                        \`;
+                    } else {
+                        throw new Error(response.data.error || 'Email failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to send email. Please check your Microsoft Graph configuration.'}
+                    \`;
+                }
+            }
+
+            // Send to both Dropbox and Email
+            async function sendToBoth() {
+                const statusDiv = document.getElementById('status');
+                const emailRecipients = document.getElementById('emailRecipients').value.trim();
+
+                if (!emailRecipients) {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 text-yellow-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>No Recipients:</strong> Please enter at least one email address
+                    \`;
+                    statusDiv.classList.remove('hidden');
+                    return;
+                }
+
+                statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+                statusDiv.textContent = 'Sending to Dropbox and Email...';
+                statusDiv.classList.remove('hidden');
+
+                try {
+                    const data = {
+                        companyName: document.getElementById('companyName').value,
+                        customerName: document.getElementById('customerName').value,
+                        workOrder: document.getElementById('workOrder').value,
+                        reference: document.getElementById('reference').value,
+                        service: document.getElementById('service').value,
+                        dueDate: document.getElementById('dueDate').value,
+                        contactEmail: document.getElementById('contactEmail').value,
+                        customUrl: document.getElementById('customUrl').value.trim(),
+                        recipients: emailRecipients.split('\\n').filter(e => e.trim())
+                    };
+
+                    // Step 1: Generate PDF
+                    statusDiv.textContent = 'Generating PDF invoice...';
+                    const pdfResponse = await axios.post('/api/generate-pdf', data);
+                    
+                    if (!pdfResponse.data.success) {
+                        throw new Error('PDF generation failed: ' + pdfResponse.data.error);
+                    }
+                    
+                    // Step 2: Upload PDF to Google Drive
+                    statusDiv.textContent = 'Uploading to Google Drive...';
+                    const driveResponse = await axios.post('/api/googledrive/upload-pdf', {
+                        pdfData: pdfResponse.data.pdfData,
+                        filename: pdfResponse.data.filename,
+                        workOrder: data.workOrder
+                    });
+
+                    if (!driveResponse.data.success) {
+                        throw new Error('Google Drive upload failed: ' + driveResponse.data.error);
+                    }
+
+                    // Step 3: Send email with Google Drive link
+                    statusDiv.textContent = 'Sending email...';
+                    const emailData = {
+                        ...data,
+                        dropboxShareUrl: driveResponse.data.previewUrl, // Using same var name for compatibility
+                        dropboxFilename: driveResponse.data.filename
+                    };
+
+                    const emailResponse = await axios.post('/api/email/send', emailData);
+
+                    const driveSuccess = driveResponse.data.success;
+                    const emailSuccess = emailResponse.data.success;
+
+                    if (driveSuccess && emailSuccess) {
+                        statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                        statusDiv.innerHTML = \`
+                            <div>
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <strong>Success! PDF Invoice Created & Sent</strong>
+                                <p class="text-sm mt-2"><i class="fas fa-file-pdf mr-1"></i> PDF: \${driveResponse.data.filename}</p>
+                                <p class="text-sm"><i class="fas fa-envelope mr-1"></i> Email: Sent to \${emailResponse.data.recipientCount} recipient(s)</p>
+                                \${driveResponse.data.previewUrl ? \`
+                                    <a href="\${driveResponse.data.previewUrl}" target="_blank" 
+                                       class="inline-block mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
+                                        <i class="fas fa-external-link-alt mr-1"></i>View PDF in Google Drive
+                                    </a>
+                                \` : ''}
+                            </div>
+                        \`;
+                    } else {
+                        const errors = [];
+                        if (!driveSuccess) errors.push('Google Drive: ' + driveResponse.data.error);
+                        if (!emailSuccess) errors.push('Email: ' + emailResponse.data.error);
+                        throw new Error(errors.join('; '));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to send. Please check your configuration.'}
+                    \`;
+                }
+            }
+
+            // Auto-update preview on input change
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', updatePreview);
+            });
+        </script>
+    </body>
+    </html>
+  `)
+})
+
+// API endpoint to generate PDF invoice
+app.post('/api/generate-pdf', async (c) => {
+  try {
+    const { PDFDocument, rgb, StandardFonts, PDFName, PDFString, PDFArray } = await import('pdf-lib')
+    const data = await c.req.json()
+    
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create()
+    const page = pdfDoc.addPage([595, 842]) // A4 size
+    
+    // Load fonts
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    
+    const { width, height } = page.getSize()
+    const margin = 50
+    
+    // Format date
+    const formattedDate = new Date(data.dueDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    // Colors
+    const blue = rgb(0.15, 0.25, 0.69) // #2563eb
+    const darkGray = rgb(0.2, 0.2, 0.2)
+    const gray = rgb(0.4, 0.4, 0.4)
+    const lightGray = rgb(0.95, 0.95, 0.95)
+    
+    let yPosition = height - margin
+    
+    // Header - Company Name
+    page.drawRectangle({
+      x: 0,
+      y: yPosition - 60,
+      width: width,
+      height: 80,
+      color: blue,
+    })
+    
+    page.drawText(data.companyName, {
+      x: margin,
+      y: yPosition - 30,
+      size: 28,
+      font: boldFont,
+      color: rgb(1, 1, 1),
+    })
+    
+    page.drawText('SERVICE INVOICE', {
+      x: margin,
+      y: yPosition - 55,
+      size: 14,
+      font: regularFont,
+      color: rgb(1, 1, 1),
+    })
+    
+    yPosition -= 120
+    
+    // Invoice Title
+    page.drawText('Invoice Details', {
+      x: margin,
+      y: yPosition,
+      size: 18,
+      font: boldFont,
+      color: darkGray,
+    })
+    
+    yPosition -= 40
+    
+    // Invoice details table
+    const drawRow = (label: string, value: string, y: number, isHighlight: boolean = false) => {
+      // Background
+      if (isHighlight) {
+        page.drawRectangle({
+          x: margin,
+          y: y - 5,
+          width: width - 2 * margin,
+          height: 25,
+          color: lightGray,
+        })
+      }
+      
+      // Label
+      page.drawText(label, {
+        x: margin + 10,
+        y: y + 5,
+        size: 11,
+        font: boldFont,
+        color: gray,
+      })
+      
+      // Value
+      page.drawText(value, {
+        x: width - margin - 200,
+        y: y + 5,
+        size: 12,
+        font: regularFont,
+        color: darkGray,
+      })
+    }
+    
+    drawRow('CUSTOMER', data.customerName, yPosition, true)
+    yPosition -= 30
+    drawRow('WORK ORDER', data.workOrder, yPosition, false)
+    yPosition -= 30
+    drawRow('REFERENCE NUMBER', data.reference, yPosition, true)
+    yPosition -= 30
+    drawRow('SERVICE PROVIDED', data.service, yPosition, false)
+    yPosition -= 30
+    drawRow('PAYMENT DUE DATE', formattedDate, yPosition, true)
+    
+    yPosition -= 60
+    
+    // Custom URL section (if provided)
+    if (data.customUrl && data.customUrl.trim()) {
+      // Box for link
+      page.drawRectangle({
+        x: margin,
+        y: yPosition - 60,
+        width: width - 2 * margin,
+        height: 70,
+        color: rgb(0.95, 0.97, 1),
+        borderColor: blue,
+        borderWidth: 2,
+      })
+      
+      page.drawText('VIEW COMPLETE INVOICE ONLINE', {
+        x: margin + 15,
+        y: yPosition - 20,
+        size: 12,
+        font: boldFont,
+        color: darkGray,
+      })
+      
+      page.drawText('Click the link below to access your detailed invoice:', {
+        x: margin + 15,
+        y: yPosition - 40,
+        size: 10,
+        font: regularFont,
+        color: gray,
+      })
+      
+      // Add clickable link
+      const linkText = 'Access Full Invoice Details'
+      page.drawText(linkText, {
+        x: margin + 15,
+        y: yPosition - 58,
+        size: 11,
+        font: boldFont,
+        color: blue,
+      })
+      
+      // Create link annotation
+      const linkWidth = boldFont.widthOfTextAtSize(linkText, 11)
+      page.drawRectangle({
+        x: margin + 15,
+        y: yPosition - 62,
+        width: linkWidth,
+        height: 15,
+        borderColor: blue,
+        borderWidth: 0,
+        opacity: 0,
+      })
+      
+      // Add link annotation using pdf-lib's proper method
+      const linkAnnotation = pdfDoc.context.register(
+        pdfDoc.context.obj({
+          Type: 'Annot',
+          Subtype: 'Link',
+          Rect: [margin + 15, yPosition - 62, margin + 15 + linkWidth, yPosition - 47],
+          Border: [0, 0, 0],
+          C: [0, 0, 1],
+          A: pdfDoc.context.obj({
+            S: 'URI',
+            URI: PDFString.of(data.customUrl),
+          }),
+        })
+      )
+      
+      const pageRef = page.ref
+      const pageDict = pdfDoc.context.lookup(pageRef)
+      let annots = pageDict.get(PDFName.of('Annots'))
+      
+      if (!annots) {
+        pageDict.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotation]))
+      } else if (annots instanceof PDFArray) {
+        annots.push(linkAnnotation)
+      } else {
+        pageDict.set(PDFName.of('Annots'), pdfDoc.context.obj([linkAnnotation]))
+      }
+      
+      yPosition -= 100
+    }
+    
+    // Footer
+    const footerY = 80
+    page.drawRectangle({
+      x: 0,
+      y: footerY - 20,
+      width: width,
+      height: 60,
+      color: rgb(0.12, 0.16, 0.23),
+    })
+    
+    page.drawText(data.companyName, {
+      x: margin,
+      y: footerY + 15,
+      size: 12,
+      font: boldFont,
+      color: rgb(1, 1, 1),
+    })
+    
+    page.drawText(`For inquiries: ${data.contactEmail}`, {
+      x: margin,
+      y: footerY - 5,
+      size: 9,
+      font: regularFont,
+      color: rgb(0.7, 0.7, 0.7),
+    })
+    
+    // Generate PDF bytes
+    const pdfBytes = await pdfDoc.save()
+    
+    return c.json({
+      success: true,
+      pdfData: Array.from(pdfBytes),
+      filename: `Invoice_${data.workOrder}.pdf`
+    })
+    
+  } catch (error) {
+    console.error('PDF generation error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Failed to generate PDF' 
+    }, 500)
+  }
+})
+
+// API endpoint to upload PDF to Dropbox
+app.post('/api/dropbox/upload-pdf', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+    
+    if (!env.DROPBOX_ACCESS_TOKEN) {
+      return c.json({ 
+        success: false, 
+        error: 'Dropbox API token not configured' 
+      }, 500)
+    }
+    
+    // Convert PDF data array back to Uint8Array
+    const pdfBytes = new Uint8Array(data.pdfData)
+    
+    // Upload PDF to Dropbox
+    const filename = data.filename || `Invoice_${data.workOrder}.pdf`
+    const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.DROPBOX_ACCESS_TOKEN}`,
+        'Content-Type': 'application/octet-stream',
+        'Dropbox-API-Arg': JSON.stringify({
+          path: `/${filename}`,
+          mode: 'add',
+          autorename: true
+        })
+      },
+      body: pdfBytes
+    })
+    
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text()
+      console.error('PDF upload failed:', uploadResponse.status, errorText)
+      return c.json({ 
+        success: false, 
+        error: `Dropbox upload failed: ${uploadResponse.status} ${errorText}` 
+      }, 500)
+    }
+    
+    const uploadResult = await uploadResponse.json()
+    console.log('✅ PDF uploaded:', uploadResult.path_display)
+    
+    // Create shared link for PDF
+    let shareUrl = null
+    try {
+      const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.DROPBOX_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          path: uploadResult.path_display,
+          settings: {
+            requested_visibility: 'public'
+          }
+        })
+      })
+      
+      if (shareResponse.ok) {
+        const shareResult = await shareResponse.json()
+        console.log('✅ Share link created:', shareResult.url)
+        
+        // For PDFs, use dl=0 to show in Dropbox viewer
+        let url = shareResult.url
+        // Keep dl=0 for preview mode (shows PDF in browser)
+        shareUrl = url
+        console.log('✅ Final PDF share URL:', shareUrl)
+      } else {
+        const errorText = await shareResponse.text()
+        console.error('❌ Share link creation failed:', shareResponse.status, errorText)
+      }
+    } catch (shareError) {
+      console.error('❌ Share link error (exception):', shareError)
+    }
+    
+    console.log('📤 PDF upload response:', {
+      success: true,
+      filename: uploadResult.name,
+      path: uploadResult.path_display,
+      shareUrl: shareUrl
+    })
+    
+    return c.json({
+      success: true,
+      filename: uploadResult.name,
+      path: uploadResult.path_display,
+      shareUrl: shareUrl
+    })
+    
+  } catch (error) {
+    console.error('PDF upload error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// API endpoint to upload PDF to Google Drive
+app.post('/api/googledrive/upload-pdf', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+    
+    if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY) {
+      return c.json({ 
+        success: false, 
+        error: 'Google Drive credentials not configured' 
+      }, 500)
+    }
+    
+    // Convert PDF data array back to Uint8Array
+    const pdfBytes = new Uint8Array(data.pdfData)
+    const filename = data.filename || `Invoice_${data.workOrder}.pdf`
+    
+    console.log('📤 Uploading to Google Drive:', filename)
+    
+    // Import Google APIs
+    const { google } = await import('googleapis')
+    
+    // Initialize Google Drive API
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      },
+      scopes: ['https://www.googleapis.com/auth/drive.file'],
+    })
+    
+    const drive = google.drive({ version: 'v3', auth })
+    
+    // Upload file
+    const fileMetadata = {
+      name: filename,
+      mimeType: 'application/pdf',
+    }
+    
+    // Convert Uint8Array to Buffer for upload
+    const buffer = Buffer.from(pdfBytes)
+    
+    // Create file
+    const file = await drive.files.create({
+      requestBody: fileMetadata,
+      media: {
+        mimeType: 'application/pdf',
+        body: buffer,
+      },
+      fields: 'id, name, webViewLink',
+    })
+    
+    console.log('✅ File uploaded to Google Drive:', file.data.id)
+    
+    // Make file publicly accessible
+    await drive.permissions.create({
+      fileId: file.data.id,
+      requestBody: {
+        role: 'reader',
+        type: 'anyone',
+      },
+    })
+    
+    console.log('✅ File made public')
+    
+    // Generate preview URL
+    const previewUrl = `https://drive.google.com/file/d/${file.data.id}/view`
+    
+    console.log('✅ Preview URL:', previewUrl)
+    
+    return c.json({
+      success: true,
+      filename: file.data.name,
+      fileId: file.data.id,
+      previewUrl: previewUrl,
+      shareUrl: previewUrl, // Use same URL for compatibility
+    })
+    
+  } catch (error) {
+    console.error('❌ Google Drive upload error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// API endpoint to upload invoice to Dropbox
+app.post('/api/dropbox/upload', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+
+    // Check if Dropbox token is configured
+    if (!env.DROPBOX_ACCESS_TOKEN) {
+      return c.json({ 
+        success: false, 
+        error: 'Dropbox API token not configured. Please set DROPBOX_ACCESS_TOKEN environment variable.' 
+      }, 500)
+    }
+
+    // Generate HTML content that auto-redirects when opened
+    // This file will be downloaded from Dropbox and redirect when opened
+    const formattedDate = new Date(data.dueDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+
+    // Create invoice viewer page (NO AUTO-REDIRECT to avoid Dropbox phishing flag)
+    // User must manually click the button
+    const hasCustomUrl = data.customUrl && data.customUrl.trim()
+    
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - ${data.workOrder} - ${data.companyName}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .invoice-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .value {
+            font-weight: 600;
+            color: #111827;
+            font-size: 16px;
+            text-align: right;
+        }
+        .service-box {
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        .service-box .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        .service-box .value {
+            font-size: 20px;
+            color: #111827;
+            text-align: left;
+        }
+        .due-date-box {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 25px 0;
+        }
+        .due-date-box .label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        .due-date-box .value {
+            font-size: 28px;
+            color: #1e40af;
+            font-weight: bold;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .view-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 18px 50px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s;
+        }
+        .view-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        .view-button:active {
+            transform: translateY(0);
+        }
+        .icon {
+            margin-right: 10px;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 25px 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .footer strong {
+            color: #111827;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 24px; }
+            .content { padding: 30px 20px; }
+            .info-row { flex-direction: column; gap: 5px; }
+            .value { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>${data.companyName}</h1>
+            <div class="subtitle">Service Completion Notice</div>
+        </div>
+        
+        <div class="content">
+            <div class="info-row">
+                <div class="label">CUSTOMER</div>
+                <div class="value">${data.customerName}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="label">WORK ORDER</div>
+                <div class="value">${data.workOrder}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="label">REFERENCE</div>
+                <div class="value">${data.reference}</div>
+            </div>
+            
+            <div class="service-box">
+                <div class="label">SERVICE PROVIDED</div>
+                <div class="value">${data.service}</div>
+            </div>
+            
+            <div class="due-date-box">
+                <div class="label">Due Date</div>
+                <div class="value">${formattedDate}</div>
+            </div>
+            
+            ${hasCustomUrl ? `
+            <div class="button-container">
+                <a href="${data.customUrl}" class="view-button" target="_blank">
+                    <span class="icon">🔗</span>
+                    View Complete Service Details
+                </a>
+            </div>
+            ` : ''}
+        </div>
+        
+        <div class="footer">
+            <strong>${data.companyName}</strong><br>
+            Questions? Contact: ${data.contactEmail}
+        </div>
+    </div>
+</body>
+</html>
+    `
+
+    // Upload to Dropbox
+    // Create user-friendly filename: "Invoice_PO-12345.html"
+    const filename = `Invoice_${data.workOrder}.html`
+    const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.DROPBOX_ACCESS_TOKEN}`,
+        'Content-Type': 'application/octet-stream',
+        'Dropbox-API-Arg': JSON.stringify({
+          path: `/${filename}`,
+          mode: 'add',
+          autorename: true,
+          mute: false
+        })
+      },
+      body: htmlContent
+    })
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text()
+      console.error('Dropbox upload error:', errorText)
+      return c.json({ 
+        success: false, 
+        error: `Dropbox upload failed: ${uploadResponse.status} ${errorText}` 
+      }, 500)
+    }
+
+    const uploadResult = await uploadResponse.json()
+
+    // Create shared link
+    let shareUrl = null
+    try {
+      const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.DROPBOX_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          path: uploadResult.path_display,
+          settings: {
+            requested_visibility: 'public'
+          }
+        })
+      })
+
+      if (shareResponse.ok) {
+        const shareResult = await shareResponse.json()
+        console.log('✅ Share link created:', shareResult.url)
+        
+        // Convert Dropbox URL to force download of HTML file
+        // dl=1 forces download instead of preview
+        let url = shareResult.url
+        
+        // Replace dl=0 with raw=1 to render HTML directly (no download)
+        // This makes the redirect instant when clicked
+        if (url.includes('/scl/fi/')) {
+          // New Dropbox link format
+          url = url.replace('dl=0', 'raw=1')
+        } else {
+          // Old format
+          url = url.replace('?dl=0', '?raw=1')
+        }
+        
+        shareUrl = url
+        console.log('✅ Modified share URL:', shareUrl)
+      } else {
+        const errorText = await shareResponse.text()
+        console.error('❌ Share link creation failed:', shareResponse.status, errorText)
+      }
+    } catch (shareError) {
+      console.error('❌ Share link error (exception):', shareError)
+    }
+
+    console.log('📤 Dropbox upload response:', {
+      success: true,
+      filename: uploadResult.name,
+      path: uploadResult.path_display,
+      shareUrl: shareUrl
+    });
+    
+    return c.json({
+      success: true,
+      filename: uploadResult.name,
+      path: uploadResult.path_display,
+      shareUrl: shareUrl
+    })
+
+  } catch (error) {
+    console.error('Upload error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// Send email via Microsoft Graph API (Office 365)
+app.post('/api/email/send', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+
+    // Check if Microsoft Graph credentials are configured
+    if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_TENANT_ID || !env.MICROSOFT_CLIENT_SECRET) {
+      return c.json({ 
+        success: false, 
+        error: 'Microsoft Graph API not configured. Please set MICROSOFT_CLIENT_ID, MICROSOFT_TENANT_ID, and MICROSOFT_CLIENT_SECRET.' 
+      }, 500)
+    }
+
+    if (!env.MICROSOFT_SENDER_EMAIL) {
+      return c.json({ 
+        success: false, 
+        error: 'MICROSOFT_SENDER_EMAIL not configured. Please set your Office 365 email address.' 
+      }, 500)
+    }
+
+    // Step 1: Get Access Token
+    const tokenResponse = await fetch(
+      `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          client_id: env.MICROSOFT_CLIENT_ID,
+          scope: 'https://graph.microsoft.com/.default',
+          client_secret: env.MICROSOFT_CLIENT_SECRET,
+          grant_type: 'client_credentials'
+        })
+      }
+    )
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      console.error('Token error:', errorText)
+      return c.json({ 
+        success: false, 
+        error: `Failed to authenticate with Microsoft Graph: ${tokenResponse.status}` 
+      }, 500)
+    }
+
+    const tokenData = await tokenResponse.json()
+    const accessToken = tokenData.access_token
+
+    // Step 2: Generate HTML email content
+    const formattedDate = new Date(data.dueDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+
+    // NEW Dropbox account - use Dropbox share link if available
+    let viewDetailsUrl = '#';
+    
+    if (data.dropboxShareUrl) {
+      // Use Dropbox share link (new account works!)
+      viewDetailsUrl = data.dropboxShareUrl;
+      console.log('✅ Using Dropbox share URL:', viewDetailsUrl);
+    } else if (data.customUrl && data.customUrl.trim()) {
+      // Fallback: Use app's redirect endpoint for custom URL
+      const baseUrl = c.req.url.split('/api')[0];
+      viewDetailsUrl = `${baseUrl}/redirect?url=${encodeURIComponent(data.customUrl)}`;
+      console.log('⚠️ No Dropbox URL, using app redirect for custom URL:', viewDetailsUrl);
+    } else {
+      // No URL at all
+      console.log('❌ No Dropbox or custom URL provided');
+    }
+
+    // Clean Office 365 optimized template
+    const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice ${data.workOrder}</title>
+</head>
+<body style="margin:0;padding:0;font-family:Segoe UI,Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5;padding:20px 0;">
+<tr>
+<td align="center">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border:1px solid #e0e0e0;">
+<tr>
+<td style="padding:30px 40px;border-bottom:3px solid #0078d4;">
+<h2 style="margin:0;color:#333333;font-size:22px;font-weight:600;">Invoice ${data.workOrder}</h2>
+<p style="margin:5px 0 0 0;color:#666666;font-size:14px;">${data.companyName}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:30px 40px;">
+<p style="margin:0 0 20px 0;color:#333333;font-size:15px;line-height:1.5;">Hello ${data.customerName},</p>
+<p style="margin:0 0 25px 0;color:#555555;font-size:14px;line-height:1.6;">Your invoice is ready for review. Please find the service details below.</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:25px;">
+<tr>
+<td style="padding:10px 0;border-bottom:1px solid #e0e0e0;">
+<span style="color:#666666;font-size:13px;">Work Order</span><br>
+<strong style="color:#333333;font-size:15px;">${data.workOrder}</strong>
+</td>
+</tr>
+<tr>
+<td style="padding:10px 0;border-bottom:1px solid #e0e0e0;">
+<span style="color:#666666;font-size:13px;">Reference</span><br>
+<strong style="color:#333333;font-size:15px;">${data.reference}</strong>
+</td>
+</tr>
+<tr>
+<td style="padding:10px 0;border-bottom:1px solid #e0e0e0;">
+<span style="color:#666666;font-size:13px;">Service</span><br>
+<strong style="color:#333333;font-size:15px;">${data.service}</strong>
+</td>
+</tr>
+<tr>
+<td style="padding:10px 0;">
+<span style="color:#666666;font-size:13px;">Payment Due</span><br>
+<strong style="color:#d83b01;font-size:15px;">${formattedDate}</strong>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="padding:10px 0;">
+<a href="${viewDetailsUrl}" style="display:inline-block;padding:12px 35px;background-color:#0078d4;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;border-radius:3px;">View Invoice</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="padding:20px 40px;background-color:#f5f5f5;border-top:1px solid #e0e0e0;">
+<p style="margin:0;color:#666666;font-size:13px;text-align:center;">Questions? Contact <a href="mailto:${data.contactEmail}" style="color:#0078d4;text-decoration:none;">${data.contactEmail}</a></p>
+<p style="margin:10px 0 0 0;color:#999999;font-size:12px;text-align:center;">${data.companyName}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+
+    // Step 3: Prepare recipients
+    const recipients = data.recipients.map(email => ({
+      emailAddress: {
+        address: email.trim()
+      }
+    }))
+
+    // Step 4: Send email via Microsoft Graph API
+    const emailMessage = {
+      message: {
+        subject: `Invoice ${data.workOrder} - ${data.companyName}`,
+        body: {
+          contentType: 'HTML',
+          content: emailHtml
+        },
+        toRecipients: recipients,
+        importance: 'Normal'
+      },
+      saveToSentItems: false  // Don't save to Sent Items folder
+    }
+
+    const sendResponse = await fetch(
+      `https://graph.microsoft.com/v1.0/users/${env.MICROSOFT_SENDER_EMAIL}/sendMail`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailMessage)
+      }
+    )
+
+    if (!sendResponse.ok) {
+      const errorText = await sendResponse.text()
+      console.error('Send email error:', errorText)
+      return c.json({ 
+        success: false, 
+        error: `Failed to send email: ${sendResponse.status} - ${errorText}` 
+      }, 500)
+    }
+
+    return c.json({
+      success: true,
+      recipientCount: recipients.length,
+      subject: `Service Completion Notice - ${data.workOrder} (${data.companyName})`
+    })
+
+  } catch (error) {
+    console.error('Email error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// Redirect endpoint - wraps Dropbox links
+app.get('/redirect', (c) => {
+  const targetUrl = c.req.query('url')
+  
+  if (!targetUrl) {
+    return c.html(`
+      <html>
+      <head><title>Invalid Link</title></head>
+      <body style="font-family: sans-serif; padding: 40px; text-align: center;">
+        <h1>❌ Invalid Link</h1>
+        <p>No redirect URL provided.</p>
+        <p><a href="/">← Back to Invoice App</a></p>
+      </body>
+      </html>
+    `, 400)
+  }
+
+  // Redirect to the Dropbox link
+  return c.redirect(targetUrl, 302)
+})
+
+// Health check endpoint
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Dropbox setup guide
+app.get('/setup-guide', async (c) => {
+  try {
+    // Read the HTML file from the project root
+    const fs = await import('fs')
+    const path = await import('path')
+    const guidePath = path.join(process.cwd(), 'DROPBOX_VISUAL_GUIDE.html')
+    const html = fs.readFileSync(guidePath, 'utf-8')
+    return c.html(html)
+  } catch (error) {
+    return c.html(`
+      <html>
+      <head><title>Setup Guide</title></head>
+      <body style="font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto;">
+        <h1>Dropbox Setup Guide</h1>
+        <p>The visual guide is available at: <code>/home/user/webapp/DROPBOX_VISUAL_GUIDE.html</code></p>
+        <p>You can also view the text guide in <code>DROPBOX_SETUP.md</code></p>
+        <p><a href="/">← Back to Invoice App</a></p>
+      </body>
+      </html>
+    `)
+  }
+})
+
+export default app

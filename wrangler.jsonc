@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "invoice-system",
+  "compatibility_date": "2026-01-15",
+  "pages_build_output_dir": "./dist",
+  "kv_namespaces": [
+    {
+      "binding": "PDF_CACHE",
+      "id": "placeholder"
+    }
+  ]
+}

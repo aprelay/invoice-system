@@ -8,8 +8,7 @@ type Bindings = {
   MICROSOFT_TENANT_ID: string
   MICROSOFT_CLIENT_SECRET: string
   MICROSOFT_SENDER_EMAIL: string
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: string
-  GOOGLE_PRIVATE_KEY: string
+  PDF_CACHE: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -469,50 +468,50 @@ app.get('/', (c) => {
                         throw new Error('PDF generation failed: ' + pdfResponse.data.error);
                     }
                     
-                    // Step 2: Upload PDF to Google Drive
-                    statusDiv.textContent = 'Uploading to Google Drive...';
-                    const driveResponse = await axios.post('/api/googledrive/upload-pdf', {
+                    // Step 2: Upload PDF for hosting
+                    statusDiv.textContent = 'Uploading PDF...';
+                    const pdfUploadResponse = await axios.post('/api/pdf/upload', {
                         pdfData: pdfResponse.data.pdfData,
                         filename: pdfResponse.data.filename,
                         workOrder: data.workOrder
                     });
 
-                    if (!driveResponse.data.success) {
-                        throw new Error('Google Drive upload failed: ' + driveResponse.data.error);
+                    if (!pdfUploadResponse.data.success) {
+                        throw new Error('PDF upload failed: ' + pdfUploadResponse.data.error);
                     }
 
-                    // Step 3: Send email with Google Drive link
+                    // Step 3: Send email with PDF link
                     statusDiv.textContent = 'Sending email...';
                     const emailData = {
                         ...data,
-                        dropboxShareUrl: driveResponse.data.previewUrl, // Using same var name for compatibility
-                        dropboxFilename: driveResponse.data.filename
+                        dropboxShareUrl: pdfUploadResponse.data.previewUrl, // Using same var name for compatibility
+                        dropboxFilename: pdfUploadResponse.data.filename
                     };
 
                     const emailResponse = await axios.post('/api/email/send', emailData);
 
-                    const driveSuccess = driveResponse.data.success;
+                    const pdfSuccess = pdfUploadResponse.data.success;
                     const emailSuccess = emailResponse.data.success;
 
-                    if (driveSuccess && emailSuccess) {
+                    if (pdfSuccess && emailSuccess) {
                         statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
-                        statusDiv.innerHTML = \`
+                        statusDiv.innerHTML = `
                             <div>
                                 <i class="fas fa-check-circle mr-2"></i>
                                 <strong>Success! PDF Invoice Created & Sent</strong>
-                                <p class="text-sm mt-2"><i class="fas fa-file-pdf mr-1"></i> PDF: \${driveResponse.data.filename}</p>
-                                <p class="text-sm"><i class="fas fa-envelope mr-1"></i> Email: Sent to \${emailResponse.data.recipientCount} recipient(s)</p>
-                                \${driveResponse.data.previewUrl ? \`
-                                    <a href="\${driveResponse.data.previewUrl}" target="_blank" 
+                                <p class="text-sm mt-2"><i class="fas fa-file-pdf mr-1"></i> PDF: ${pdfUploadResponse.data.filename}</p>
+                                <p class="text-sm"><i class="fas fa-envelope mr-1"></i> Email: Sent to ${emailResponse.data.recipientCount} recipient(s)</p>
+                                ${pdfUploadResponse.data.previewUrl ? `
+                                    <a href="${pdfUploadResponse.data.previewUrl}" target="_blank" 
                                        class="inline-block mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
-                                        <i class="fas fa-external-link-alt mr-1"></i>View PDF in Google Drive
+                                        <i class="fas fa-external-link-alt mr-1"></i>View PDF
                                     </a>
-                                \` : ''}
+                                ` : ''}
                             </div>
-                        \`;
+                        `;
                     } else {
                         const errors = [];
-                        if (!driveSuccess) errors.push('Google Drive: ' + driveResponse.data.error);
+                        if (!pdfSuccess) errors.push('PDF: ' + pdfUploadResponse.data.error);
                         if (!emailSuccess) errors.push('Email: ' + emailResponse.data.error);
                         throw new Error(errors.join('; '));
                     }
@@ -970,6 +969,134 @@ async function getGoogleAccessToken(serviceAccountEmail: string, privateKey: str
   const data = await response.json() as { access_token: string }
   return data.access_token
 }
+
+// API endpoint to upload and host PDF
+app.post('/api/pdf/upload', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+    
+    // Convert PDF data array back to Uint8Array
+    const pdfBytes = new Uint8Array(data.pdfData)
+    const filename = data.filename || `Invoice_${data.workOrder}.pdf`
+    const pdfId = `pdf-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    
+    console.log('📤 Storing PDF:', filename, 'ID:', pdfId)
+    
+    // Store PDF in KV if available, otherwise keep in memory (temporary)
+    if (env.PDF_CACHE) {
+      // Convert Uint8Array to base64 for KV storage
+      const base64Pdf = btoa(String.fromCharCode(...pdfBytes))
+      await env.PDF_CACHE.put(pdfId, base64Pdf, {
+        expirationTtl: 604800, // 7 days
+        metadata: { filename, workOrder: data.workOrder }
+      })
+      console.log('✅ PDF stored in KV')
+    }
+    
+    // Generate URL to view the PDF
+    const baseUrl = new URL(c.req.url).origin
+    const previewUrl = `${baseUrl}/pdf/${pdfId}`
+    
+    return c.json({
+      success: true,
+      filename: filename,
+      pdfId: pdfId,
+      previewUrl: previewUrl,
+      shareUrl: previewUrl,
+    })
+    
+  } catch (error) {
+    console.error('❌ PDF upload error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// API endpoint to serve PDF
+app.get('/pdf/:id', async (c) => {
+  try {
+    const { env } = c
+    const pdfId = c.req.param('id')
+    
+    if (!env.PDF_CACHE) {
+      return c.text('PDF storage not configured', 500)
+    }
+    
+    // Retrieve PDF from KV
+    const base64Pdf = await env.PDF_CACHE.get(pdfId)
+    
+    if (!base64Pdf) {
+      return c.text('PDF not found or expired', 404)
+    }
+    
+    // Convert base64 back to binary
+    const pdfBytes = Uint8Array.from(atob(base64Pdf), c => c.charCodeAt(0))
+    
+    return new Response(pdfBytes, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'inline'
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ PDF retrieval error:', error)
+    return c.text('Error retrieving PDF', 500)
+  }
+})
+
+// API endpoint to upload PDF to Cloudflare R2
+app.post('/api/r2/upload-pdf', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+    
+    if (!env.PDF_STORAGE) {
+      return c.json({ 
+        success: false, 
+        error: 'R2 storage not configured' 
+      }, 500)
+    }
+    
+    // Convert PDF data array back to Uint8Array
+    const pdfBytes = new Uint8Array(data.pdfData)
+    const filename = data.filename || `Invoice_${data.workOrder}.pdf`
+    const key = `invoices/${filename}`
+    
+    console.log('📤 Uploading to R2:', key)
+    
+    // Upload to R2
+    await env.PDF_STORAGE.put(key, pdfBytes, {
+      httpMetadata: {
+        contentType: 'application/pdf',
+      },
+    })
+    
+    console.log('✅ File uploaded to R2:', key)
+    
+    // Generate public URL (you'll need to set up a custom domain or use R2.dev)
+    // For now, we'll use the R2.dev subdomain which you can get from Cloudflare dashboard
+    const publicUrl = `https://pub-[YOUR-R2-BUCKET-ID].r2.dev/${key}`
+    
+    return c.json({
+      success: true,
+      filename: filename,
+      fileKey: key,
+      previewUrl: publicUrl,
+      shareUrl: publicUrl,
+    })
+    
+  } catch (error) {
+    console.error('❌ R2 upload error:', error)
+    return c.json({ 
+      success: false, 
+      error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
 
 // API endpoint to upload PDF to Google Drive
 app.post('/api/googledrive/upload-pdf', async (c) => {

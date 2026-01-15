@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox API Setup - Step by Step Visual Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .step-box {
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s;
+        }
+        .step-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .code-box {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .warning-box {
+            border-left: 4px solid #ef4444;
+            background-color: #fee2e2;
+            padding: 16px;
+            border-radius: 4px;
+        }
+        .success-box {
+            border-left: 4px solid #10b981;
+            background-color: #d1fae5;
+            padding: 16px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg p-8 mb-8">
+            <h1 class="text-4xl font-bold mb-4">
+                <i class="fab fa-dropbox mr-3"></i>
+                Dropbox API Setup Guide
+            </h1>
+            <p class="text-xl">Complete Visual Step-by-Step Instructions</p>
+            <p class="mt-2 text-blue-100">Follow these steps to connect your invoice app to Dropbox</p>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-list-ol mr-2"></i>Quick Navigation
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <a href="#step1" class="block p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                    <i class="fas fa-1 mr-2 text-blue-600"></i>Create Dropbox App
+                </a>
+                <a href="#step2" class="block p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                    <i class="fas fa-2 mr-2 text-blue-600"></i>Set Permissions
+                </a>
+                <a href="#step3" class="block p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                    <i class="fas fa-3 mr-2 text-blue-600"></i>Generate Token
+                </a>
+                <a href="#step4" class="block p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                    <i class="fas fa-4 mr-2 text-blue-600"></i>Configure App
+                </a>
+            </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div id="step1" class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+            <div class="bg-blue-600 text-white p-6">
+                <h2 class="text-3xl font-bold">
+                    <i class="fas fa-1 mr-3"></i>Step 1: Create a Dropbox App
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-blue-600 mr-2"></i>
+                        Open Dropbox Developers Portal
+                    </h3>
+                    <div class="mb-4">
+                        <p class="text-gray-700 mb-3">Go to the Dropbox Developers website:</p>
+                        <div class="code-box">
+                            <a href="https://www.dropbox.com/developers/apps" target="_blank" class="text-blue-400 hover:underline">
+                                https://www.dropbox.com/developers/apps
+                            </a>
+                        </div>
+                    </div>
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Dropbox Developers Homepage
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2 italic">You'll see a page with "My apps" and a "Create app" button</p>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-blue-600 mr-2"></i>
+                        Click "Create app" Button
+                    </h3>
+                    <div class="mb-4">
+                        <p class="text-gray-700 mb-3">Look for the blue <span class="highlight">"Create app"</span> button and click it</p>
+                    </div>
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: "Create app" button location (top right)
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-blue-600 mr-2"></i>
+                        Choose App Configuration
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-2">1. Choose an API:</p>
+                            <div class="bg-green-50 border-2 border-green-500 p-4 rounded-lg">
+                                <p class="font-bold text-green-800">✅ Select: <span class="highlight">Scoped access</span></p>
+                                <p class="text-sm text-gray-600 mt-1">This is the modern, recommended API type</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-2">2. Choose the type of access:</p>
+                            <div class="bg-green-50 border-2 border-green-500 p-4 rounded-lg">
+                                <p class="font-bold text-green-800">✅ Select: <span class="highlight">Full Dropbox</span></p>
+                                <p class="text-sm text-gray-600 mt-1">Access to all files and folders in Dropbox</p>
+                            </div>
+                            <div class="bg-gray-100 border-2 border-gray-400 p-4 rounded-lg mt-2">
+                                <p class="font-bold text-gray-600">⚪ Alternative: App folder</p>
+                                <p class="text-sm text-gray-600">Only access to a specific folder (more restrictive)</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-2">3. Name your app:</p>
+                            <div class="code-box">
+                                Invoice Sender
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">
+                                Or use any name like: "RGBRNE Invoices", "Service Notice Sender", etc.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-2">4. Click the button:</p>
+                            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold cursor-not-allowed opacity-80">
+                                <i class="fas fa-plus mr-2"></i>Create app
+                            </button>
+                        </div>
+                    </div>
+                    <div class="screenshot-placeholder mt-4">
+                        📸 Screenshot: App creation form with all options
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="step2" class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+            <div class="bg-purple-600 text-white p-6">
+                <h2 class="text-3xl font-bold">
+                    <i class="fas fa-2 mr-3"></i>Step 2: Set Permissions
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="warning-box mb-4">
+                    <p class="font-bold text-red-800 mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Important!
+                    </p>
+                    <p class="text-red-700">You MUST set permissions before generating the access token, otherwise the token won't have the necessary permissions!</p>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-purple-600 mr-2"></i>
+                        Navigate to Permissions Tab
+                    </h3>
+                    <p class="text-gray-700 mb-3">After creating your app, you'll see several tabs at the top:</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="bg-white border-2 border-gray-300 px-4 py-2 rounded">Settings</span>
+                        <span class="bg-purple-600 text-white border-2 border-purple-600 px-4 py-2 rounded font-bold">Permissions</span>
+                        <span class="bg-white border-2 border-gray-300 px-4 py-2 rounded">Branding</span>
+                    </div>
+                    <p class="text-gray-700 mb-3">Click on the <span class="highlight">"Permissions"</span> tab</p>
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Permissions tab location
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-purple-600 mr-2"></i>
+                        Enable Required Permissions
+                    </h3>
+                    <p class="text-gray-700 mb-4">Scroll down and find these three permissions. Check the boxes next to them:</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="bg-green-50 border-2 border-green-500 p-4 rounded-lg">
+                            <div class="flex items-center">
+                                <input type="checkbox" checked disabled class="mr-3 w-5 h-5">
+                                <div>
+                                    <p class="font-bold text-green-800">files.content.write</p>
+                                    <p class="text-sm text-gray-600">Allows the app to upload files to Dropbox</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border-2 border-green-500 p-4 rounded-lg">
+                            <div class="flex items-center">
+                                <input type="checkbox" checked disabled class="mr-3 w-5 h-5">
+                                <div>
+                                    <p class="font-bold text-green-800">files.content.read</p>
+                                    <p class="text-sm text-gray-600">Allows the app to read files from Dropbox</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border-2 border-green-500 p-4 rounded-lg">
+                            <div class="flex items-center">
+                                <input type="checkbox" checked disabled class="mr-3 w-5 h-5">
+                                <div>
+                                    <p class="font-bold text-green-800">sharing.write</p>
+                                    <p class="text-sm text-gray-600">Allows the app to create shareable links</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="screenshot-placeholder mb-4">
+                        📸 Screenshot: Permissions list with checkboxes
+                    </div>
+
+                    <div class="bg-yellow-50 border-2 border-yellow-500 p-4 rounded-lg mb-4">
+                        <p class="font-bold text-yellow-800 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Note:
+                        </p>
+                        <p class="text-yellow-700">There are many other permissions in the list. You only need these three. Don't worry about the others.</p>
+                    </div>
+
+                    <div class="success-box">
+                        <p class="font-bold text-green-800 mb-2">After selecting all three permissions:</p>
+                        <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold cursor-not-allowed opacity-80">
+                            <i class="fas fa-check mr-2"></i>Submit
+                        </button>
+                        <p class="text-green-700 mt-2">Click the <span class="highlight">"Submit"</span> button at the bottom of the page</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step3" class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+            <div class="bg-green-600 text-white p-6">
+                <h2 class="text-3xl font-bold">
+                    <i class="fas fa-3 mr-3"></i>Step 3: Generate Access Token
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-green-600 mr-2"></i>
+                        Go to Settings Tab
+                    </h3>
+                    <p class="text-gray-700 mb-3">Click on the <span class="highlight">"Settings"</span> tab</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="bg-green-600 text-white border-2 border-green-600 px-4 py-2 rounded font-bold">Settings</span>
+                        <span class="bg-white border-2 border-gray-300 px-4 py-2 rounded">Permissions</span>
+                        <span class="bg-white border-2 border-gray-300 px-4 py-2 rounded">Branding</span>
+                    </div>
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Settings tab location
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-green-600 mr-2"></i>
+                        Generate the Access Token
+                    </h3>
+                    <div class="space-y-4">
+                        <p class="text-gray-700">Scroll down to find the section called <span class="highlight">"OAuth 2"</span></p>
+                        
+                        <p class="text-gray-700">Look for: <span class="highlight">"Generated access token"</span></p>
+
+                        <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold cursor-not-allowed opacity-80">
+                            <i class="fas fa-key mr-2"></i>Generate
+                        </button>
+                        <p class="text-gray-700">Click the <span class="highlight">"Generate"</span> button</p>
+
+                        <div class="screenshot-placeholder">
+                            📸 Screenshot: "Generated access token" section with Generate button
+                        </div>
+
+                        <div class="warning-box mt-4">
+                            <p class="font-bold text-red-800 mb-2">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Important!
+                            </p>
+                            <p class="text-red-700">After clicking Generate, a long token will appear. This is shown ONLY ONCE! Copy it immediately!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg mt-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-green-600 mr-2"></i>
+                        Copy Your Access Token
+                    </h3>
+                    <p class="text-gray-700 mb-3">The token will look like this:</p>
+                    <div class="code-box mb-4">
+                        sl.BxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxA
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">It starts with <code class="bg-gray-800 text-green-400 px-2 py-1 rounded">sl.</code> and is very long (about 84 characters)</p>
+                    
+                    <div class="bg-blue-50 border-2 border-blue-500 p-4 rounded-lg">
+                        <p class="font-bold text-blue-800 mb-2">
+                            <i class="fas fa-clipboard mr-2"></i>How to copy:
+                        </p>
+                        <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                            <li>Click inside the token text field</li>
+                            <li>Press <kbd class="bg-gray-200 px-2 py-1 rounded">Ctrl+A</kbd> (Windows) or <kbd class="bg-gray-200 px-2 py-1 rounded">Cmd+A</kbd> (Mac) to select all</li>
+                            <li>Press <kbd class="bg-gray-200 px-2 py-1 rounded">Ctrl+C</kbd> (Windows) or <kbd class="bg-gray-200 px-2 py-1 rounded">Cmd+C</kbd> (Mac) to copy</li>
+                        </ol>
+                    </div>
+
+                    <div class="success-box mt-4">
+                        <p class="font-bold text-green-800 mb-2">
+                            <i class="fas fa-check-circle mr-2"></i>Success!
+                        </p>
+                        <p class="text-green-700">Your token is now copied. Save it somewhere safe before proceeding to Step 4!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div id="step4" class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+            <div class="bg-orange-600 text-white p-6">
+                <h2 class="text-3xl font-bold">
+                    <i class="fas fa-4 mr-3"></i>Step 4: Configure Your Application
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-orange-600 mr-2"></i>
+                        Edit the .dev.vars File
+                    </h3>
+                    <p class="text-gray-700 mb-3">In your project folder, open the <span class="highlight">.dev.vars</span> file</p>
+                    
+                    <div class="mb-4">
+                        <p class="font-semibold text-gray-800 mb-2">Using command line:</p>
+                        <div class="code-box">
+                            cd /home/user/webapp<br>
+                            nano .dev.vars
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <p class="font-semibold text-gray-800 mb-2">You'll see this:</p>
+                        <div class="code-box">
+                            # Local development environment variables<br>
+                            DROPBOX_ACCESS_TOKEN=your_dropbox_token_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-orange-600 mr-2"></i>
+                        Replace with Your Token
+                    </h3>
+                    <p class="text-gray-700 mb-3">Replace <code class="bg-gray-800 text-red-400 px-2 py-1 rounded">your_dropbox_token_here</code> with your actual token:</p>
+                    
+                    <div class="mb-4">
+                        <p class="font-semibold text-gray-800 mb-2">Before:</p>
+                        <div class="code-box bg-red-900">
+                            DROPBOX_ACCESS_TOKEN=your_dropbox_token_here
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <p class="font-semibold text-gray-800 mb-2">After:</p>
+                        <div class="code-box bg-green-900">
+                            DROPBOX_ACCESS_TOKEN=sl.BxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxA
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <p class="font-bold text-red-800 mb-2">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Make sure:
+                        </p>
+                        <ul class="list-disc list-inside text-red-700 space-y-1">
+                            <li>No spaces before or after the token</li>
+                            <li>No quotes around the token</li>
+                            <li>Token starts with <code class="bg-red-200 px-1 rounded">sl.</code></li>
+                            <li>The entire token is on one line</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-box bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-arrow-right text-orange-600 mr-2"></i>
+                        Restart the Application
+                    </h3>
+                    <p class="text-gray-700 mb-3">After saving the file, restart your app:</p>
+                    <div class="code-box mb-4">
+                        pm2 restart webapp
+                    </div>
+
+                    <div class="success-box">
+                        <p class="font-bold text-green-800 mb-2">
+                            <i class="fas fa-check-circle mr-2"></i>All Done!
+                        </p>
+                        <p class="text-green-700 mb-3">Your invoice app is now connected to Dropbox!</p>
+                        <p class="text-green-700">Go to your app and try sending an invoice to test it.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="bg-red-50 border-2 border-red-500 rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-red-800 mb-4">
+                <i class="fas fa-tools mr-2"></i>Common Problems & Solutions
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="bg-white p-4 rounded-lg">
+                    <p class="font-bold text-gray-800 mb-2">❌ Error: "Invalid access token"</p>
+                    <p class="text-gray-700 mb-2">Solutions:</p>
+                    <ul class="list-disc list-inside text-gray-600 ml-4">
+                        <li>Make sure you copied the entire token (it's very long!)</li>
+                        <li>Check for extra spaces or line breaks</li>
+                        <li>Generate a new token if needed</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg">
+                    <p class="font-bold text-gray-800 mb-2">❌ Error: "Permission denied"</p>
+                    <p class="text-gray-700 mb-2">Solutions:</p>
+                    <ul class="list-disc list-inside text-gray-600 ml-4">
+                        <li>Go back to Step 2 and set permissions</li>
+                        <li>Generate a NEW token after setting permissions</li>
+                        <li>Old tokens don't get new permissions automatically</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg">
+                    <p class="font-bold text-gray-800 mb-2">❌ Files upload but no share link</p>
+                    <p class="text-gray-700 mb-2">Solutions:</p>
+                    <ul class="list-disc list-inside text-gray-600 ml-4">
+                        <li>Make sure <code>sharing.write</code> permission is enabled</li>
+                        <li>Generate a new token with updated permissions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold mb-4">
+                <i class="fas fa-bookmark mr-2"></i>Quick Reference
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <p class="font-bold mb-2">Required Permissions:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>files.content.write</li>
+                        <li>files.content.read</li>
+                        <li>sharing.write</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-bold mb-2">Token Format:</p>
+                    <p class="font-mono text-sm bg-white bg-opacity-20 p-2 rounded">sl.xxx...xxx</p>
+                    <p class="text-sm mt-1">Starts with "sl." and is ~84 characters long</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-600">
+            <p>
+                <i class="fas fa-question-circle mr-2"></i>
+                Need more help? Check the README.md or DROPBOX_SETUP.md files
+            </p>
+        </div>
+    </div>
+</body>
+</html>

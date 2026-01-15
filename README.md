@@ -11,44 +11,40 @@
   - Responsive design matching professional invoice standards
 
 ## URLs
+- **Production (Live)**: https://invoice-system-7fc.pages.dev
+- **GitHub Repository**: https://github.com/aprelay/invoice-system
 - **Local Development**: http://localhost:3000
-- **Sandbox (Public)**: https://3000-igjl5xwwc2bg4t23js3hm-b9b802c4.sandbox.novita.ai
-- **Dropbox Setup Guide**: https://3000-igjl5xwwc2bg4t23js3hm-b9b802c4.sandbox.novita.ai/setup-guide
-- **Health Check**: https://3000-igjl5xwwc2bg4t23js3hm-b9b802c4.sandbox.novita.ai/api/health
-- **Production**: (To be deployed to Cloudflare Pages)
-- **GitHub**: (To be configured)
 
 ## Features Completed ✅
-1. ✅ Professional invoice UI matching RGBRNE Mechanical design
+1. ✅ Professional invoice UI
 2. ✅ Real-time invoice preview
 3. ✅ Form validation and data collection
-4. ✅ Dropbox API integration
-5. ✅ HTML invoice generation
-6. ✅ Shareable link creation
-7. ✅ **Random field generation** for Work Order, Reference, and Service Description
-8. ✅ **Visual step-by-step Dropbox setup guide** with screenshots placeholders
-9. ✅ Individual randomize buttons for each field
-10. ✅ "Randomize All" button to generate all fields at once
-11. ✅ **Office 365 Email Integration** via Microsoft Graph API
-12. ✅ **Multi-recipient email support** - Send to multiple email addresses
-13. ✅ **Professional HTML email templates** with company branding
-14. ✅ **Send to Dropbox + Email** - Combined functionality
-15. ✅ **Email recipient management** - Textarea with line-by-line entry
-16. ✅ **Custom URL Wrapper** - Manual URL input with Dropbox tracking redirect
+4. ✅ **Google Drive PDF Storage** - Upload PDFs, generate shareable preview links
+5. ✅ **PDF Generation with Clickable Links** - Professional PDF invoices with embedded URLs
+6. ✅ **Office 365 Email Integration** via Microsoft Graph API (direct HTTP)
+7. ✅ **Multi-recipient email support** - Send to multiple email addresses
+8. ✅ **Professional HTML email templates** - Office 365 optimized
+9. ✅ **Lightweight Direct HTTP Implementation** - No heavy SDKs (5MB total)
+10. ✅ **Deployed to Cloudflare Pages** - Global CDN with fast delivery
+11. ✅ **GitHub Integration** - Auto-deploy on push
 
 ## Features Not Yet Implemented ❌
-1. ❌ PDF generation (currently generates HTML invoices)
-2. ❌ Invoice history/database storage
-3. ❌ User authentication
-4. ❌ Multiple invoice templates
+1. ❌ Invoice history/database storage
+2. ❌ User authentication
+3. ❌ Multiple invoice templates
+4. ❌ Payment integration
 
 ## Tech Stack
 - **Backend**: Hono Framework (Cloudflare Workers)
 - **Frontend**: HTML, TailwindCSS, Vanilla JavaScript
-- **APIs**: Dropbox API v2, Microsoft Graph API (Office 365)
-- **Deployment**: Cloudflare Pages
-- **Storage**: Dropbox (for invoice files)
-- **Email**: Office 365 (via Microsoft Graph API)
+- **APIs**: 
+  - Google Drive REST API (direct HTTP with JWT authentication)
+  - Microsoft Graph API (direct HTTP for Office 365 email)
+- **PDF Generation**: pdf-lib (lightweight, no external dependencies)
+- **Deployment**: Cloudflare Pages (auto-deploy from GitHub)
+- **Storage**: Google Drive (for PDF invoices)
+- **Email**: Office 365 (via Microsoft Graph REST API)
+- **Package Size**: ~5MB (2 dependencies: hono, pdf-lib)
 
 ## Email Configuration
 - **Sender**: `jaedyn@evolutionfamily.ca`
@@ -281,9 +277,11 @@ npx wrangler pages secret put DROPBOX_ACCESS_TOKEN --project-name webapp
 
 ## Deployment Status
 - **Platform**: Cloudflare Pages
-- **Status**: ✅ Running in Sandbox
-- **Sandbox URL**: https://3000-igjl5xwwc2bg4t23js3hm-b9b802c4.sandbox.novita.ai
-- **Last Updated**: 2026-01-14
+- **Status**: ✅ LIVE AND WORKING
+- **Production URL**: https://invoice-system-7fc.pages.dev
+- **GitHub**: https://github.com/aprelay/invoice-system
+- **Auto-Deploy**: Enabled (deploys on git push)
+- **Last Updated**: 2026-01-15
 
 ## Troubleshooting
 

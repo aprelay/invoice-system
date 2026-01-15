@@ -1030,12 +1030,23 @@ app.post('/api/googledrive/upload-pdf', async (c) => {
       }
     )
     
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text()
+      console.error('❌ Google Drive upload failed:', uploadResponse.status, errorText)
+      throw new Error(`Google Drive upload failed: ${uploadResponse.status} ${errorText}`)
+    }
+    
     const fileData = await uploadResponse.json() as { id: string; name: string; webViewLink: string }
+    
+    if (!fileData.id) {
+      console.error('❌ No file ID returned from Google Drive:', fileData)
+      throw new Error('Google Drive did not return a file ID')
+    }
     
     console.log('✅ File uploaded to Google Drive:', fileData.id)
     
     // Make file publicly accessible
-    await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
+    const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -1046,6 +1057,12 @@ app.post('/api/googledrive/upload-pdf', async (c) => {
         type: 'anyone'
       })
     })
+    
+    if (!permissionResponse.ok) {
+      const errorText = await permissionResponse.text()
+      console.error('❌ Failed to set permissions:', permissionResponse.status, errorText)
+      // Don't throw - file is uploaded, just not public
+    }
     
     console.log('✅ File made public')
     

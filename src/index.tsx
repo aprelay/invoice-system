@@ -163,7 +163,7 @@ app.get('/', (c) => {
                             
                             <button type="button" onclick="sendToGoogleDrive()" 
                                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fab fa-google-drive mr-2"></i>Send to Google Drive
+                                <i class="fas fa-file-pdf mr-2"></i>Generate PDF Only
                             </button>
 
                             <button type="button" onclick="sendToEmail()" 
@@ -173,7 +173,7 @@ app.get('/', (c) => {
 
                             <button type="button" onclick="sendToBoth()" 
                                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                                <i class="fas fa-paper-plane mr-2"></i>Send to Google Drive + Email
+                                <i class="fas fa-paper-plane mr-2"></i>Generate PDF + Send Email
                             </button>
                         </div>
 
@@ -310,7 +310,7 @@ app.get('/', (c) => {
             async function sendToGoogleDrive() {
                 const statusDiv = document.getElementById('status');
                 statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
-                statusDiv.textContent = 'Generating PDF and uploading to Google Drive...';
+                statusDiv.textContent = 'Generating PDF invoice...';
                 statusDiv.classList.remove('hidden');
 
                 try {
@@ -321,38 +321,52 @@ app.get('/', (c) => {
                         reference: document.getElementById('reference').value,
                         service: document.getElementById('service').value,
                         dueDate: document.getElementById('dueDate').value,
-                        contactEmail: document.getElementById('contactEmail').value
+                        contactEmail: document.getElementById('contactEmail').value,
+                        customUrl: document.getElementById('customUrl').value.trim()
                     };
 
-                    const response = await axios.post('/api/dropbox/upload', data);
+                    // Step 1: Generate PDF
+                    const pdfResponse = await axios.post('/api/generate-pdf', data);
+                    
+                    if (!pdfResponse.data.success) {
+                        throw new Error('PDF generation failed: ' + pdfResponse.data.error);
+                    }
 
-                    if (response.data.success) {
+                    // Step 2: Upload PDF
+                    statusDiv.textContent = 'Uploading PDF...';
+                    const uploadResponse = await axios.post('/api/pdf/upload', {
+                        pdfData: pdfResponse.data.pdfData,
+                        filename: pdfResponse.data.filename,
+                        workOrder: data.workOrder
+                    });
+
+                    if (uploadResponse.data.success) {
                         statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
-                        statusDiv.innerHTML = \`
+                        statusDiv.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div>
                                     <i class="fas fa-check-circle mr-2"></i>
-                                    <strong>Successfully sent to Dropbox!</strong>
-                                    <p class="text-sm mt-1">File: \${response.data.filename}</p>
+                                    <strong>PDF Invoice Created!</strong>
+                                    <p class="text-sm mt-1">File: ${uploadResponse.data.filename}</p>
                                 </div>
-                                \${response.data.shareUrl ? \`
-                                    <a href="\${response.data.shareUrl}" target="_blank" 
-                                       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
-                                        <i class="fas fa-external-link-alt mr-1"></i>View
+                                ${uploadResponse.data.previewUrl ? `
+                                    <a href="${uploadResponse.data.previewUrl}" target="_blank" 
+                                       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                                        <i class="fas fa-external-link-alt mr-1"></i>View PDF
                                     </a>
-                                \` : ''}
+                                ` : ''}
                             </div>
-                        \`;
+                        `;
                     } else {
-                        throw new Error(response.data.error || 'Upload failed');
+                        throw new Error(uploadResponse.data.error || 'Upload failed');
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
-                    statusDiv.innerHTML = \`
+                    statusDiv.innerHTML = `
                         <i class="fas fa-exclamation-circle mr-2"></i>
-                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to send to Dropbox. Please check your API token.'}
-                    \`;
+                        <strong>Error:</strong> ${error.response?.data?.error || error.message || 'Failed to create PDF'}
+                    `;
                 }
             }
 

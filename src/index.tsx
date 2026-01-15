@@ -162,9 +162,9 @@ app.get('/', (c) => {
                                 <i class="fas fa-eye mr-2"></i>Update Preview
                             </button>
                             
-                            <button type="button" onclick="sendToDropbox()" 
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fab fa-dropbox mr-2"></i>Send to Dropbox
+                            <button type="button" onclick="sendToGoogleDrive()" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
+                                <i class="fab fa-google-drive mr-2"></i>Send to Google Drive
                             </button>
 
                             <button type="button" onclick="sendToEmail()" 
@@ -174,7 +174,7 @@ app.get('/', (c) => {
 
                             <button type="button" onclick="sendToBoth()" 
                                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                                <i class="fas fa-paper-plane mr-2"></i>Send to Dropbox + Email
+                                <i class="fas fa-paper-plane mr-2"></i>Send to Google Drive + Email
                             </button>
                         </div>
 
@@ -308,10 +308,10 @@ app.get('/', (c) => {
                 \`;
             }
 
-            async function sendToDropbox() {
+            async function sendToGoogleDrive() {
                 const statusDiv = document.getElementById('status');
                 statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
-                statusDiv.textContent = 'Sending to Dropbox...';
+                statusDiv.textContent = 'Generating PDF and uploading to Google Drive...';
                 statusDiv.classList.remove('hidden');
 
                 try {

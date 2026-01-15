@@ -14,11 +14,7 @@
     "git:commit": "git add . && git commit -m"
   },
   "dependencies": {
-    "@azure/identity": "^4.13.0",
-    "@microsoft/microsoft-graph-client": "^3.0.7",
-    "googleapis": "^170.0.0",
     "hono": "^4.11.4",
-    "jspdf": "^4.0.0",
     "pdf-lib": "^1.17.1"
   },
   "devDependencies": {

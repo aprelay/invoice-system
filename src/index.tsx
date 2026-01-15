@@ -8,6 +8,8 @@ type Bindings = {
   MICROSOFT_TENANT_ID: string
   MICROSOFT_CLIENT_SECRET: string
   MICROSOFT_SENDER_EMAIL: string
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: string
+  GOOGLE_PRIVATE_KEY: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -874,6 +876,72 @@ app.post('/api/dropbox/upload-pdf', async (c) => {
   }
 })
 
+// Helper function to create JWT for Google Service Account
+async function createGoogleJWT(serviceAccountEmail: string, privateKey: string): Promise<string> {
+  const header = {
+    alg: 'RS256',
+    typ: 'JWT'
+  }
+  
+  const now = Math.floor(Date.now() / 1000)
+  const payload = {
+    iss: serviceAccountEmail,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now
+  }
+  
+  const encodedHeader = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  const unsignedToken = `${encodedHeader}.${encodedPayload}`
+  
+  // Import private key
+  const pemKey = privateKey.replace(/\\n/g, '\n')
+  const pemHeader = '-----BEGIN PRIVATE KEY-----'
+  const pemFooter = '-----END PRIVATE KEY-----'
+  const pemContents = pemKey.substring(pemHeader.length, pemKey.length - pemFooter.length).replace(/\s/g, '')
+  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryKey,
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-256'
+    },
+    false,
+    ['sign']
+  )
+  
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    new TextEncoder().encode(unsignedToken)
+  )
+  
+  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  
+  return `${unsignedToken}.${encodedSignature}`
+}
+
+// Helper function to get Google OAuth access token
+async function getGoogleAccessToken(serviceAccountEmail: string, privateKey: string): Promise<string> {
+  const jwt = await createGoogleJWT(serviceAccountEmail, privateKey)
+  
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+  })
+  
+  const data = await response.json() as { access_token: string }
+  return data.access_token
+}
+
 // API endpoint to upload PDF to Google Drive
 app.post('/api/googledrive/upload-pdf', async (c) => {
   try {
@@ -893,61 +961,74 @@ app.post('/api/googledrive/upload-pdf', async (c) => {
     
     console.log('📤 Uploading to Google Drive:', filename)
     
-    // Import Google APIs
-    const { google } = await import('googleapis')
+    // Get OAuth access token
+    const accessToken = await getGoogleAccessToken(
+      env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      env.GOOGLE_PRIVATE_KEY
+    )
     
-    // Initialize Google Drive API
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      },
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-    })
+    console.log('✅ Got access token')
     
-    const drive = google.drive({ version: 'v3', auth })
+    // Upload file using multipart upload
+    const boundary = '-------314159265358979323846'
+    const delimiter = `\r\n--${boundary}\r\n`
+    const closeDelimiter = `\r\n--${boundary}--`
     
-    // Upload file
-    const fileMetadata = {
+    const metadata = {
       name: filename,
-      mimeType: 'application/pdf',
+      mimeType: 'application/pdf'
     }
     
-    // Convert Uint8Array to Buffer for upload
-    const buffer = Buffer.from(pdfBytes)
+    const multipartBody = 
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      JSON.stringify(metadata) +
+      delimiter +
+      'Content-Type: application/pdf\r\n' +
+      'Content-Transfer-Encoding: base64\r\n\r\n' +
+      btoa(String.fromCharCode(...pdfBytes)) +
+      closeDelimiter
     
-    // Create file
-    const file = await drive.files.create({
-      requestBody: fileMetadata,
-      media: {
-        mimeType: 'application/pdf',
-        body: buffer,
-      },
-      fields: 'id, name, webViewLink',
-    })
+    const uploadResponse = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`
+        },
+        body: multipartBody
+      }
+    )
     
-    console.log('✅ File uploaded to Google Drive:', file.data.id)
+    const fileData = await uploadResponse.json() as { id: string; name: string; webViewLink: string }
+    
+    console.log('✅ File uploaded to Google Drive:', fileData.id)
     
     // Make file publicly accessible
-    await drive.permissions.create({
-      fileId: file.data.id,
-      requestBody: {
-        role: 'reader',
-        type: 'anyone',
+    await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify({
+        role: 'reader',
+        type: 'anyone'
+      })
     })
     
     console.log('✅ File made public')
     
     // Generate preview URL
-    const previewUrl = `https://drive.google.com/file/d/${file.data.id}/view`
+    const previewUrl = `https://drive.google.com/file/d/${fileData.id}/view`
     
     console.log('✅ Preview URL:', previewUrl)
     
     return c.json({
       success: true,
-      filename: file.data.name,
-      fileId: file.data.id,
+      filename: fileData.name,
+      fileId: fileData.id,
       previewUrl: previewUrl,
       shareUrl: previewUrl, // Use same URL for compatibility
     })

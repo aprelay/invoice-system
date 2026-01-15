@@ -896,18 +896,27 @@ async function createGoogleJWT(serviceAccountEmail: string, privateKey: string):
   const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   const unsignedToken = `${encodedHeader}.${encodedPayload}`
   
-  // Import private key
-  const pemKey = privateKey.replace(/\\n/g, '\n')
+  // Import private key - handle multiple possible formats
+  let pemKey = privateKey
+  
+  // Replace literal \n with actual newlines
+  if (pemKey.includes('\\n')) {
+    pemKey = pemKey.replace(/\\n/g, '\n')
+  }
+  
+  // If the key doesn't have the header/footer, it might be just the base64 content
   const pemHeader = '-----BEGIN PRIVATE KEY-----'
   const pemFooter = '-----END PRIVATE KEY-----'
+  
+  // Check if key has proper format
+  if (!pemKey.includes(pemHeader) || !pemKey.includes(pemFooter)) {
+    console.error('❌ Private key format issue - key preview:', pemKey.substring(0, 100))
+    throw new Error('Invalid private key format: missing BEGIN or END markers. Make sure the environment variable includes the full key with headers.')
+  }
   
   // Extract the base64 content between header and footer
   const pemHeaderIndex = pemKey.indexOf(pemHeader)
   const pemFooterIndex = pemKey.indexOf(pemFooter)
-  
-  if (pemHeaderIndex === -1 || pemFooterIndex === -1) {
-    throw new Error('Invalid private key format: missing BEGIN or END markers')
-  }
   
   const pemContents = pemKey
     .substring(pemHeaderIndex + pemHeader.length, pemFooterIndex)
@@ -916,8 +925,10 @@ async function createGoogleJWT(serviceAccountEmail: string, privateKey: string):
     .replace(/\r/g, '')
   
   if (!pemContents) {
-    throw new Error('Invalid private key: no content found')
+    throw new Error('Invalid private key: no content found between BEGIN and END markers')
   }
+  
+  console.log('✅ Private key extracted, length:', pemContents.length)
   
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
   

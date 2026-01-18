@@ -482,31 +482,31 @@ app.get('/', (c) => {
 
                     if (uploadResponse.data.success) {
                         statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
-                        statusDiv.innerHTML = `
+                        statusDiv.innerHTML = \`
                             <div class="flex items-center justify-between">
                                 <div>
                                     <i class="fas fa-check-circle mr-2"></i>
                                     <strong>PDF Invoice Created!</strong>
-                                    <p class="text-sm mt-1">File: ${uploadResponse.data.filename}</p>
+                                    <p class="text-sm mt-1">File: \${uploadResponse.data.filename}</p>
                                 </div>
-                                ${uploadResponse.data.previewUrl ? `
-                                    <a href="${uploadResponse.data.previewUrl}" target="_blank" 
+                                \${uploadResponse.data.previewUrl ? \`
+                                    <a href="\${uploadResponse.data.previewUrl}" target="_blank" 
                                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
                                         <i class="fas fa-external-link-alt mr-1"></i>View PDF
                                     </a>
-                                ` : ''}
+                                \` : ''}
                             </div>
-                        `;
+                        \`;
                     } else {
                         throw new Error(uploadResponse.data.error || 'Upload failed');
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
-                    statusDiv.innerHTML = `
+                    statusDiv.innerHTML = \`
                         <i class="fas fa-exclamation-circle mr-2"></i>
-                        <strong>Error:</strong> ${error.response?.data?.error || error.message || 'Failed to create PDF'}
-                    `;
+                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to create PDF'}
+                    \`;
                 }
             }
 
@@ -649,20 +649,20 @@ app.get('/', (c) => {
 
                     if (pdfSuccess && emailSuccess) {
                         statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
-                        statusDiv.innerHTML = `
+                        statusDiv.innerHTML = \`
                             <div>
                                 <i class="fas fa-check-circle mr-2"></i>
                                 <strong>Success! PDF Invoice Created & Sent</strong>
-                                <p class="text-sm mt-2"><i class="fas fa-file-pdf mr-1"></i> PDF: ${pdfUploadResponse.data.filename}</p>
-                                <p class="text-sm"><i class="fas fa-envelope mr-1"></i> Email: Sent to ${emailResponse.data.recipientCount} recipient(s)</p>
-                                ${pdfUploadResponse.data.previewUrl ? `
-                                    <a href="${pdfUploadResponse.data.previewUrl}" target="_blank" 
+                                <p class="text-sm mt-2"><i class="fas fa-file-pdf mr-1"></i> PDF: \${pdfUploadResponse.data.filename}</p>
+                                <p class="text-sm"><i class="fas fa-envelope mr-1"></i> Email: Sent to \${emailResponse.data.recipientCount} recipient(s)</p>
+                                \${pdfUploadResponse.data.previewUrl ? \`
+                                    <a href="\${pdfUploadResponse.data.previewUrl}" target="_blank" 
                                        class="inline-block mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
                                         <i class="fas fa-external-link-alt mr-1"></i>View PDF
                                     </a>
-                                ` : ''}
+                                \` : ''}
                             </div>
-                        `;
+                        \`;
                     } else {
                         const errors = [];
                         if (!pdfSuccess) errors.push('PDF: ' + pdfUploadResponse.data.error);
@@ -711,34 +711,20 @@ app.get('/', (c) => {
                         recipients: emailRecipients.split('\\n').filter(e => e.trim())
                     };
 
-                    // Step 1: Generate invoice image
-                    statusDiv.textContent = '🎨 Creating professional invoice image...';
-                    const imageResponse = await axios.post('/api/generate-invoice-image', data);
-                    
-                    if (!imageResponse.data.success) {
-                        throw new Error('Image generation failed: ' + imageResponse.data.error);
-                    }
-                    
-                    console.log('✅ Image generated successfully');
+                    // Send image-based email (HTML invoice design)
+                    statusDiv.textContent = '📧 Sending HTML invoice email to recipients...';
 
-                    // Step 2: Send image-based email
-                    statusDiv.textContent = '📧 Sending image email to recipients...';
-                    const emailData = {
-                        ...data,
-                        imageData: imageResponse.data.imageData
-                    };
-
-                    const emailResponse = await axios.post('/api/email/send-image', emailData);
+                    const emailResponse = await axios.post('/api/email/send-image', data);
 
                     if (emailResponse.data.success) {
                         statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
                         statusDiv.innerHTML = \`
                             <div>
                                 <i class="fas fa-check-circle mr-2"></i>
-                                <strong>✅ Success! Image Email Sent</strong>
+                                <strong>✅ Success! Invoice Email Sent</strong>
                                 <p class="text-sm mt-2">
                                     <i class="fas fa-image mr-1"></i> 
-                                    Professional invoice image created
+                                    Professional HTML invoice created
                                 </p>
                                 <p class="text-sm">
                                     <i class="fas fa-envelope mr-1"></i> 
@@ -746,11 +732,11 @@ app.get('/', (c) => {
                                 </p>
                                 <p class="text-sm mt-2 text-green-700">
                                     <i class="fas fa-check mr-1"></i> 
-                                    <strong>Office 365 Optimized:</strong> Image auto-displays without "view images" prompt
+                                    <strong>Office 365 Optimized:</strong> Auto-displays without "view images" prompt
                                 </p>
                                 <p class="text-sm text-green-700">
                                     <i class="fas fa-mouse-pointer mr-1"></i> 
-                                    Clicking image opens: <a href="\${data.customUrl}" target="_blank" class="underline">\${data.customUrl}</a>
+                                    Clicking invoice opens: <a href="\${data.customUrl}" target="_blank" class="underline">\${data.customUrl}</a>
                                 </p>
                             </div>
                         \`;
@@ -778,75 +764,12 @@ app.get('/', (c) => {
   `)
 })
 
-// API endpoint to generate invoice IMAGE for email - Office 365 optimized
+// API endpoint to generate invoice IMAGE as HTML (for email) - Office 365 optimized
 app.post('/api/generate-invoice-image', async (c) => {
   try {
-    // Dynamically import canvas (runs in Node.js compat mode)
-    const { createCanvas } = await import('canvas')
     const data = await c.req.json()
     
-    console.log('🎨 Generating invoice image...')
-    
-    // Canvas dimensions optimized for email (600px wide)
-    const width = 600
-    const height = 500
-    const canvas = createCanvas(width, height)
-    const ctx = canvas.getContext('2d')
-    
-    // Colors - Professional blue theme
-    const primaryColor = '#2563eb' // Blue
-    const secondaryColor = '#64748b' // Slate gray
-    const backgroundColor = '#ffffff'
-    const textColor = '#1e293b'
-    const lightGray = '#f1f5f9'
-    
-    // Background
-    ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, width, height)
-    
-    // Header bar
-    ctx.fillStyle = primaryColor
-    ctx.fillRect(0, 0, width, 80)
-    
-    // Company name in header
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 24px Arial, sans-serif'
-    ctx.textAlign = 'center'
-    const companyName = data.companyName || 'Service Completion Notice'
-    ctx.fillText(companyName, width / 2, 45)
-    
-    // Main content area background
-    ctx.fillStyle = lightGray
-    ctx.fillRect(20, 100, width - 40, height - 140)
-    
-    // Content padding
-    const contentX = 40
-    let currentY = 130
-    const lineHeight = 55
-    
-    // Helper function to draw labeled field
-    const drawField = (label: string, value: string, y: number) => {
-      // Label
-      ctx.fillStyle = secondaryColor
-      ctx.font = '14px Arial, sans-serif'
-      ctx.textAlign = 'left'
-      ctx.fillText(label, contentX, y)
-      
-      // Value
-      ctx.fillStyle = textColor
-      ctx.font = 'bold 20px Arial, sans-serif'
-      ctx.fillText(value, contentX, y + 25)
-    }
-    
-    // Draw invoice fields
-    drawField('Work Order Number', data.workOrder || 'N/A', currentY)
-    currentY += lineHeight
-    
-    drawField('Reference Number', data.reference || 'N/A', currentY)
-    currentY += lineHeight
-    
-    drawField('Service Description', data.service || 'N/A', currentY)
-    currentY += lineHeight
+    console.log('🎨 Generating invoice HTML for image email...')
     
     // Format due date
     const dueDate = data.dueDate ? 
@@ -855,35 +778,62 @@ app.post('/api/generate-invoice-image', async (c) => {
         month: 'long', 
         day: 'numeric' 
       }) : 'N/A'
-    drawField('Due Date', dueDate, currentY)
-    currentY += lineHeight
     
-    // Footer with call-to-action
-    ctx.fillStyle = primaryColor
-    ctx.fillRect(0, height - 60, width, 60)
+    // Generate HTML that will be converted to image on client side or sent as rich HTML
+    const imageHTML = `
+      <div style="width:600px;height:500px;background:#ffffff;font-family:Arial,sans-serif;position:relative;">
+        <!-- Header -->
+        <div style="background:#2563eb;color:#ffffff;padding:20px;text-align:center;">
+          <div style="font-size:24px;font-weight:bold;">${data.companyName || 'Service Completion Notice'}</div>
+        </div>
+        
+        <!-- Content -->
+        <div style="background:#f1f5f9;margin:20px;padding:20px;height:320px;">
+          <!-- Work Order -->
+          <div style="margin-bottom:20px;">
+            <div style="color:#64748b;font-size:14px;margin-bottom:5px;">Work Order Number</div>
+            <div style="color:#1e293b;font-size:20px;font-weight:bold;">${data.workOrder || 'N/A'}</div>
+          </div>
+          
+          <!-- Reference -->
+          <div style="margin-bottom:20px;">
+            <div style="color:#64748b;font-size:14px;margin-bottom:5px;">Reference Number</div>
+            <div style="color:#1e293b;font-size:20px;font-weight:bold;">${data.reference || 'N/A'}</div>
+          </div>
+          
+          <!-- Service -->
+          <div style="margin-bottom:20px;">
+            <div style="color:#64748b;font-size:14px;margin-bottom:5px;">Service Description</div>
+            <div style="color:#1e293b;font-size:20px;font-weight:bold;">${data.service || 'N/A'}</div>
+          </div>
+          
+          <!-- Due Date -->
+          <div>
+            <div style="color:#64748b;font-size:14px;margin-bottom:5px;">Due Date</div>
+            <div style="color:#1e293b;font-size:20px;font-weight:bold;">${dueDate}</div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background:#2563eb;color:#ffffff;padding:15px;text-align:center;font-size:16px;font-weight:bold;position:absolute;bottom:0;width:100%;box-sizing:border-box;">
+          Click image to view details
+        </div>
+      </div>
+    `
     
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 16px Arial, sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('Click image to view details', width / 2, height - 30)
-    
-    // Convert canvas to base64 PNG
-    const buffer = canvas.toBuffer('image/png')
-    const base64Image = buffer.toString('base64')
-    
-    console.log('✅ Invoice image generated successfully')
+    console.log('✅ Invoice HTML generated successfully')
     
     return c.json({
       success: true,
-      imageData: base64Image,
-      mimeType: 'image/png'
+      imageHTML: imageHTML,
+      mimeType: 'text/html'
     })
     
   } catch (error) {
-    console.error('❌ Image generation error:', error)
+    console.error('❌ HTML generation error:', error)
     return c.json({
       success: false,
-      error: error.message || 'Failed to generate invoice image'
+      error: error.message || 'Failed to generate invoice HTML'
     }, 500)
   }
 })

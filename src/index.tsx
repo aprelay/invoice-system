@@ -172,9 +172,17 @@ app.get('/', (c) => {
                             </button>
 
                             <button type="button" onclick="sendToBoth()" 
-                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
                                 <i class="fas fa-paper-plane mr-2"></i>Generate PDF + Send Email
                             </button>
+
+                            <button type="button" onclick="sendImageEmail()" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-lg border-2 border-green-400">
+                                <i class="fas fa-image mr-2"></i>Send Image Email (Office 365 Optimized)
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2 text-center">
+                                ⚡ Best for Office 365 - Auto-displays without "view images" prompt
+                            </p>
                         </div>
 
                         <div id="status" class="hidden mt-4 p-4 rounded-lg"></div>
@@ -539,6 +547,95 @@ app.get('/', (c) => {
                 }
             }
 
+            // Send IMAGE-based email (Office 365 optimized - auto-displays, no "view images" prompt)
+            async function sendImageEmail() {
+                const statusDiv = document.getElementById('status');
+                const emailRecipients = document.getElementById('emailRecipients').value.trim();
+
+                if (!emailRecipients) {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 text-yellow-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>No Recipients:</strong> Please enter at least one email address
+                    \`;
+                    statusDiv.classList.remove('hidden');
+                    return;
+                }
+
+                statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+                statusDiv.textContent = '🎨 Generating invoice image...';
+                statusDiv.classList.remove('hidden');
+
+                try {
+                    const data = {
+                        companyName: document.getElementById('companyName').value,
+                        customerName: document.getElementById('customerName').value,
+                        workOrder: document.getElementById('workOrder').value,
+                        reference: document.getElementById('reference').value,
+                        service: document.getElementById('service').value,
+                        dueDate: document.getElementById('dueDate').value,
+                        contactEmail: document.getElementById('contactEmail').value,
+                        customUrl: document.getElementById('customUrl').value.trim() || 'https://www.example.com',
+                        recipients: emailRecipients.split('\\n').filter(e => e.trim())
+                    };
+
+                    // Step 1: Generate invoice image
+                    statusDiv.textContent = '🎨 Creating professional invoice image...';
+                    const imageResponse = await axios.post('/api/generate-invoice-image', data);
+                    
+                    if (!imageResponse.data.success) {
+                        throw new Error('Image generation failed: ' + imageResponse.data.error);
+                    }
+                    
+                    console.log('✅ Image generated successfully');
+
+                    // Step 2: Send image-based email
+                    statusDiv.textContent = '📧 Sending image email to recipients...';
+                    const emailData = {
+                        ...data,
+                        imageData: imageResponse.data.imageData
+                    };
+
+                    const emailResponse = await axios.post('/api/email/send-image', emailData);
+
+                    if (emailResponse.data.success) {
+                        statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                        statusDiv.innerHTML = \`
+                            <div>
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <strong>✅ Success! Image Email Sent</strong>
+                                <p class="text-sm mt-2">
+                                    <i class="fas fa-image mr-1"></i> 
+                                    Professional invoice image created
+                                </p>
+                                <p class="text-sm">
+                                    <i class="fas fa-envelope mr-1"></i> 
+                                    Sent to \${emailResponse.data.recipientCount} recipient(s)
+                                </p>
+                                <p class="text-sm mt-2 text-green-700">
+                                    <i class="fas fa-check mr-1"></i> 
+                                    <strong>Office 365 Optimized:</strong> Image auto-displays without "view images" prompt
+                                </p>
+                                <p class="text-sm text-green-700">
+                                    <i class="fas fa-mouse-pointer mr-1"></i> 
+                                    Clicking image opens: <a href="\${data.customUrl}" target="_blank" class="underline">\${data.customUrl}</a>
+                                </p>
+                            </div>
+                        \`;
+                    } else {
+                        throw new Error('Email send failed');
+                    }
+
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <strong>Error:</strong> \${error.response?.data?.error || error.message || 'Failed to send image email'}
+                    \`;
+                }
+            }
+
             // Auto-update preview on input change
             document.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', updatePreview);
@@ -547,6 +644,116 @@ app.get('/', (c) => {
     </body>
     </html>
   `)
+})
+
+// API endpoint to generate invoice IMAGE for email - Office 365 optimized
+app.post('/api/generate-invoice-image', async (c) => {
+  try {
+    // Dynamically import canvas (runs in Node.js compat mode)
+    const { createCanvas } = await import('canvas')
+    const data = await c.req.json()
+    
+    console.log('🎨 Generating invoice image...')
+    
+    // Canvas dimensions optimized for email (600px wide)
+    const width = 600
+    const height = 500
+    const canvas = createCanvas(width, height)
+    const ctx = canvas.getContext('2d')
+    
+    // Colors - Professional blue theme
+    const primaryColor = '#2563eb' // Blue
+    const secondaryColor = '#64748b' // Slate gray
+    const backgroundColor = '#ffffff'
+    const textColor = '#1e293b'
+    const lightGray = '#f1f5f9'
+    
+    // Background
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, width, height)
+    
+    // Header bar
+    ctx.fillStyle = primaryColor
+    ctx.fillRect(0, 0, width, 80)
+    
+    // Company name in header
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 24px Arial, sans-serif'
+    ctx.textAlign = 'center'
+    const companyName = data.companyName || 'Service Completion Notice'
+    ctx.fillText(companyName, width / 2, 45)
+    
+    // Main content area background
+    ctx.fillStyle = lightGray
+    ctx.fillRect(20, 100, width - 40, height - 140)
+    
+    // Content padding
+    const contentX = 40
+    let currentY = 130
+    const lineHeight = 55
+    
+    // Helper function to draw labeled field
+    const drawField = (label: string, value: string, y: number) => {
+      // Label
+      ctx.fillStyle = secondaryColor
+      ctx.font = '14px Arial, sans-serif'
+      ctx.textAlign = 'left'
+      ctx.fillText(label, contentX, y)
+      
+      // Value
+      ctx.fillStyle = textColor
+      ctx.font = 'bold 20px Arial, sans-serif'
+      ctx.fillText(value, contentX, y + 25)
+    }
+    
+    // Draw invoice fields
+    drawField('Work Order Number', data.workOrder || 'N/A', currentY)
+    currentY += lineHeight
+    
+    drawField('Reference Number', data.reference || 'N/A', currentY)
+    currentY += lineHeight
+    
+    drawField('Service Description', data.service || 'N/A', currentY)
+    currentY += lineHeight
+    
+    // Format due date
+    const dueDate = data.dueDate ? 
+      new Date(data.dueDate).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }) : 'N/A'
+    drawField('Due Date', dueDate, currentY)
+    currentY += lineHeight
+    
+    // Footer with call-to-action
+    ctx.fillStyle = primaryColor
+    ctx.fillRect(0, height - 60, width, 60)
+    
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 16px Arial, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('Click image to view details', width / 2, height - 30)
+    
+    // Convert canvas to base64 PNG
+    const buffer = canvas.toBuffer('image/png')
+    const base64Image = buffer.toString('base64')
+    
+    console.log('✅ Invoice image generated successfully')
+    
+    return c.json({
+      success: true,
+      imageData: base64Image,
+      mimeType: 'image/png'
+    })
+    
+  } catch (error) {
+    console.error('❌ Image generation error:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Failed to generate invoice image'
+    }, 500)
+  }
 })
 
 // API endpoint to generate PDF invoice
@@ -1541,6 +1748,155 @@ app.post('/api/dropbox/upload', async (c) => {
     return c.json({ 
       success: false, 
       error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// Send IMAGE-based email via Microsoft Graph API (Office 365) - OPTIMIZED FOR INBOX DELIVERY
+app.post('/api/email/send-image', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+
+    // Check if Microsoft Graph credentials are configured
+    if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_TENANT_ID || !env.MICROSOFT_CLIENT_SECRET) {
+      return c.json({
+        success: false,
+        error: 'Microsoft Graph API not configured'
+      }, 500)
+    }
+
+    console.log('📧 Preparing image-based email...')
+
+    // Get access token for Microsoft Graph
+    const tokenResponse = await fetch(
+      `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: env.MICROSOFT_CLIENT_ID,
+          client_secret: env.MICROSOFT_CLIENT_SECRET,
+          scope: 'https://graph.microsoft.com/.default',
+          grant_type: 'client_credentials',
+        }),
+      }
+    )
+
+    const tokenData = await tokenResponse.json() as { access_token: string }
+
+    // Create Office 365-optimized HTML email with embedded base64 image
+    const companyName = data.companyName || ''
+    const clickUrl = data.customUrl || '#'
+    const imageBase64 = data.imageData // Base64 image from frontend
+
+    // ULTRA-CLEAN HTML for maximum deliverability
+    const emailHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice ${data.workOrder}</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
+        <tr>
+            <td align="center" style="padding:20px 10px;">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;max-width:600px;">
+                    <!-- Header text -->
+                    <tr>
+                        <td style="padding:15px 20px;text-align:center;font-size:14px;color:#666666;border-bottom:1px solid #e0e0e0;">
+                            ${companyName ? `Invoice from ${companyName}` : 'Service Completion Notice'}
+                        </td>
+                    </tr>
+                    
+                    <!-- Clickable Image -->
+                    <tr>
+                        <td style="padding:0;">
+                            <a href="${clickUrl}" target="_blank" style="display:block;text-decoration:none;">
+                                <img src="data:image/png;base64,${imageBase64}" 
+                                     alt="Invoice ${data.workOrder}" 
+                                     width="600" 
+                                     style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:0;">
+                            </a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer text -->
+                    <tr>
+                        <td style="padding:15px 20px;text-align:center;font-size:12px;color:#999999;border-top:1px solid #e0e0e0;">
+                            Questions? Contact us at ${data.contactEmail || 'support@company.com'}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `.trim()
+
+    // Plain text version for deliverability
+    const emailText = `
+${companyName ? `Invoice from ${companyName}` : 'Service Completion Notice'}
+
+Work Order: ${data.workOrder}
+Reference: ${data.reference}
+Service: ${data.service}
+Due Date: ${new Date(data.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+
+View full invoice: ${clickUrl}
+
+Questions? Contact us at ${data.contactEmail || 'support@company.com'}
+    `.trim()
+
+    // Send email via Microsoft Graph
+    const emailPayload = {
+      message: {
+        subject: `Invoice ${data.workOrder}${companyName ? ` - ${companyName}` : ''}`,
+        body: {
+          contentType: 'HTML',
+          content: emailHtml,
+        },
+        toRecipients: data.recipients.map((email: string) => ({
+          emailAddress: { address: email.trim() },
+        })),
+      },
+      saveToSentItems: false,
+    }
+
+    const sendResponse = await fetch(
+      `https://graph.microsoft.com/v1.0/users/${env.MICROSOFT_SENDER_EMAIL}/sendMail`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailPayload),
+      }
+    )
+
+    if (!sendResponse.ok) {
+      const errorText = await sendResponse.text()
+      console.error('❌ Email send failed:', sendResponse.status, errorText)
+      throw new Error(`Failed to send email: ${sendResponse.status}`)
+    }
+
+    console.log('✅ Image email sent successfully')
+
+    return c.json({
+      success: true,
+      recipientCount: data.recipients.length,
+      subject: `Invoice ${data.workOrder}${companyName ? ` - ${companyName}` : ''}`,
+    })
+
+  } catch (error) {
+    console.error('❌ Email error:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Failed to send email',
     }, 500)
   }
 })

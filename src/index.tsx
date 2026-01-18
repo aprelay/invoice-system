@@ -845,11 +845,24 @@ app.get('/', (c) => {
                     
                     console.log('✅ Image converted to PNG successfully');
 
-                    // Step 3: Send image-based email
-                    statusDiv.textContent = '📧 Sending image email to recipients...';
+                    // Step 3: Store image in KV and get public URL
+                    statusDiv.textContent = '💾 Uploading image to cloud storage...';
+                    const storeResponse = await axios.post('/api/store-invoice-image', {
+                        imageData: base64Image
+                    });
+                    
+                    if (!storeResponse.data.success) {
+                        throw new Error('Image storage failed: ' + storeResponse.data.error);
+                    }
+                    
+                    const imageUrl = storeResponse.data.imageUrl;
+                    console.log('✅ Image URL:', imageUrl);
+
+                    // Step 4: Send email with external image URL
+                    statusDiv.textContent = '📧 Sending email to recipients...';
                     const emailData = {
                         ...data,
-                        imageData: base64Image
+                        imageUrl: imageUrl // Send URL instead of base64
                     };
 
                     const emailResponse = await axios.post('/api/email/send-image', emailData);
@@ -870,7 +883,7 @@ app.get('/', (c) => {
                                 </p>
                                 <p class="text-sm mt-2 text-green-700">
                                     <i class="fas fa-check mr-1"></i> 
-                                    <strong>Office 365 Optimized:</strong> Image auto-displays without "view images" prompt
+                                    <strong>Office 365 Compatible:</strong> Image hosted externally (no blocking)
                                 </p>
                                 <p class="text-sm text-green-700">
                                     <i class="fas fa-mouse-pointer mr-1"></i> 
@@ -900,6 +913,84 @@ app.get('/', (c) => {
     </body>
     </html>
   `)
+})
+
+// Store invoice image in KV and return public URL
+app.post('/api/store-invoice-image', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+    
+    if (!env.PDF_CACHE) {
+      return c.json({
+        success: false,
+        error: 'PDF_CACHE (KV) not configured'
+      }, 500)
+    }
+    
+    console.log('💾 Storing invoice image in KV...')
+    
+    // Generate unique image ID
+    const imageId = `img-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    
+    // Store image data in KV (7 day expiration)
+    await env.PDF_CACHE.put(imageId, data.imageData, {
+      expirationTtl: 60 * 60 * 24 * 7 // 7 days
+    })
+    
+    // Generate public URL
+    const imageUrl = `${new URL(c.req.url).origin}/invoice-image/${imageId}`
+    
+    console.log('✅ Image stored successfully:', imageUrl)
+    
+    return c.json({
+      success: true,
+      imageUrl: imageUrl,
+      imageId: imageId
+    })
+    
+  } catch (error) {
+    console.error('❌ Image storage error:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Failed to store invoice image'
+    }, 500)
+  }
+})
+
+// Serve invoice image from KV
+app.get('/invoice-image/:imageId', async (c) => {
+  try {
+    const { env } = c
+    const imageId = c.req.param('imageId')
+    
+    if (!env.PDF_CACHE) {
+      return c.text('Storage not configured', 500)
+    }
+    
+    // Get image from KV
+    const imageData = await env.PDF_CACHE.get(imageId)
+    
+    if (!imageData) {
+      return c.text('Image not found or expired', 404)
+    }
+    
+    // Convert base64 to binary
+    const imageBuffer = Buffer.from(imageData, 'base64')
+    
+    // Return image
+    return new Response(imageBuffer, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=604800', // 7 days
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ Image retrieval error:', error)
+    return c.text('Failed to retrieve image', 500)
+  }
 })
 
 // API endpoint to generate invoice IMAGE as base64 PNG using data URL - Office 365 optimized
@@ -2012,12 +2103,12 @@ app.post('/api/email/send-image', async (c) => {
 
     const tokenData = await tokenResponse.json() as { access_token: string }
 
-    // Create Office 365-optimized HTML email with embedded base64 SVG image
+    // Create Office 365-optimized HTML email with EXTERNAL image URL
     const companyName = data.companyName || ''
     const clickUrl = data.customUrl || '#'
-    const imageBase64 = data.imageData // Base64 SVG image from frontend
+    const imageUrl = data.imageUrl // External image URL from KV storage
 
-    // ULTRA-CLEAN HTML for maximum deliverability
+    // ULTRA-CLEAN HTML for maximum deliverability with external image
     const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -2030,7 +2121,7 @@ app.post('/api/email/send-image', async (c) => {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
         <tr>
             <td align="center" style="padding:20px 10px;">
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;max-width:600px;">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;max-width:600px;border-radius:8px;overflow:hidden;">
                     <!-- Header text -->
                     <tr>
                         <td style="padding:15px 20px;text-align:center;font-size:14px;color:#666666;border-bottom:1px solid #e0e0e0;">
@@ -2038,11 +2129,11 @@ app.post('/api/email/send-image', async (c) => {
                         </td>
                     </tr>
                     
-                    <!-- Clickable Image -->
+                    <!-- Clickable External Image -->
                     <tr>
                         <td style="padding:0;">
                             <a href="${clickUrl}" target="_blank" style="display:block;text-decoration:none;">
-                                <img src="data:image/png;base64,${imageBase64}" 
+                                <img src="${imageUrl}" 
                                      alt="Invoice ${data.workOrder}" 
                                      width="600" 
                                      height="500"

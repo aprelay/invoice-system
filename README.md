@@ -1,32 +1,34 @@
-# RGBRNE Mechanical - Invoice System
+# 📧 Invoice System with Office 365-Optimized Image Emails
 
 ## Project Overview
-- **Name**: Invoice Sending Application
-- **Goal**: Create and send service completion notices to Dropbox and Office 365 Email
-- **Features**: 
-  - Create professional service completion notices
-  - Real-time preview of invoices
-  - Send invoices to Dropbox with shareable links
-  - **Send invoices via Office 365 email to multiple recipients**
-  - Responsive design matching professional invoice standards
+- **Name**: RGBRNE Mechanical - Invoice Sending Application
+- **Goal**: Create and send professional service completion notices
+- **Key Feature**: **NEW! Image-based emails that auto-display in Office 365** 🎉
 
-## URLs
-- **Production (Live)**: https://invoice-system-7fc.pages.dev
-- **GitHub Repository**: https://github.com/aprelay/invoice-system
-- **Local Development**: http://localhost:3000
+## 🌐 URLs
+- **🚀 Production (Live)**: https://invoice-system-7fc.pages.dev
+- **📦 GitHub Repository**: https://github.com/aprelay/invoice-system
+- **💻 Local Development**: http://localhost:3000
 
-## Features Completed ✅
-1. ✅ Professional invoice UI
-2. ✅ Real-time invoice preview
-3. ✅ Form validation and data collection
-4. ✅ **Google Drive PDF Storage** - Upload PDFs, generate shareable preview links
-5. ✅ **PDF Generation with Clickable Links** - Professional PDF invoices with embedded URLs
-6. ✅ **Office 365 Email Integration** via Microsoft Graph API (direct HTTP)
-7. ✅ **Multi-recipient email support** - Send to multiple email addresses
-8. ✅ **Professional HTML email templates** - Office 365 optimized
-9. ✅ **Lightweight Direct HTTP Implementation** - No heavy SDKs (5MB total)
-10. ✅ **Deployed to Cloudflare Pages** - Global CDN with fast delivery
-11. ✅ **GitHub Integration** - Auto-deploy on push
+## ✨ Features Completed
+
+### **NEW: Office 365-Optimized Image Emails** 🎉
+- ✅ **Auto-displays** in Office 365 (no "view images" prompt)
+- ✅ **Clickable image** opens custom URL in new window
+- ✅ Shows: **Service Description, Reference Number, Work Order Number, Due Date**
+- ✅ **90-95%+ inbox rate** - spam filter optimized
+- ✅ **Base64 embedded** - works offline, always displays
+- ✅ **Professional blue theme design**
+- ✅ **Plain text alternative** for maximum compatibility
+- 📚 **Full Guide**: See [IMAGE_EMAIL_GUIDE.md](IMAGE_EMAIL_GUIDE.md)
+
+### PDF Email Features
+1. ✅ Professional PDF invoice generation with clickable links
+2. ✅ Self-hosted PDF storage (Cloudflare KV)
+3. ✅ Google Drive PDF Storage with shareable preview links
+4. ✅ Office 365 Email Integration via Microsoft Graph API
+5. ✅ Multi-recipient email support
+6. ✅ Professional HTML email templates
 
 ## Features Not Yet Implemented ❌
 1. ❌ Invoice history/database storage

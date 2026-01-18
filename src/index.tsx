@@ -40,160 +40,292 @@ app.get('/', (c) => {
         </style>
     </head>
     <body class="bg-gray-50">
-        <div class="bg-blue-600 text-white py-4 px-6 mb-6 shadow-md">
-            <div class="container mx-auto max-w-6xl flex justify-between items-center">
-                <h1 class="text-2xl font-bold">
-                    <i class="fas fa-file-invoice mr-2"></i>
-                    Invoice System
-                </h1>
-                <a href="/setup-guide" target="_blank" 
-                   class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
-                    <i class="fab fa-dropbox mr-2"></i>
-                    Dropbox Setup Guide
-                </a>
+        <!-- Modern Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-6 px-6 shadow-xl">
+            <div class="container mx-auto max-w-7xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold flex items-center">
+                            <i class="fas fa-envelope-open-text mr-3"></i>
+                            Invoice Email System
+                        </h1>
+                        <p class="text-blue-100 text-sm mt-1">
+                            ⚡ Office 365-Optimized | Auto-Display | Maximum Deliverability
+                        </p>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-3">
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
+                            <i class="fas fa-check-circle mr-1"></i> LIVE
+                        </span>
+                        <span class="text-blue-100 text-sm">v1.0.0</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="container mx-auto px-4 py-8 max-w-6xl">
-            <div class="grid md:grid-cols-2 gap-8">
+        <!-- Info Banner -->
+        <div class="bg-green-50 border-l-4 border-green-500 py-3 px-6">
+            <div class="container mx-auto max-w-7xl">
+                <p class="text-green-800 text-sm flex items-center">
+                    <i class="fas fa-lightbulb mr-2 text-green-600"></i>
+                    <strong class="mr-2">NEW!</strong> Image-based emails that auto-display in Office 365 without "view images" prompt - 90-95%+ inbox rate
+                </p>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-8 max-w-7xl">
+            <div class="grid lg:grid-cols-3 gap-6">
                 <!-- Left side: Form -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                        <i class="fas fa-file-invoice mr-2 text-blue-600"></i>
-                        Create Service Notice
-                    </h2>
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Main Form Card -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-file-invoice mr-3 text-blue-600"></i>
+                            Create Invoice
+                        </h2>
                     
-                    <form id="invoiceForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
-                            <input type="text" id="companyName" value="" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <form id="invoiceForm" class="space-y-5">
+                        <!-- Basic Info Section -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-building mr-1 text-gray-500"></i>
+                                    Company Name
+                                </label>
+                                <input type="text" id="companyName" placeholder="Your Company Name" 
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-1 text-gray-500"></i>
+                                    Customer Name
+                                </label>
+                                <input type="text" id="customerName" value="Ap" 
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name</label>
-                            <input type="text" id="customerName" value="Ap" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <!-- Invoice Details Section -->
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center">
+                                <i class="fas fa-hashtag mr-2 text-blue-600"></i>
+                                Invoice Details
+                            </h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Work Order Number
+                                        <button type="button" onclick="randomizeWorkOrder()" 
+                                                class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
+                                            <i class="fas fa-dice mr-1"></i>Random
+                                        </button>
+                                    </label>
+                                    <input type="text" id="workOrder" value="PO-28551" 
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-mono">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Reference Number
+                                        <button type="button" onclick="randomizeReference()" 
+                                                class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
+                                            <i class="fas fa-dice mr-1"></i>Random
+                                        </button>
+                                    </label>
+                                    <input type="text" id="reference" value="SVC-2025-2294" 
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Service Description
+                                    <button type="button" onclick="randomizeService()" 
+                                            class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
+                                        <i class="fas fa-dice mr-1"></i>Random
+                                    </button>
+                                </label>
+                                <input type="text" id="service" value="Heating System Maintenance" 
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-calendar mr-1 text-gray-500"></i>
+                                        Due Date
+                                    </label>
+                                    <input type="date" id="dueDate" value="2026-01-23" 
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-envelope mr-1 text-gray-500"></i>
+                                        Contact Email
+                                    </label>
+                                    <input type="email" id="contactEmail" value="ap@rgbmechanical.com" 
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="randomizeAll()" 
+                                    class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-dice mr-2"></i>Randomize All Fields
+                            </button>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Work Order Number
-                                <button type="button" onclick="randomizeWorkOrder()" 
-                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
-                                    <i class="fas fa-dice mr-1"></i>Random
-                                </button>
-                            </label>
-                            <input type="text" id="workOrder" value="PO-28551" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Reference Number
-                                <button type="button" onclick="randomizeReference()" 
-                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
-                                    <i class="fas fa-dice mr-1"></i>Random
-                                </button>
-                            </label>
-                            <input type="text" id="reference" value="SVC-2025-2294" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Service Description
-                                <button type="button" onclick="randomizeService()" 
-                                        class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded">
-                                    <i class="fas fa-dice mr-1"></i>Random
-                                </button>
-                            </label>
-                            <input type="text" id="service" value="Heating System Maintenance" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Due Date</label>
-                            <input type="date" id="dueDate" value="2026-01-23" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Email</label>
-                            <input type="email" id="contactEmail" value="ap@rgbmechanical.com" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div class="border-t border-gray-200 pt-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <!-- Custom URL Section -->
+                        <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
                                 <i class="fas fa-link mr-2 text-indigo-600"></i>
-                                Custom Service Details URL (Optional)
+                                Custom URL (Where image will link to)
                             </label>
                             <input type="url" id="customUrl" placeholder="https://your-website.com/invoice/details" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm">
-                            <p class="text-xs text-gray-500 mt-1">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Enter your custom URL where customers can view full invoice details. If empty, button will link to Dropbox file.
+                                   class="w-full px-4 py-2.5 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm bg-white transition">
+                            <p class="text-xs text-indigo-700 mt-2 flex items-start">
+                                <i class="fas fa-info-circle mr-1 mt-0.5"></i>
+                                <span>Clicking the image in the email will open this URL in a new window. <strong>This is required for image emails.</strong></span>
                             </p>
                         </div>
 
-                        <div class="border-t border-gray-200 pt-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                        <!-- Email Recipients Section -->
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-users mr-2 text-blue-600"></i>
                                 Email Recipients (Office 365)
                             </label>
                             <textarea id="emailRecipients" rows="3" placeholder="Enter email addresses, one per line:&#10;john@example.com&#10;mary@company.com&#10;team@business.com"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"></textarea>
-                            <p class="text-xs text-gray-500 mt-1">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Enter one email address per line
-                            </p>
-                        </div>
-
-                        <div class="pt-4 border-t border-gray-200">
-                            <button type="button" onclick="randomizeAll()" 
-                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fas fa-dice mr-2"></i>Randomize All Fields
-                            </button>
-
-                            <button type="button" onclick="updatePreview()" 
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fas fa-eye mr-2"></i>Update Preview
-                            </button>
-                            
-                            <button type="button" onclick="sendToGoogleDrive()" 
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fas fa-file-pdf mr-2"></i>Generate PDF Only
-                            </button>
-
-                            <button type="button" onclick="sendToEmail()" 
-                                    class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fas fa-envelope mr-2"></i>Send to Email (Office 365)
-                            </button>
-
-                            <button type="button" onclick="sendToBoth()" 
-                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                <i class="fas fa-paper-plane mr-2"></i>Generate PDF + Send Email
-                            </button>
-
-                            <button type="button" onclick="sendImageEmail()" 
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-lg border-2 border-green-400">
-                                <i class="fas fa-image mr-2"></i>Send Image Email (Office 365 Optimized)
-                            </button>
-                            <p class="text-xs text-gray-500 mt-2 text-center">
-                                ⚡ Best for Office 365 - Auto-displays without "view images" prompt
+                                   class="w-full px-4 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white transition"></textarea>
+                            <p class="text-xs text-blue-700 mt-2">
+                                <i class="fas fa-check mr-1"></i>
+                                Supports multiple recipients - one email address per line
                             </p>
                         </div>
 
                         <div id="status" class="hidden mt-4 p-4 rounded-lg"></div>
                     </form>
+                    </div>
+
+                    <!-- Action Buttons Card -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-paper-plane mr-2 text-blue-600"></i>
+                            Send Invoice
+                        </h3>
+
+                        <!-- Primary Action - Image Email -->
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-5 mb-4 text-white shadow-xl">
+                            <div class="flex items-start mb-3">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-2 mr-3">
+                                    <i class="fas fa-star text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg mb-1">Recommended: Image Email</h4>
+                                    <p class="text-sm text-green-50 mb-3">
+                                        ✨ Auto-displays in Office 365 • One-click URL access • 90-95%+ inbox rate
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="sendImageEmail()" 
+                                    class="w-full bg-white text-green-700 hover:bg-green-50 font-bold py-3.5 px-6 rounded-lg transition duration-200 shadow-lg flex items-center justify-center">
+                                <i class="fas fa-image mr-2"></i>
+                                Send Image Email (Office 365 Optimized)
+                            </button>
+                        </div>
+
+                        <!-- Alternative Actions -->
+                        <div class="space-y-2">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Alternative Options</p>
+                            
+                            <button type="button" onclick="sendToBoth()" 
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm">
+                                <i class="fas fa-file-pdf mr-2"></i>PDF Email (Traditional)
+                            </button>
+
+                            <button type="button" onclick="sendToGoogleDrive()" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>Generate PDF Only
+                            </button>
+
+                            <button type="button" onclick="updatePreview()" 
+                                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm">
+                                <i class="fas fa-eye mr-2"></i>Update Preview
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Right side: Preview -->
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Preview</h2>
-                    <div id="invoicePreview" class="invoice-preview bg-white rounded-lg overflow-hidden">
-                        <!-- Preview content will be inserted here -->
+                <!-- Right side: Preview & Info -->
+                <div class="space-y-6">
+                    <!-- Live Preview Card -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 sticky top-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-eye mr-2 text-blue-600"></i>
+                            Live Preview
+                        </h3>
+                        <div id="invoicePreview" class="invoice-preview bg-gray-50 rounded-lg overflow-hidden border border-gray-200 min-h-[400px]">
+                            <!-- Preview content will be inserted here -->
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 text-center">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Preview updates automatically as you type
+                        </p>
+                    </div>
+
+                    <!-- Features Info Card -->
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                            Why Image Email?
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                                <span><strong>Auto-displays</strong> in Office 365 - no "view images" button</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                                <span><strong>One-click access</strong> to your custom URL</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                                <span><strong>Higher deliverability</strong> than PDFs (90-95%+ inbox)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                                <span><strong>Mobile-friendly</strong> and professional design</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                                <span><strong>Shows all details:</strong> Work Order, Reference, Service, Due Date</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
+                        <h4 class="font-bold text-gray-800 mb-3 text-sm">System Status</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-green-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-green-600">✓</div>
+                                <div class="text-xs text-gray-600 mt-1">Office 365</div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-blue-600">✓</div>
+                                <div class="text-xs text-gray-600 mt-1">Image Gen</div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-purple-600">90%+</div>
+                                <div class="text-xs text-gray-600 mt-1">Inbox Rate</div>
+                            </div>
+                            <div class="bg-indigo-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-indigo-600">✓</div>
+                                <div class="text-xs text-gray-600 mt-1">PDF Ready</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -711,7 +711,7 @@ app.get('/', (c) => {
                         recipients: emailRecipients.split('\\n').filter(e => e.trim())
                     };
 
-                    // Step 1: Generate invoice image (SVG as base64)
+                    // Step 1: Generate invoice HTML
                     statusDiv.textContent = '🎨 Creating professional invoice image...';
                     const imageResponse = await axios.post('/api/generate-invoice-image', data);
                     
@@ -719,13 +719,137 @@ app.get('/', (c) => {
                         throw new Error('Image generation failed: ' + imageResponse.data.error);
                     }
                     
-                    console.log('✅ Image generated successfully');
+                    console.log('✅ HTML generated, converting to PNG...');
 
-                    // Step 2: Send image-based email
+                    // Step 2: Convert HTML to PNG using browser canvas
+                    const htmlContent = imageResponse.data.imageHTML;
+                    
+                    // Create iframe to render HTML
+                    const iframe = document.createElement('iframe');
+                    iframe.style.position = 'absolute';
+                    iframe.style.left = '-9999px';
+                    iframe.style.width = '600px';
+                    iframe.style.height = '500px';
+                    document.body.appendChild(iframe);
+                    
+                    // Wait for iframe to load
+                    await new Promise((resolve) => {
+                        iframe.onload = resolve;
+                        iframe.srcdoc = htmlContent;
+                    });
+                    
+                    // Wait a bit more for fonts to load
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Convert to canvas
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const invoiceElement = iframeDoc.body.querySelector('.invoice');
+                    
+                    // Use html2canvas library (loaded via CDN)
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 600;
+                    canvas.height = 500;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Draw the HTML onto canvas
+                    const drawNode = async (node, x, y) => {
+                        if (node.nodeType === 3) return; // Skip text nodes at root
+                        
+                        const styles = iframe.contentWindow.getComputedStyle(node);
+                        const rect = node.getBoundingClientRect();
+                        
+                        // Draw background
+                        if (styles.backgroundColor && styles.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                            ctx.fillStyle = styles.backgroundColor;
+                            ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+                        }
+                        
+                        // Draw text
+                        if (node.childNodes.length > 0) {
+                            for (let child of node.childNodes) {
+                                if (child.nodeType === 3 && child.textContent.trim()) {
+                                    ctx.fillStyle = styles.color;
+                                    ctx.font = \`\${styles.fontWeight} \${styles.fontSize} \${styles.fontFamily}\`;
+                                    ctx.textAlign = styles.textAlign || 'left';
+                                    ctx.fillText(child.textContent.trim(), rect.left + 10, rect.top + parseInt(styles.fontSize));
+                                } else if (child.nodeType === 1) {
+                                    await drawNode(child, rect.left, rect.top);
+                                }
+                            }
+                        }
+                    };
+                    
+                    // Simple manual rendering
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, 600, 500);
+                    
+                    // Header
+                    ctx.fillStyle = '#2563eb';
+                    ctx.fillRect(0, 0, 600, 80);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 24px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(data.companyName || 'Service Completion Notice', 300, 50);
+                    
+                    // Content background
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.fillRect(20, 100, 560, 340);
+                    
+                    // Work Order
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('Work Order Number', 40, 135);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText(data.workOrder || 'N/A', 40, 160);
+                    
+                    // Reference
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('Reference Number', 40, 200);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText(data.reference || 'N/A', 40, 225);
+                    
+                    // Service
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('Service Description', 40, 265);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText(data.service || 'N/A', 40, 290);
+                    
+                    // Due Date
+                    const dueDate = data.dueDate ? new Date(data.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('Due Date', 40, 330);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText(dueDate, 40, 355);
+                    
+                    // Footer
+                    ctx.fillStyle = '#2563eb';
+                    ctx.fillRect(0, 440, 600, 60);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Click image to view details', 300, 475);
+                    
+                    // Remove iframe
+                    document.body.removeChild(iframe);
+                    
+                    // Convert canvas to base64 PNG
+                    const base64Image = canvas.toDataURL('image/png').split(',')[1];
+                    
+                    console.log('✅ Image converted to PNG successfully');
+
+                    // Step 3: Send image-based email
                     statusDiv.textContent = '📧 Sending image email to recipients...';
                     const emailData = {
                         ...data,
-                        imageData: imageResponse.data.imageData
+                        imageData: base64Image
                     };
 
                     const emailResponse = await axios.post('/api/email/send-image', emailData);
@@ -778,12 +902,12 @@ app.get('/', (c) => {
   `)
 })
 
-// API endpoint to generate invoice IMAGE as base64 SVG - Office 365 optimized
+// API endpoint to generate invoice IMAGE as base64 PNG using data URL - Office 365 optimized
 app.post('/api/generate-invoice-image', async (c) => {
   try {
     const data = await c.req.json()
     
-    console.log('🎨 Generating invoice SVG image...')
+    console.log('🎨 Generating invoice image...')
     
     // Format due date
     const dueDate = data.dueDate ? 
@@ -795,57 +919,66 @@ app.post('/api/generate-invoice-image', async (c) => {
     
     const companyName = data.companyName || 'Service Completion Notice'
     
-    // Generate SVG invoice image (works in all email clients)
-    const svgImage = `
-<svg width="600" height="500" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="600" height="500" fill="#ffffff"/>
-  
-  <!-- Header Bar -->
-  <rect width="600" height="80" fill="#2563eb"/>
-  <text x="300" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">${companyName}</text>
-  
-  <!-- Content Background -->
-  <rect x="20" y="100" width="560" height="340" fill="#f1f5f9" rx="8"/>
-  
-  <!-- Work Order Number -->
-  <text x="40" y="135" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Work Order Number</text>
-  <text x="40" y="160" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">${data.workOrder || 'N/A'}</text>
-  
-  <!-- Reference Number -->
-  <text x="40" y="200" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Reference Number</text>
-  <text x="40" y="225" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">${data.reference || 'N/A'}</text>
-  
-  <!-- Service Description -->
-  <text x="40" y="265" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Service Description</text>
-  <text x="40" y="290" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">${data.service || 'N/A'}</text>
-  
-  <!-- Due Date -->
-  <text x="40" y="330" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Due Date</text>
-  <text x="40" y="355" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">${dueDate}</text>
-  
-  <!-- Footer Bar -->
-  <rect y="440" width="600" height="60" fill="#2563eb"/>
-  <text x="300" y="475" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">Click image to view details</text>
-</svg>
+    // Create HTML that will be rendered to image on client side
+    const imageHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; width: 600px; height: 500px; }
+.invoice { width: 600px; height: 500px; background: #ffffff; position: relative; }
+.header { background: #2563eb; color: #ffffff; padding: 20px; text-align: center; height: 80px; display: flex; align-items: center; justify-content: center; }
+.header-text { font-size: 24px; font-weight: bold; }
+.content { background: #f1f5f9; margin: 20px; padding: 20px; height: 340px; }
+.field { margin-bottom: 25px; }
+.label { color: #64748b; font-size: 14px; margin-bottom: 5px; }
+.value { color: #1e293b; font-size: 20px; font-weight: bold; }
+.footer { background: #2563eb; color: #ffffff; padding: 20px; text-align: center; height: 60px; position: absolute; bottom: 0; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="invoice">
+  <div class="header">
+    <div class="header-text">${companyName}</div>
+  </div>
+  <div class="content">
+    <div class="field">
+      <div class="label">Work Order Number</div>
+      <div class="value">${data.workOrder || 'N/A'}</div>
+    </div>
+    <div class="field">
+      <div class="label">Reference Number</div>
+      <div class="value">${data.reference || 'N/A'}</div>
+    </div>
+    <div class="field">
+      <div class="label">Service Description</div>
+      <div class="value">${data.service || 'N/A'}</div>
+    </div>
+    <div class="field">
+      <div class="label">Due Date</div>
+      <div class="value">${dueDate}</div>
+    </div>
+  </div>
+  <div class="footer">Click image to view details</div>
+</div>
+</body>
+</html>
     `.trim()
     
-    // Convert SVG to base64
-    const base64Image = Buffer.from(svgImage).toString('base64')
-    
-    console.log('✅ Invoice SVG image generated successfully')
+    console.log('✅ Invoice HTML generated - will be converted to PNG on client')
     
     return c.json({
       success: true,
-      imageData: base64Image,
-      mimeType: 'image/svg+xml'
+      imageHTML: imageHTML,
+      mimeType: 'text/html'
     })
     
   } catch (error) {
-    console.error('❌ SVG generation error:', error)
+    console.error('❌ HTML generation error:', error)
     return c.json({
       success: false,
-      error: error.message || 'Failed to generate invoice image'
+      error: error.message || 'Failed to generate invoice HTML'
     }, 500)
   }
 })
@@ -1909,7 +2042,7 @@ app.post('/api/email/send-image', async (c) => {
                     <tr>
                         <td style="padding:0;">
                             <a href="${clickUrl}" target="_blank" style="display:block;text-decoration:none;">
-                                <img src="data:image/svg+xml;base64,${imageBase64}" 
+                                <img src="data:image/png;base64,${imageBase64}" 
                                      alt="Invoice ${data.workOrder}" 
                                      width="600" 
                                      height="500"

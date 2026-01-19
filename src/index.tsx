@@ -113,11 +113,12 @@ app.get('/', (c) => {
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-building mr-1 text-gray-500"></i>
-                                    Company Name
+                                    <i class="fas fa-building mr-1 text-blue-500"></i>
+                                    Company Name (Editable)
                                 </label>
-                                <input type="text" id="companyName" value="RGBRNE Mechanical" readonly
-                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed transition">
+                                <input type="text" id="companyName" value="RGBRNE Mechanical" 
+                                       placeholder="Enter your company name"
+                                       class="w-full px-4 py-2.5 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                             </div>
 
                             <div>

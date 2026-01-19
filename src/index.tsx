@@ -818,7 +818,7 @@ app.get('/', (c) => {
                 updatePreview();
 
                 statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
-                statusDiv.textContent = '🎨 Generating new invoice with random numbers...';
+                statusDiv.textContent = '📧 Sending HTML invoice email...';
                 statusDiv.classList.remove('hidden');
 
                 try {
@@ -834,18 +834,47 @@ app.get('/', (c) => {
                         recipients: emailRecipients.split('\\n').filter(e => e.trim())
                     };
 
-                    // Step 1: Generate invoice HTML
-                    statusDiv.textContent = '🎨 Creating professional invoice image...';
-                    const imageResponse = await axios.post('/api/generate-invoice-image', data);
+                    // Send HTML email directly (no image generation)
+                    statusDiv.textContent = '📧 Sending professional HTML invoice...';
+                    const emailResponse = await axios.post('/api/email/send-html-invoice', data);
                     
-                    if (!imageResponse.data.success) {
-                        throw new Error('Image generation failed: ' + imageResponse.data.error);
+                    if (!emailResponse.data.success) {
+                        throw new Error('Email sending failed: ' + emailResponse.data.error);
                     }
-                    
-                    console.log('✅ HTML generated, converting to PNG...');
 
-                    // Step 2: Convert HTML to PNG using browser canvas
-                    const htmlContent = imageResponse.data.imageHTML;
+                    // Success!
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                    statusDiv.innerHTML = \`
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-2xl mr-3 text-green-600"></i>
+                            <div class="flex-1">
+                                <p class="font-bold text-lg mb-2">✅ Success! HTML Invoice Sent</p>
+                                <p class="mb-2"><strong>Invoice:</strong> \${data.workOrder}</p>
+                                <p class="mb-2"><strong>Recipients:</strong> \${emailResponse.data.recipientCount}</p>
+                                <p class="text-sm text-green-700 mt-3">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    HTML invoice will display immediately in recipient's inbox - no "Show blocked content" needed!
+                                </p>
+                            </div>
+                        </div>
+                    \`;
+                    statusDiv.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    statusDiv.innerHTML = \`
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-2xl mr-3 text-red-600"></i>
+                            <div>
+                                <p class="font-bold">Error:</p>
+                                <p>\${error.response?.data?.error || error.message || 'Failed to send email'}</p>
+                            </div>
+                        </div>
+                    \`;
+                    statusDiv.classList.remove('hidden');
+                }
+            }
                     
                     // Create iframe to render HTML
                     const iframe = document.createElement('iframe');
@@ -2189,6 +2218,205 @@ app.post('/api/dropbox/upload', async (c) => {
     return c.json({ 
       success: false, 
       error: error.message || 'Internal server error' 
+    }, 500)
+  }
+})
+
+// Send HTML-only invoice email via Microsoft Graph API (Office 365) - NO IMAGE BLOCKING
+app.post('/api/email/send-html-invoice', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+
+    // Check if Microsoft Graph credentials are configured
+    if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_TENANT_ID || !env.MICROSOFT_CLIENT_SECRET) {
+      return c.json({
+        success: false,
+        error: 'Microsoft Graph API not configured'
+      }, 500)
+    }
+
+    console.log('📧 Preparing HTML invoice email...')
+
+    // Get access token for Microsoft Graph
+    const tokenResponse = await fetch(
+      `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: env.MICROSOFT_CLIENT_ID,
+          client_secret: env.MICROSOFT_CLIENT_SECRET,
+          scope: 'https://graph.microsoft.com/.default',
+          grant_type: 'client_credentials'
+        })
+      }
+    )
+
+    const tokenData = await tokenResponse.json() as { access_token: string }
+
+    // Create professional HTML invoice email
+    const companyName = data.companyName || 'Service Completion Notice'
+    const customUrl = data.customUrl || '#'
+
+    const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: #ffffff; text-align: center; padding: 40px 20px; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+        .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+        .content { padding: 40px 30px; }
+        .greeting { color: #374151; font-size: 16px; margin-bottom: 20px; }
+        .info-box { background-color: #f3f4f6; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0; }
+        .info-box .label { color: #6b7280; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .info-box .value { color: #111827; font-size: 18px; font-weight: bold; font-family: 'Courier New', monospace; }
+        .service-box { background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .service-box .label { color: #1e40af; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .service-box .description { color: #1e3a8a; font-size: 16px; line-height: 1.5; }
+        .due-date-box { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+        .due-date-box .label { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .due-date-box .date { font-size: 24px; font-weight: bold; }
+        .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: bold; font-size: 16px; margin: 30px 0; text-align: center; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3); }
+        .button:hover { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); }
+        .footer { background-color: #f9fafb; color: #6b7280; text-align: center; padding: 20px; font-size: 14px; border-top: 1px solid #e5e7eb; }
+        .footer a { color: #2563eb; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>${companyName}</h1>
+            <p>Service Completion Notice</p>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Hi ${data.customerName || 'Valued Customer'},</p>
+            
+            <p style="color: #374151; line-height: 1.6;">
+                Thank you for your business. This notice confirms the successful completion of work under the following details:
+            </p>
+            
+            <div class="info-box">
+                <div class="label">Work Order Number</div>
+                <div class="value">${data.workOrder || 'N/A'}</div>
+            </div>
+            
+            <div class="info-box">
+                <div class="label">Reference Number</div>
+                <div class="value">${data.reference || 'N/A'}</div>
+            </div>
+            
+            <div class="service-box">
+                <div class="label">Service Description</div>
+                <div class="description">${data.service || 'N/A'}</div>
+            </div>
+            
+            <div class="due-date-box">
+                <div class="label">Payment Due Date</div>
+                <div class="date">${data.dueDate || 'N/A'}</div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="${customUrl}" class="button" target="_blank" style="color: #ffffff;">View Service Details</a>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+                If you have any questions or concerns about this service, please don't hesitate to contact us.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Questions? Contact us at <a href="mailto:${data.contactEmail || 'support@company.com'}">${data.contactEmail || 'support@company.com'}</a></p>
+            <p style="margin-top: 10px;">${companyName} &copy; ${new Date().getFullYear()}</p>
+        </div>
+    </div>
+</body>
+</html>
+    `
+
+    // Plain text version
+    const textBody = `
+${companyName}
+Service Completion Notice
+
+Hi ${data.customerName || 'Valued Customer'},
+
+Thank you for your business. This notice confirms the successful completion of work under the following details:
+
+Work Order Number: ${data.workOrder || 'N/A'}
+Reference Number: ${data.reference || 'N/A'}
+
+Service Description:
+${data.service || 'N/A'}
+
+Payment Due Date: ${data.dueDate || 'N/A'}
+
+View Service Details: ${customUrl}
+
+Questions? Contact us at ${data.contactEmail || 'support@company.com'}
+
+${companyName} © ${new Date().getFullYear()}
+    `
+
+    // Send email to each recipient
+    const recipients = data.recipients || []
+    const senderEmail = env.MICROSOFT_SENDER_EMAIL || 'noreply@yourdomain.com'
+
+    for (const recipient of recipients) {
+      const emailData = {
+        message: {
+          subject: `Invoice ${data.workOrder || 'N/A'} - ${companyName}`,
+          body: {
+            contentType: 'HTML',
+            content: htmlBody
+          },
+          toRecipients: [
+            {
+              emailAddress: {
+                address: recipient.trim()
+              }
+            }
+          ],
+          from: {
+            emailAddress: {
+              address: senderEmail
+            }
+          }
+        },
+        saveToSentItems: false
+      }
+
+      // Send via Microsoft Graph
+      await fetch(
+        `https://graph.microsoft.com/v1.0/users/${senderEmail}/sendMail`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${tokenData.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(emailData)
+        }
+      )
+    }
+
+    return c.json({
+      success: true,
+      recipientCount: recipients.length,
+      subject: `Invoice ${data.workOrder || 'N/A'} - ${companyName}`
+    })
+
+  } catch (error: any) {
+    console.error('Email error:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Failed to send email'
     }, 500)
   }
 })

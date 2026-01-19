@@ -58,11 +58,33 @@
 - **Email**: Office 365 (via Microsoft Graph REST API)
 - **Package Size**: ~5MB (2 dependencies: hono, pdf-lib)
 
-## Email Configuration
-- **Sender**: `jaedyn@evolutionfamily.ca`
-- **Save to Sent Items**: ❌ No (emails won't clutter your sent folder)
+## 🚀 NEW: Multi-Account OAuth Email System
+
+### **Send from ANY Microsoft 365 Account!** 🎉
+- ✅ **Multiple accounts supported** - Unlimited accounts from different organizations
+- ✅ **No admin consent required** - User-level Mail.Send permission
+- ✅ **OAuth 2.0 Authorization Flow** - Secure delegated permissions
+- ✅ **Account switching** - Select sender from dropdown
+- ✅ **Automatic token refresh** - Set it and forget it
+- ✅ **Secure storage** - Tokens stored in Cloudflare KV
+
+### Supported Example Accounts:
+```
+- jaedyn@evolutionfamily.ca
+- tracy@company.com
+- john@microsoft.com
+- james@anything.org
+```
+
+**Each user authorizes their own account independently!**
+
+📚 **Setup Guide**: See [QUICK_OAUTH_SETUP.md](QUICK_OAUTH_SETUP.md) (15 minutes)
+
+### Email Features
 - **Recipients**: Multiple recipients supported (one per line)
 - **Format**: Professional HTML email with company branding
+- **Personalization**: Domain-based greetings (e.g., "Hi harrisonenergy Team,")
+- **Save to Sent Items**: ❌ No (emails won't clutter your sent folder)
 
 ## Data Architecture
 - **Invoice Data Structure**:
@@ -348,7 +370,7 @@ npm run build
    - Step-by-step token generation
    - Permissions checklist
 
-5. **QUICK_START.md** - Fast startup guide
+9. **QUICK_START.md** - Fast startup guide
    - Essential commands
    - Quick testing steps
 
@@ -362,3 +384,4 @@ Private project for RGBRNE Mechanical
 
 ## Contact
 For questions or support, contact the development team.
+team.

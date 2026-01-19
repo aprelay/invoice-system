@@ -8,8 +8,12 @@ type Bindings = {
   MICROSOFT_TENANT_ID: string
   MICROSOFT_CLIENT_SECRET: string
   MICROSOFT_SENDER_EMAIL: string
+  OAUTH_CLIENT_ID: string
+  OAUTH_CLIENT_SECRET: string
+  OAUTH_TENANT_ID: string
   PDF_CACHE: KVNamespace
   INVOICE_IMAGE_CACHE: KVNamespace
+  OAUTH_TOKENS: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -129,6 +133,28 @@ app.get('/', (c) => {
                                 <input type="text" id="customerName" value="" readonly
                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed transition">
                             </div>
+                        </div>
+
+                        <!-- Sender Account Selection (OAuth Multi-Account) -->
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-sm font-bold text-gray-700 flex items-center">
+                                    <i class="fas fa-user-circle mr-2 text-green-600"></i>
+                                    Send From Account
+                                </label>
+                                <a href="/accounts" class="text-xs text-green-700 hover:text-green-900 font-semibold flex items-center">
+                                    <i class="fas fa-cog mr-1"></i>
+                                    Manage Accounts
+                                </a>
+                            </div>
+                            <select id="senderAccount" 
+                                    class="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-base font-semibold">
+                                <option value="">-- Select sender account --</option>
+                            </select>
+                            <p class="text-xs text-green-700 mt-2 flex items-start">
+                                <i class="fas fa-info-circle mr-1 mt-0.5"></i>
+                                <span>Select which Microsoft 365 account to send from. <a href="/accounts" class="underline hover:text-green-900">Add accounts</a> to see more options.</span>
+                            </p>
                         </div>
 
                         <!-- Invoice Details Section (Locked) -->
@@ -771,6 +797,42 @@ app.get('/', (c) => {
                 }
             }
 
+            // Load authorized sender accounts
+            async function loadSenderAccounts() {
+                try {
+                    const response = await axios.get('/api/accounts');
+                    const senderSelect = document.getElementById('senderAccount');
+                    
+                    if (response.data.success && response.data.accounts.length > 0) {
+                        // Clear existing options except the first one
+                        senderSelect.innerHTML = '<option value="">-- Select sender account --</option>';
+                        
+                        // Add account options
+                        response.data.accounts.forEach(account => {
+                            const option = document.createElement('option');
+                            option.value = account.email;
+                            option.textContent = \`\${account.email} (\${account.displayName || 'No name'})\`;
+                            senderSelect.appendChild(option);
+                        });
+                        
+                        // Select first account by default
+                        if (response.data.accounts.length > 0) {
+                            senderSelect.value = response.data.accounts[0].email;
+                        }
+                    } else {
+                        // No accounts configured
+                        senderSelect.innerHTML = '<option value="">-- No accounts added yet --</option>';
+                    }
+                } catch (error) {
+                    console.error('Failed to load sender accounts:', error);
+                    const senderSelect = document.getElementById('senderAccount');
+                    senderSelect.innerHTML = '<option value="">-- Error loading accounts --</option>';
+                }
+            }
+            
+            // Load accounts on page load
+            loadSenderAccounts();
+
             // Send IMAGE-based email (Office 365 optimized - auto-displays, no "view images" prompt)
             async function sendImageEmail() {
                 const statusDiv = document.getElementById('status');
@@ -834,7 +896,8 @@ app.get('/', (c) => {
                         contactEmail: document.getElementById('contactEmail').value,
                         customUrl: document.getElementById('customUrl').value.trim() || 'https://www.example.com',
                         recipients: emailRecipients.split('\\n').filter(e => e.trim()),
-                        template: selectedTemplate  // Pass template for button text variation
+                        template: selectedTemplate,  // Pass template for button text variation
+                        senderAccount: document.getElementById('senderAccount').value  // OAuth sender account
                     };
 
                     // Send HTML email directly (no image generation)
@@ -2050,32 +2113,53 @@ app.post('/api/email/send-html-invoice', async (c) => {
     const { env } = c
     const data = await c.req.json()
 
-    // Check if Microsoft Graph credentials are configured
-    if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_TENANT_ID || !env.MICROSOFT_CLIENT_SECRET) {
-      return c.json({
-        success: false,
-        error: 'Microsoft Graph API not configured'
-      }, 500)
-    }
-
     console.log('📧 Preparing HTML invoice email...')
-
-    // Get access token for Microsoft Graph
-    const tokenResponse = await fetch(
-      `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: env.MICROSOFT_CLIENT_ID,
-          client_secret: env.MICROSOFT_CLIENT_SECRET,
-          scope: 'https://graph.microsoft.com/.default',
-          grant_type: 'client_credentials'
-        })
+    
+    let accessToken: string | null = null
+    let senderEmail: string
+    
+    // Check if user selected an OAuth account
+    if (data.senderAccount && env.OAUTH_TOKENS) {
+      console.log(`Using OAuth account: ${data.senderAccount}`)
+      accessToken = await getValidAccessToken(env, data.senderAccount)
+      senderEmail = data.senderAccount
+      
+      if (!accessToken) {
+        return c.json({
+          success: false,
+          error: `OAuth token not found or expired for ${data.senderAccount}. Please re-authorize this account.`
+        }, 401)
       }
-    )
+    } else {
+      // Fall back to legacy Application Permissions
+      console.log('Using legacy application permissions')
+      
+      if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_TENANT_ID || !env.MICROSOFT_CLIENT_SECRET) {
+        return c.json({
+          success: false,
+          error: 'Microsoft Graph API not configured. Please set up OAuth accounts or configure legacy credentials.'
+        }, 500)
+      }
 
-    const tokenData = await tokenResponse.json() as { access_token: string }
+      // Get access token using client credentials (Application Permissions)
+      const tokenResponse = await fetch(
+        `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: env.MICROSOFT_CLIENT_ID,
+            client_secret: env.MICROSOFT_CLIENT_SECRET,
+            scope: 'https://graph.microsoft.com/.default',
+            grant_type: 'client_credentials'
+          })
+        }
+      )
+
+      const tokenData = await tokenResponse.json() as { access_token: string }
+      accessToken = tokenData.access_token
+      senderEmail = env.MICROSOFT_SENDER_EMAIL || 'noreply@yourdomain.com'
+    }
 
     // Create OFFICE 365 OPTIMIZED HTML invoice email
     // Minimal design, inline styles only, no gradients, maximum deliverability
@@ -2249,7 +2333,6 @@ ${companyName} © ${new Date().getFullYear()}`
 
     // Send email to each recipient with personalized greeting
     const recipients = data.recipients || []
-    const senderEmail = env.MICROSOFT_SENDER_EMAIL || 'noreply@yourdomain.com'
 
     for (const recipient of recipients) {
       // Extract domain name from email (part after @, before .)
@@ -2299,7 +2382,7 @@ ${companyName} © ${new Date().getFullYear()}`
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${tokenData.access_token}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(emailData)
@@ -2674,6 +2757,177 @@ app.post('/api/email/send', async (c) => {
   }
 })
 
+// Account Management Page
+app.get('/accounts', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Manage Sender Accounts - Invoice System</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    </head>
+    <body class="bg-gray-50">
+        <div class="min-h-screen">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-600 to-emerald-700 text-white py-6 px-6 shadow-xl">
+                <div class="container mx-auto max-w-4xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold flex items-center">
+                                <i class="fas fa-user-circle mr-3"></i>
+                                Manage Sender Accounts
+                            </h1>
+                            <p class="text-green-100 mt-2">Add and manage Microsoft 365 accounts for sending invoices</p>
+                        </div>
+                        <a href="/" class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-green-50 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container mx-auto max-w-4xl py-8 px-6">
+                <!-- Add Account Button -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-plus-circle mr-2 text-green-600"></i>
+                                Add New Account
+                            </h2>
+                            <p class="text-gray-600">Authorize a Microsoft 365 account to send invoices from</p>
+                        </div>
+                        <a href="/auth/microsoft" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add Account
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Account List -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        <i class="fas fa-list mr-2 text-blue-600"></i>
+                        Authorized Accounts
+                    </h2>
+                    
+                    <div id="accountsList" class="space-y-3">
+                        <div class="text-center py-8">
+                            <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-600">Loading accounts...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                    <h3 class="font-semibold text-blue-900 mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        How OAuth Multi-Account Works
+                    </h3>
+                    <ul class="text-sm text-blue-800 space-y-1 ml-6 list-disc">
+                        <li>Each user authorizes their own Microsoft 365 account</li>
+                        <li>No admin consent required - users control their own access</li>
+                        <li>Works across different organizations (evolutionfamily.ca, company.com, etc.)</li>
+                        <li>Tokens automatically refresh - accounts stay authorized</li>
+                        <li>Remove accounts anytime to revoke access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Load and display accounts
+            async function loadAccounts() {
+                try {
+                    const response = await axios.get('/api/accounts');
+                    const accountsList = document.getElementById('accountsList');
+                    
+                    if (!response.data.success || response.data.accounts.length === 0) {
+                        accountsList.innerHTML = \`
+                            <div class="text-center py-8">
+                                <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-gray-600 font-medium mb-2">No accounts added yet</p>
+                                <p class="text-sm text-gray-500">Click "Add Account" above to authorize your first Microsoft 365 account</p>
+                            </div>
+                        \`;
+                        return;
+                    }
+                    
+                    // Display accounts
+                    accountsList.innerHTML = response.data.accounts.map(account => {
+                        const addedDate = new Date(account.addedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        
+                        return \`
+                            <div class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 transition">
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-green-100 rounded-full p-3">
+                                        <i class="fas fa-user text-green-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">\${account.email}</p>
+                                        <p class="text-sm text-gray-600">\${account.displayName || 'No display name'}</p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Added: \${addedDate}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="removeAccount('\${account.email}')" 
+                                        class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition font-semibold text-sm">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Remove
+                                </button>
+                            </div>
+                        \`;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading accounts:', error);
+                    const accountsList = document.getElementById('accountsList');
+                    accountsList.innerHTML = \`
+                        <div class="text-center py-8">
+                            <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-3"></i>
+                            <p class="text-red-600 font-medium">Failed to load accounts</p>
+                            <p class="text-sm text-gray-600 mt-2">\${error.message || 'Unknown error'}</p>
+                        </div>
+                    \`;
+                }
+            }
+            
+            // Remove account
+            async function removeAccount(email) {
+                if (!confirm(\`Remove account \${email}? You will need to re-authorize it to use it again.\`)) {
+                    return;
+                }
+                
+                try {
+                    await axios.delete(\`/api/accounts/\${encodeURIComponent(email)}\`);
+                    alert('Account removed successfully!');
+                    loadAccounts(); // Reload list
+                } catch (error) {
+                    alert('Failed to remove account: ' + (error.response?.data?.error || error.message));
+                }
+            }
+            
+            // Load accounts on page load
+            loadAccounts();
+        </script>
+    </body>
+    </html>
+  `)
+})
+
 // Redirect endpoint - wraps Dropbox links
 app.get('/redirect', (c) => {
   const targetUrl = c.req.query('url')
@@ -2723,5 +2977,322 @@ app.get('/setup-guide', async (c) => {
     `)
   }
 })
+
+// ==========================================
+// OAUTH 2.0 MULTI-ACCOUNT SUPPORT
+// ==========================================
+
+// OAuth: Initiate Microsoft authorization
+app.get('/auth/microsoft', async (c) => {
+  const { env } = c
+  
+  if (!env.OAUTH_CLIENT_ID) {
+    return c.json({
+      success: false,
+      error: 'OAuth not configured. Please set OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, and OAUTH_TENANT_ID in Cloudflare secrets.'
+    }, 500)
+  }
+  
+  const baseUrl = new URL(c.req.url).origin
+  const redirectUri = `${baseUrl}/auth/callback`
+  
+  // Use 'common' tenant for multi-tenant support
+  const tenantId = env.OAUTH_TENANT_ID || 'common'
+  
+  const authUrl = new URL(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`)
+  authUrl.searchParams.set('client_id', env.OAUTH_CLIENT_ID)
+  authUrl.searchParams.set('response_type', 'code')
+  authUrl.searchParams.set('redirect_uri', redirectUri)
+  authUrl.searchParams.set('response_mode', 'query')
+  authUrl.searchParams.set('scope', 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access')
+  authUrl.searchParams.set('state', crypto.randomUUID())
+  
+  return c.redirect(authUrl.toString())
+})
+
+// OAuth: Handle callback and exchange code for tokens
+app.get('/auth/callback', async (c) => {
+  const { env } = c
+  const code = c.req.query('code')
+  const error = c.req.query('error')
+  const errorDescription = c.req.query('error_description')
+  
+  if (error) {
+    return c.html(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authorization Error</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div class="text-red-600 text-6xl mb-4">❌</div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-4">Authorization Failed</h1>
+          <p class="text-gray-700 mb-2"><strong>Error:</strong> ${error}</p>
+          <p class="text-gray-600 mb-6">${errorDescription || 'Unknown error occurred'}</p>
+          <a href="/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            ← Back to Invoice System
+          </a>
+        </div>
+      </body>
+      </html>
+    `)
+  }
+  
+  if (!code) {
+    return c.html(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authorization Error</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div class="text-yellow-600 text-6xl mb-4">⚠️</div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-4">No Authorization Code</h1>
+          <p class="text-gray-700 mb-6">Authorization was cancelled or failed. Please try again.</p>
+          <a href="/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            ← Back to Invoice System
+          </a>
+        </div>
+      </body>
+      </html>
+    `)
+  }
+  
+  try {
+    const baseUrl = new URL(c.req.url).origin
+    const redirectUri = `${baseUrl}/auth/callback`
+    const tenantId = env.OAUTH_TENANT_ID || 'common'
+    
+    // Exchange authorization code for tokens
+    const tokenResponse = await fetch(
+      `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: env.OAUTH_CLIENT_ID,
+          client_secret: env.OAUTH_CLIENT_SECRET,
+          code: code,
+          redirect_uri: redirectUri,
+          grant_type: 'authorization_code'
+        })
+      }
+    )
+    
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json() as any
+      throw new Error(errorData.error_description || 'Token exchange failed')
+    }
+    
+    const tokenData = await tokenResponse.json() as {
+      access_token: string
+      refresh_token: string
+      expires_in: number
+    }
+    
+    // Get user info
+    const userResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`
+      }
+    })
+    
+    if (!userResponse.ok) {
+      throw new Error('Failed to get user info')
+    }
+    
+    const userData = await userResponse.json() as {
+      mail?: string
+      userPrincipalName?: string
+      displayName?: string
+    }
+    
+    const userEmail = userData.mail || userData.userPrincipalName || 'unknown@example.com'
+    
+    // Store tokens in KV
+    const accountData = {
+      email: userEmail,
+      displayName: userData.displayName || userEmail,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+      expiresAt: Date.now() + (tokenData.expires_in * 1000),
+      addedAt: Date.now()
+    }
+    
+    if (env.OAUTH_TOKENS) {
+      await env.OAUTH_TOKENS.put(
+        `account:${userEmail}`,
+        JSON.stringify(accountData),
+        { expirationTtl: 60 * 60 * 24 * 90 } // 90 days
+      )
+    }
+    
+    // Success page
+    return c.html(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authorization Successful</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md text-center">
+          <div class="text-green-600 text-6xl mb-4">✅</div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-4">Account Added Successfully!</h1>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-gray-600 mb-1">Email:</p>
+            <p class="font-semibold text-gray-900">${userEmail}</p>
+            <p class="text-sm text-gray-600 mt-2 mb-1">Display Name:</p>
+            <p class="font-semibold text-gray-900">${userData.displayName || 'N/A'}</p>
+          </div>
+          <p class="text-gray-700 mb-6">You can now send invoices from this account!</p>
+          <a href="/" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold">
+            ← Back to Invoice System
+          </a>
+        </div>
+      </body>
+      </html>
+    `)
+  } catch (error: any) {
+    console.error('OAuth callback error:', error)
+    return c.html(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authorization Error</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50 flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div class="text-red-600 text-6xl mb-4">❌</div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-4">Authorization Failed</h1>
+          <p class="text-gray-700 mb-6">${error.message || 'An unexpected error occurred'}</p>
+          <a href="/" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            ← Back to Invoice System
+          </a>
+        </div>
+      </body>
+      </html>
+    `)
+  }
+})
+
+// API: Get list of authorized accounts
+app.get('/api/accounts', async (c) => {
+  const { env } = c
+  
+  if (!env.OAUTH_TOKENS) {
+    return c.json({ success: false, accounts: [], error: 'OAuth tokens storage not configured' })
+  }
+  
+  try {
+    const accounts = []
+    const list = await env.OAUTH_TOKENS.list({ prefix: 'account:' })
+    
+    for (const key of list.keys) {
+      const data = await env.OAUTH_TOKENS.get(key.name)
+      if (data) {
+        const account = JSON.parse(data)
+        accounts.push({
+          email: account.email,
+          displayName: account.displayName,
+          addedAt: account.addedAt
+        })
+      }
+    }
+    
+    return c.json({ success: true, accounts })
+  } catch (error: any) {
+    return c.json({ success: false, accounts: [], error: error.message })
+  }
+})
+
+// API: Remove an authorized account
+app.delete('/api/accounts/:email', async (c) => {
+  const { env } = c
+  const email = c.req.param('email')
+  
+  if (!env.OAUTH_TOKENS) {
+    return c.json({ success: false, error: 'OAuth tokens storage not configured' }, 500)
+  }
+  
+  try {
+    await env.OAUTH_TOKENS.delete(`account:${email}`)
+    return c.json({ success: true, message: 'Account removed successfully' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// API: Refresh access token if needed
+async function getValidAccessToken(env: Bindings, email: string): Promise<string | null> {
+  if (!env.OAUTH_TOKENS) {
+    return null
+  }
+  
+  const data = await env.OAUTH_TOKENS.get(`account:${email}`)
+  if (!data) {
+    return null
+  }
+  
+  const account = JSON.parse(data)
+  
+  // Check if token is still valid (with 5 minute buffer)
+  if (account.expiresAt > Date.now() + (5 * 60 * 1000)) {
+    return account.accessToken
+  }
+  
+  // Token expired, refresh it
+  try {
+    const tenantId = env.OAUTH_TENANT_ID || 'common'
+    const tokenResponse = await fetch(
+      `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: env.OAUTH_CLIENT_ID,
+          client_secret: env.OAUTH_CLIENT_SECRET,
+          refresh_token: account.refreshToken,
+          grant_type: 'refresh_token',
+          scope: 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access'
+        })
+      }
+    )
+    
+    if (!tokenResponse.ok) {
+      console.error('Token refresh failed')
+      return null
+    }
+    
+    const tokenData = await tokenResponse.json() as {
+      access_token: string
+      refresh_token?: string
+      expires_in: number
+    }
+    
+    // Update stored tokens
+    account.accessToken = tokenData.access_token
+    if (tokenData.refresh_token) {
+      account.refreshToken = tokenData.refresh_token
+    }
+    account.expiresAt = Date.now() + (tokenData.expires_in * 1000)
+    
+    await env.OAUTH_TOKENS.put(
+      `account:${email}`,
+      JSON.stringify(account),
+      { expirationTtl: 60 * 60 * 24 * 90 } // 90 days
+    )
+    
+    return tokenData.access_token
+  } catch (error) {
+    console.error('Error refreshing token:', error)
+    return null
+  }
+}
 
 export default app

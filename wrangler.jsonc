@@ -11,6 +11,10 @@
     {
       "binding": "INVOICE_IMAGE_CACHE",
       "id": "431a64f33af9450b986ad3a25f0acfd3"
+    },
+    {
+      "binding": "OAUTH_TOKENS",
+      "id": "placeholder_will_be_created"
     }
   ]
 }

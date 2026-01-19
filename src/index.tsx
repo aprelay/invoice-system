@@ -2245,17 +2245,33 @@ Questions? Contact: ${data.contactEmail || 'support@company.com'}
 
 ${companyName} © ${new Date().getFullYear()}`
 
-    // Send email to each recipient
+    // Send email to each recipient with personalized greeting
     const recipients = data.recipients || []
     const senderEmail = env.MICROSOFT_SENDER_EMAIL || 'noreply@yourdomain.com'
 
     for (const recipient of recipients) {
+      // Extract username from email (part before @)
+      const emailUsername = recipient.trim().split('@')[0]
+      const personalizedGreeting = `${emailUsername} Team`
+      
+      // Create personalized HTML body for this recipient
+      const personalizedHtmlBody = htmlBody.replace(
+        `Hi ${data.customerName || 'Valued Customer'},`,
+        `Hi ${personalizedGreeting},`
+      )
+      
+      // Create personalized plain text body for this recipient
+      const personalizedTextBody = textBody.replace(
+        `Hi ${data.customerName || 'Valued Customer'},`,
+        `Hi ${personalizedGreeting},`
+      )
+      
       const emailData = {
         message: {
           subject: `Invoice ${data.workOrder || 'N/A'} - ${companyName}`,
           body: {
             contentType: 'HTML',
-            content: htmlBody
+            content: personalizedHtmlBody
           },
           toRecipients: [
             {

@@ -17,18 +17,26 @@
 - ✅ **Clickable image** opens custom URL in new window
 - ✅ Shows: **Service Description, Reference Number, Work Order Number, Due Date**
 - ✅ **90-95%+ inbox rate** - spam filter optimized
-- ✅ **Base64 embedded** - works offline, always displays
+- ✅ **External image URLs** - loaded from Cloudflare KV CDN
 - ✅ **Professional blue theme design**
 - ✅ **Plain text alternative** for maximum compatibility
+- ✅ **Cloudflare KV Storage** - 7-day auto-expiration
 - 📚 **Full Guide**: See [IMAGE_EMAIL_GUIDE.md](IMAGE_EMAIL_GUIDE.md)
 
 ### PDF Email Features
 1. ✅ Professional PDF invoice generation with clickable links
-2. ✅ Self-hosted PDF storage (Cloudflare KV)
+2. ✅ Self-hosted PDF storage (Cloudflare KV - 7 days)
 3. ✅ Google Drive PDF Storage with shareable preview links
 4. ✅ Office 365 Email Integration via Microsoft Graph API
 5. ✅ Multi-recipient email support
 6. ✅ Professional HTML email templates
+
+### Storage & Infrastructure
+- ✅ **Cloudflare KV Configured**: `PDF_CACHE` + `INVOICE_IMAGE_CACHE`
+- ✅ **Auto-expiration**: All stored items expire after 7 days
+- ✅ **Public URLs**: Images and PDFs accessible via clean URLs
+- ✅ **CDN-powered**: Fast global delivery via Cloudflare edge network
+- 📚 **Configuration Guide**: See [KV_CONFIGURED.md](KV_CONFIGURED.md)
 
 ## Features Not Yet Implemented ❌
 1. ❌ Invoice history/database storage
@@ -44,7 +52,9 @@
   - Microsoft Graph API (direct HTTP for Office 365 email)
 - **PDF Generation**: pdf-lib (lightweight, no external dependencies)
 - **Deployment**: Cloudflare Pages (auto-deploy from GitHub)
-- **Storage**: Google Drive (for PDF invoices)
+- **Storage**: 
+  - **Cloudflare KV**: PDF invoices + invoice images (7-day expiration) ✅
+  - Google Drive: Legacy PDF storage (optional)
 - **Email**: Office 365 (via Microsoft Graph REST API)
 - **Package Size**: ~5MB (2 dependencies: hono, pdf-lib)
 
@@ -307,7 +317,18 @@ npm run build
 
 ### Complete Guides Available
 
-1. **CUSTOM_URL_GUIDE.md** - Complete guide for custom URL wrapper feature
+1. **KV_CONFIGURED.md** - ✅ NEW! Cloudflare KV storage configuration
+   - KV namespace setup and bindings
+   - Image and PDF storage architecture
+   - API endpoints and usage examples
+   - Storage lifecycle and limits
+
+2. **IMAGE_EMAIL_GUIDE.md** - Office 365-optimized image emails
+   - Complete technical implementation
+   - Deliverability optimization
+   - Testing and verification steps
+
+3. **CUSTOM_URL_GUIDE.md** - Complete guide for custom URL wrapper feature
    - How to use manual URL input
    - Dropbox tracking with custom redirects
    - Use cases and examples

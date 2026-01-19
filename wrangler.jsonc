@@ -6,7 +6,11 @@
   "kv_namespaces": [
     {
       "binding": "PDF_CACHE",
-      "id": "placeholder"
+      "id": "07c8386508f94337b24a634c62b5d680"
+    },
+    {
+      "binding": "INVOICE_IMAGE_CACHE",
+      "id": "431a64f33af9450b986ad3a25f0acfd3"
     }
   ]
 }

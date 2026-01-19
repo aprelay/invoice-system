@@ -9,6 +9,7 @@ type Bindings = {
   MICROSOFT_CLIENT_SECRET: string
   MICROSOFT_SENDER_EMAIL: string
   PDF_CACHE: KVNamespace
+  INVOICE_IMAGE_CACHE: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Bindings }>()

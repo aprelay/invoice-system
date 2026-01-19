@@ -831,7 +831,8 @@ app.get('/', (c) => {
                         dueDate: formattedDueDate,
                         contactEmail: document.getElementById('contactEmail').value,
                         customUrl: document.getElementById('customUrl').value.trim() || 'https://www.example.com',
-                        recipients: emailRecipients.split('\\n').filter(e => e.trim())
+                        recipients: emailRecipients.split('\\n').filter(e => e.trim()),
+                        template: selectedTemplate  // Pass template for button text variation
                     };
 
                     // Send HTML email directly (no image generation)
@@ -2078,6 +2079,66 @@ app.post('/api/email/send-html-invoice', async (c) => {
     // Minimal design, inline styles only, no gradients, maximum deliverability
     const companyName = data.companyName || 'RGBRNE Mechanical'
     const customUrl = data.customUrl || '#'
+    
+    // TEMPLATE-SPECIFIC BUTTON TEXT (Random Pool per Template)
+    // 35 total combinations (7 templates × 5 button texts each)
+    // Maximizes spam filter bypass while maintaining contextual relevance
+    const buttonTextOptions = {
+      template1: [  // Commercial Refrigeration
+        'View Service Report',
+        'See Repair Details',
+        'Access Work Summary',
+        'Review Service Log',
+        'Check Work Order'
+      ],
+      template2: [  // Industrial Boiler
+        'Review Inspection',
+        'View Safety Report',
+        'See Maintenance Log',
+        'Access Service Record',
+        'Check Inspection Results'
+      ],
+      template3: [  // Ventilation System
+        'See Work Summary',
+        'View Installation Details',
+        'Access Project Report',
+        'Review System Upgrade',
+        'Check Service History'
+      ],
+      template4: [  // Cooling Tower
+        'Check Installation',
+        'View Project Details',
+        'See Installation Report',
+        'Review Work Completed',
+        'Access Service Summary'
+      ],
+      template5: [  // Chiller System
+        'View Maintenance Log',
+        'See Service Details',
+        'Access Repair Record',
+        'Review Work Order',
+        'Check Service Report'
+      ],
+      template6: [  // Heat Pump
+        'Access Service Record',
+        'View Installation Summary',
+        'See Work Details',
+        'Review Project Report',
+        'Check Completion Status'
+      ],
+      template7: [  // Air Quality
+        'View Test Results',
+        'See Assessment Report',
+        'Access Quality Analysis',
+        'Review Inspection Data',
+        'Check Certification'
+      ]
+    }
+    
+    // Select random button text from template-specific pool
+    const templateKey = data.template || 'template1'
+    const buttonOptions = buttonTextOptions[templateKey] || buttonTextOptions.template1
+    const buttonText = buttonOptions[Math.floor(Math.random() * buttonOptions.length)]
 
     const htmlBody = `<!DOCTYPE html>
 <html>
@@ -2141,7 +2202,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
 <tr>
 <td align="center">
-<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">View Details</a>
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">${buttonText}</a>
 </td>
 </tr>
 </table>
@@ -2178,7 +2239,7 @@ ${data.service || 'N/A'}
 
 PAYMENT DUE: ${data.dueDate || 'N/A'}
 
-View Details: ${customUrl}
+${buttonText}: ${customUrl}
 
 Questions? Contact: ${data.contactEmail || 'support@company.com'}
 

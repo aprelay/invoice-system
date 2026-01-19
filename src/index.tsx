@@ -177,11 +177,12 @@ app.get('/', (c) => {
 
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        <i class="fas fa-envelope mr-1 text-gray-500"></i>
-                                        Contact Email
+                                        <i class="fas fa-envelope mr-1 text-blue-500"></i>
+                                        Contact Email (Editable)
                                     </label>
-                                    <input type="email" id="contactEmail" value="ap@rgbmechanical.com" readonly
-                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                                    <input type="email" id="contactEmail" value="ap@rgbmechanical.com" 
+                                           placeholder="Enter contact email address"
+                                           class="w-full px-4 py-2.5 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                                 </div>
                             </div>
 

@@ -86,6 +86,29 @@ app.get('/', (c) => {
                         </h2>
                     
                     <form id="invoiceForm" class="space-y-5">
+                        <!-- Invoice Template Selection -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border-2 border-purple-300">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-list-ul mr-2 text-purple-600"></i>
+                                Select Invoice Template
+                            </label>
+                            <select id="invoiceTemplate" 
+                                    class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-base font-semibold">
+                                <option value="">-- Choose a service type --</option>
+                                <option value="template1">Commercial Refrigeration Repair</option>
+                                <option value="template2">Industrial Boiler Maintenance</option>
+                                <option value="template3">Ventilation System Upgrade</option>
+                                <option value="template4">Cooling Tower Installation</option>
+                                <option value="template5">Chiller System Service</option>
+                                <option value="template6">Heat Pump Replacement</option>
+                                <option value="template7">Air Quality Testing & Certification</option>
+                            </select>
+                            <p class="text-xs text-purple-700 mt-2 flex items-start">
+                                <i class="fas fa-info-circle mr-1 mt-0.5"></i>
+                                <span>Select a template and all invoice fields will be auto-populated with random numbers.</span>
+                            </p>
+                        </div>
+
                         <!-- Basic Info Section -->
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -93,73 +116,62 @@ app.get('/', (c) => {
                                     <i class="fas fa-building mr-1 text-gray-500"></i>
                                     Company Name
                                 </label>
-                                <input type="text" id="companyName" placeholder="Your Company Name" 
-                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <input type="text" id="companyName" value="RGBRNE Mechanical" readonly
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed transition">
                             </div>
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                     <i class="fas fa-user mr-1 text-gray-500"></i>
-                                    Customer Name
+                                    Customer Name (Auto-detected)
                                 </label>
-                                <input type="text" id="customerName" value="Ap" 
-                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <input type="text" id="customerName" value="" readonly
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed transition">
                             </div>
                         </div>
 
-                        <!-- Invoice Details Section -->
-                        <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                        <!-- Invoice Details Section (Locked) -->
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-4 border-2 border-gray-300">
                             <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center">
                                 <i class="fas fa-hashtag mr-2 text-blue-600"></i>
-                                Invoice Details
+                                Invoice Details (Auto-Generated)
+                                <i class="fas fa-lock ml-2 text-gray-400 text-xs"></i>
                             </h3>
                             
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         Work Order Number
-                                        <button type="button" onclick="randomizeWorkOrder()" 
-                                                class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
-                                            <i class="fas fa-dice mr-1"></i>Random
-                                        </button>
                                     </label>
-                                    <input type="text" id="workOrder" value="PO-28551" 
-                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-mono">
+                                    <input type="text" id="workOrder" value="" readonly
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed font-mono">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         Reference Number
-                                        <button type="button" onclick="randomizeReference()" 
-                                                class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
-                                            <i class="fas fa-dice mr-1"></i>Random
-                                        </button>
                                     </label>
-                                    <input type="text" id="reference" value="SVC-2025-2294" 
-                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-mono">
+                                    <input type="text" id="reference" value="" readonly
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed font-mono">
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                     Service Description
-                                    <button type="button" onclick="randomizeService()" 
-                                            class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded transition">
-                                        <i class="fas fa-dice mr-1"></i>Random
-                                    </button>
                                 </label>
-                                <input type="text" id="service" value="Heating System Maintenance" 
-                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <textarea id="service" rows="2" readonly
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed resize-none"></textarea>
                             </div>
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         <i class="fas fa-calendar mr-1 text-gray-500"></i>
-                                        Due Date
+                                        Due Date (10 days from today)
                                     </label>
-                                    <input type="date" id="dueDate" value="2026-01-23" 
-                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    <input type="text" id="dueDate" value="" readonly
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
                                 </div>
 
                                 <div>
@@ -167,15 +179,17 @@ app.get('/', (c) => {
                                         <i class="fas fa-envelope mr-1 text-gray-500"></i>
                                         Contact Email
                                     </label>
-                                    <input type="email" id="contactEmail" value="ap@rgbmechanical.com" 
-                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    <input type="email" id="contactEmail" value="ap@rgbmechanical.com" readonly
+                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
                                 </div>
                             </div>
 
-                            <button type="button" onclick="randomizeAll()" 
-                                    class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center">
-                                <i class="fas fa-dice mr-2"></i>Randomize All Fields
-                            </button>
+                            <div class="bg-blue-50 border border-blue-300 rounded-lg p-3">
+                                <p class="text-xs text-blue-800 flex items-start">
+                                    <i class="fas fa-info-circle mr-2 mt-0.5 text-blue-600"></i>
+                                    <span><strong>Note:</strong> Fields are locked. New random numbers are generated each time you send an email.</span>
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Custom URL Section -->
@@ -334,61 +348,136 @@ app.get('/', (c) => {
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
-            // Service descriptions library
-            const services = [
-                'Heating System Maintenance',
-                'Air Conditioning Repair',
-                'HVAC Installation',
-                'Furnace Inspection',
-                'Duct Cleaning Service',
-                'Thermostat Replacement',
-                'Boiler Maintenance',
-                'Heat Pump Installation',
-                'Emergency HVAC Repair',
-                'Air Quality Assessment',
-                'Commercial HVAC Service',
-                'Residential Cooling System Repair',
-                'Preventive Maintenance Check',
-                'Refrigeration System Service',
-                'Ventilation System Upgrade',
-                'Plumbing Inspection',
-                'Water Heater Installation',
-                'Pipe Leak Repair',
-                'Drain Cleaning Service',
-                'Electrical System Inspection'
-            ];
+            // Expanded service descriptions library (20+ NEW services)
+            const serviceTemplates = {
+                template1: [
+                    'Commercial Refrigeration System - Complete Compressor Overhaul and Coolant Refill',
+                    'Walk-in Freezer Repair - Emergency Temperature Control System Restoration',
+                    'Industrial Ice Machine Maintenance - Full Cleaning and Performance Optimization',
+                    'Refrigerated Display Case - Condenser Coil Replacement and Efficiency Testing',
+                    'Cold Storage Unit - Complete Electrical System Upgrade and Safety Inspection'
+                ],
+                template2: [
+                    'Industrial Boiler System - Annual Safety Inspection and Efficiency Calibration',
+                    'Steam Boiler Maintenance - Pressure Relief Valve Testing and Replacement',
+                    'High-Pressure Boiler Service - Complete Tube Cleaning and Scale Removal',
+                    'Boiler Feed Water System - Chemical Treatment and Pump Replacement',
+                    'Commercial Boiler - Emergency Repair and Combustion Analysis'
+                ],
+                template3: [
+                    'Commercial Ventilation System - Complete Ductwork Replacement and Airflow Balancing',
+                    'Industrial Exhaust Fan Upgrade - High-Efficiency Motor Installation',
+                    'Kitchen Ventilation Hood - Grease Filter Replacement and Fire Suppression Check',
+                    'HVAC Air Handler Upgrade - Variable Speed Drive Installation',
+                    'Clean Room Ventilation - HEPA Filter Installation and Validation Testing'
+                ],
+                template4: [
+                    'Cooling Tower Installation - 500-Ton Capacity with VFD Controls',
+                    'Evaporative Cooling Tower - Complete Basin Cleaning and Biocide Treatment',
+                    'Industrial Cooling Tower - Fan Motor Replacement and Vibration Analysis',
+                    'Closed-Circuit Cooling Tower - Heat Exchanger Coil Repair',
+                    'Cooling Tower Water Treatment - Chemical Feed System Installation'
+                ],
+                template5: [
+                    'Industrial Chiller System - Complete Refrigerant Recovery and Recharge',
+                    'Water-Cooled Chiller - Condenser Tube Cleaning and Eddy Current Testing',
+                    'Air-Cooled Chiller Service - Compressor Replacement and Oil Analysis',
+                    'Centrifugal Chiller - Control Panel Upgrade and Performance Testing',
+                    'Chiller Plant Optimization - Building Automation System Integration'
+                ],
+                template6: [
+                    'Geothermal Heat Pump Installation - 5-Ton Ground Source System',
+                    'Air Source Heat Pump - Complete Defrost Cycle Repair and Refrigerant Check',
+                    'Ductless Mini-Split Heat Pump - Multi-Zone Installation with WiFi Controls',
+                    'Commercial Heat Pump - Reversing Valve Replacement and Performance Testing',
+                    'Hybrid Heat Pump System - Dual Fuel Integration and Smart Thermostat Setup'
+                ],
+                template7: [
+                    'Indoor Air Quality Assessment - Complete VOC Testing and Mold Inspection',
+                    'IAQ Certification - HVAC System Compliance Testing for LEED Requirements',
+                    'Air Quality Monitoring - CO2 Sensor Installation and Building Automation',
+                    'Particulate Matter Testing - PM2.5 and PM10 Analysis with Remediation Plan',
+                    'HVAC Air Quality Upgrade - UV-C Germicidal Lamp Installation'
+                ]
+            };
 
-            // Generate random work order number
-            function randomizeWorkOrder() {
-                const randomNum = Math.floor(Math.random() * 90000) + 10000;
-                document.getElementById('workOrder').value = 'PO-' + randomNum;
-                updatePreview();
+            // Get Windows username
+            function getWindowsUsername() {
+                // Try to get from environment or browser
+                const userAgent = navigator.userAgent;
+                const username = navigator.userInfo || 'User';
+                
+                // Fallback: try to extract from various sources
+                if (userAgent.includes('Windows')) {
+                    return 'WindowsUser';
+                }
+                return 'User';
             }
 
-            // Generate random reference number
-            function randomizeReference() {
-                const year = 2025;
-                const randomNum = Math.floor(Math.random() * 9000) + 1000;
-                document.getElementById('reference').value = 'SVC-' + year + '-' + randomNum;
-                updatePreview();
+            // Calculate due date (10 days from today)
+            function calculateDueDate() {
+                const today = new Date();
+                const dueDate = new Date(today);
+                dueDate.setDate(today.getDate() + 10);
+                return dueDate.toISOString().split('T')[0];
             }
 
-            // Generate random service description
-            function randomizeService() {
-                const randomService = services[Math.floor(Math.random() * services.length)];
+            // Generate random numbers for invoice
+            function generateRandomInvoiceNumbers() {
+                const poNumber = 'PO-' + (Math.floor(Math.random() * 90000) + 10000);
+                const refNumber = 'SVC-2026-' + (Math.floor(Math.random() * 9000) + 1000);
+                return { poNumber, refNumber };
+            }
+
+            // Populate form based on template selection
+            function onTemplateChange() {
+                const templateSelect = document.getElementById('invoiceTemplate');
+                const selectedTemplate = templateSelect.value;
+                
+                if (!selectedTemplate) {
+                    // Clear fields if no template selected
+                    document.getElementById('workOrder').value = '';
+                    document.getElementById('reference').value = '';
+                    document.getElementById('service').value = '';
+                    document.getElementById('dueDate').value = '';
+                    updatePreview();
+                    return;
+                }
+
+                // Generate random numbers
+                const { poNumber, refNumber } = generateRandomInvoiceNumbers();
+                
+                // Get random service from template
+                const serviceOptions = serviceTemplates[selectedTemplate];
+                const randomService = serviceOptions[Math.floor(Math.random() * serviceOptions.length)];
+                
+                // Get due date
+                const dueDate = calculateDueDate();
+                const formattedDueDate = new Date(dueDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Populate fields
+                document.getElementById('workOrder').value = poNumber;
+                document.getElementById('reference').value = refNumber;
                 document.getElementById('service').value = randomService;
+                document.getElementById('dueDate').value = formattedDueDate;
+                
                 updatePreview();
             }
 
-            // Randomize all three fields
-            function randomizeAll() {
-                randomizeWorkOrder();
-                randomizeReference();
-                randomizeService();
-            }
-
-            // Initialize preview on page load
-            window.addEventListener('DOMContentLoaded', updatePreview);
+            // Initialize on page load
+            window.addEventListener('DOMContentLoaded', function() {
+                // Set Windows username
+                document.getElementById('customerName').value = getWindowsUsername();
+                
+                // Add event listener to template dropdown
+                document.getElementById('invoiceTemplate').addEventListener('change', onTemplateChange);
+                
+                updatePreview();
+            });
 
             function updatePreview() {
                 const companyName = document.getElementById('companyName').value;
@@ -684,6 +773,18 @@ app.get('/', (c) => {
             async function sendImageEmail() {
                 const statusDiv = document.getElementById('status');
                 const emailRecipients = document.getElementById('emailRecipients').value.trim();
+                const templateSelect = document.getElementById('invoiceTemplate');
+
+                // Validate template selection
+                if (!templateSelect.value) {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 text-yellow-800';
+                    statusDiv.innerHTML = \`
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>No Template Selected:</strong> Please select an invoice template first
+                    \`;
+                    statusDiv.classList.remove('hidden');
+                    return;
+                }
 
                 if (!emailRecipients) {
                     statusDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 text-yellow-800';
@@ -695,18 +796,39 @@ app.get('/', (c) => {
                     return;
                 }
 
+                // CRITICAL: Generate NEW random numbers for this email
+                const { poNumber, refNumber } = generateRandomInvoiceNumbers();
+                const selectedTemplate = templateSelect.value;
+                const serviceOptions = serviceTemplates[selectedTemplate];
+                const randomService = serviceOptions[Math.floor(Math.random() * serviceOptions.length)];
+                const dueDate = calculateDueDate();
+                const formattedDueDate = new Date(dueDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Update fields with new random values
+                document.getElementById('workOrder').value = poNumber;
+                document.getElementById('reference').value = refNumber;
+                document.getElementById('service').value = randomService;
+                document.getElementById('dueDate').value = formattedDueDate;
+                
+                // Update preview
+                updatePreview();
+
                 statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
-                statusDiv.textContent = '🎨 Generating invoice image...';
+                statusDiv.textContent = '🎨 Generating new invoice with random numbers...';
                 statusDiv.classList.remove('hidden');
 
                 try {
                     const data = {
                         companyName: document.getElementById('companyName').value,
                         customerName: document.getElementById('customerName').value,
-                        workOrder: document.getElementById('workOrder').value,
-                        reference: document.getElementById('reference').value,
-                        service: document.getElementById('service').value,
-                        dueDate: document.getElementById('dueDate').value,
+                        workOrder: poNumber,
+                        reference: refNumber,
+                        service: randomService,
+                        dueDate: formattedDueDate,
                         contactEmail: document.getElementById('contactEmail').value,
                         customUrl: document.getElementById('customUrl').value.trim() || 'https://www.example.com',
                         recipients: emailRecipients.split('\\n').filter(e => e.trim())

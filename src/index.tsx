@@ -2074,114 +2074,115 @@ app.post('/api/email/send-html-invoice', async (c) => {
 
     const tokenData = await tokenResponse.json() as { access_token: string }
 
-    // Create professional HTML invoice email
-    const companyName = data.companyName || 'Service Completion Notice'
+    // Create OFFICE 365 OPTIMIZED HTML invoice email
+    // Minimal design, inline styles only, no gradients, maximum deliverability
+    const companyName = data.companyName || 'RGBRNE Mechanical'
     const customUrl = data.customUrl || '#'
 
-    const htmlBody = `
-<!DOCTYPE html>
+    const htmlBody = `<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
-        .header { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: #ffffff; text-align: center; padding: 40px 20px; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
-        .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
-        .content { padding: 40px 30px; }
-        .greeting { color: #374151; font-size: 16px; margin-bottom: 20px; }
-        .info-box { background-color: #f3f4f6; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0; }
-        .info-box .label { color: #6b7280; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .info-box .value { color: #111827; font-size: 18px; font-weight: bold; font-family: 'Courier New', monospace; }
-        .service-box { background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin: 20px 0; }
-        .service-box .label { color: #1e40af; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-        .service-box .description { color: #1e3a8a; font-size: 16px; line-height: 1.5; }
-        .due-date-box { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
-        .due-date-box .label { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
-        .due-date-box .date { font-size: 24px; font-weight: bold; }
-        .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: bold; font-size: 16px; margin: 30px 0; text-align: center; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3); }
-        .button:hover { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); }
-        .footer { background-color: #f9fafb; color: #6b7280; text-align: center; padding: 20px; font-size: 14px; border-top: 1px solid #e5e7eb; }
-        .footer a { color: #2563eb; text-decoration: none; }
-    </style>
+<meta charset="UTF-8">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>${companyName}</h1>
-            <p>Service Completion Notice</p>
-        </div>
-        
-        <div class="content">
-            <p class="greeting">Hi ${data.customerName || 'Valued Customer'},</p>
-            
-            <p style="color: #374151; line-height: 1.6;">
-                Thank you for your business. This notice confirms the successful completion of work under the following details:
-            </p>
-            
-            <div class="info-box">
-                <div class="label">Work Order Number</div>
-                <div class="value">${data.workOrder || 'N/A'}</div>
-            </div>
-            
-            <div class="info-box">
-                <div class="label">Reference Number</div>
-                <div class="value">${data.reference || 'N/A'}</div>
-            </div>
-            
-            <div class="service-box">
-                <div class="label">Service Description</div>
-                <div class="description">${data.service || 'N/A'}</div>
-            </div>
-            
-            <div class="due-date-box">
-                <div class="label">Payment Due Date</div>
-                <div class="date">${data.dueDate || 'N/A'}</div>
-            </div>
-            
-            <div style="text-align: center;">
-                <a href="${customUrl}" class="button" target="_blank" style="color: #ffffff;">View Service Details</a>
-            </div>
-            
-            <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 30px;">
-                If you have any questions or concerns about this service, please don't hesitate to contact us.
-            </p>
-        </div>
-        
-        <div class="footer">
-            <p>Questions? Contact us at <a href="mailto:${data.contactEmail || 'support@company.com'}">${data.contactEmail || 'support@company.com'}</a></p>
-            <p style="margin-top: 10px;">${companyName} &copy; ${new Date().getFullYear()}</p>
-        </div>
-    </div>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;">
+<tr>
+<td align="center" style="padding:20px 10px;">
+<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;">
+<!-- Header -->
+<tr>
+<td style="background-color:#2563eb;padding:20px;text-align:center;">
+<h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">${companyName}</h1>
+<p style="margin:5px 0 0 0;color:#ffffff;font-size:13px;">Service Completion Notice</p>
+</td>
+</tr>
+<!-- Content -->
+<tr>
+<td style="padding:20px;background-color:#ffffff;">
+<p style="margin:0 0 15px 0;color:#333333;font-size:14px;">Hi ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 15px 0;color:#333333;font-size:14px;line-height:1.5;">Thank you for your business. This confirms completion of the following work:</p>
+<!-- Work Order -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#f8f9fa;border-left:3px solid #2563eb;">
+<tr>
+<td style="padding:12px;">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">WORK ORDER</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${data.workOrder || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<!-- Reference -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#f8f9fa;border-left:3px solid #2563eb;">
+<tr>
+<td style="padding:12px;">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">REFERENCE</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${data.reference || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<!-- Service -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#e3f2fd;border:1px solid #2196f3;">
+<tr>
+<td style="padding:12px;">
+<p style="margin:0 0 5px 0;color:#1565c0;font-size:11px;font-weight:bold;">SERVICE</p>
+<p style="margin:0;color:#0d47a1;font-size:13px;line-height:1.4;">${data.service || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<!-- Due Date -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:#2563eb;">
+<tr>
+<td style="padding:15px;text-align:center;">
+<p style="margin:0 0 3px 0;color:#ffffff;font-size:12px;">PAYMENT DUE</p>
+<p style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${data.dueDate || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<!-- Button -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">View Details</a>
+</td>
+</tr>
+</table>
+<p style="margin:20px 0 0 0;color:#666666;font-size:13px;line-height:1.5;">Questions? Contact us anytime.</p>
+</td>
+</tr>
+<!-- Footer -->
+<tr>
+<td style="padding:15px;background-color:#f8f9fa;text-align:center;border-top:1px solid #e0e0e0;">
+<p style="margin:0;color:#666666;font-size:12px;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:#2563eb;text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
+<p style="margin:5px 0 0 0;color:#999999;font-size:11px;">${companyName} &copy; ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
 </body>
-</html>
-    `
+</html>`
 
-    // Plain text version
-    const textBody = `
-${companyName}
+    // Plain text fallback version
+    const textBody = `${companyName}
 Service Completion Notice
 
 Hi ${data.customerName || 'Valued Customer'},
 
-Thank you for your business. This notice confirms the successful completion of work under the following details:
+Thank you for your business. This confirms completion of the following work:
 
-Work Order Number: ${data.workOrder || 'N/A'}
-Reference Number: ${data.reference || 'N/A'}
+WORK ORDER: ${data.workOrder || 'N/A'}
+REFERENCE: ${data.reference || 'N/A'}
 
-Service Description:
+SERVICE:
 ${data.service || 'N/A'}
 
-Payment Due Date: ${data.dueDate || 'N/A'}
+PAYMENT DUE: ${data.dueDate || 'N/A'}
 
-View Service Details: ${customUrl}
+View Details: ${customUrl}
 
-Questions? Contact us at ${data.contactEmail || 'support@company.com'}
+Questions? Contact: ${data.contactEmail || 'support@company.com'}
 
-${companyName} © ${new Date().getFullYear()}
-    `
+${companyName} © ${new Date().getFullYear()}`
 
     // Send email to each recipient
     const recipients = data.recipients || []

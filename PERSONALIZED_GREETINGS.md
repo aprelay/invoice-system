@@ -1,32 +1,39 @@
-# 🎯 Personalized Email Greetings
+# 🎯 Personalized Email Greetings (Domain-Based)
 
 **Last Updated**: 2026-01-19  
 **Status**: ✅ **IMPLEMENTED**  
-**Feature**: Auto-extract username from recipient email for personalized greetings
+**Feature**: Auto-extract **domain name** from recipient email for professional B2B greetings
 
 ---
 
-## 🎯 **WHAT WAS FIXED**
+## 🎯 **WHAT WAS IMPLEMENTED**
 
 ### ❌ **Before (Wrong)**:
 ```
-Recipient Email: w4consultings@outlook.com
+Recipient Email: asalas@harrisonenergy.com
 Email Greeting:  "Hi WindowsUser," ❌
 
-Problem: Used Windows username, not recipient's email
+Problem: Used Windows username, not recipient's company
 ```
 
-### ✅ **After (Correct)**:
+### ✅ **After (Correct - Domain-Based)**:
 ```
-Recipient Email: w4consultings@outlook.com
-Email Greeting:  "Hi w4consultings Team," ✅
+Recipient Email: asalas@harrisonenergy.com
+Email Greeting:  "Hi harrisonenergy Team," ✅
 
-Recipient Email: john.smith@company.com
-Email Greeting:  "Hi john.smith Team," ✅
+Recipient Email: john@microsoft.com
+Email Greeting:  "Hi microsoft Team," ✅
 
-Recipient Email: info@business.net
-Email Greeting:  "Hi info Team," ✅
+Recipient Email: info@apple.com
+Email Greeting:  "Hi apple Team," ✅
 ```
+
+### 💡 **Why Domain Name is Better:**
+1. ✅ **B2B Professional** - Addresses the company, not the individual
+2. ✅ **Makes Business Sense** - You're invoicing the company
+3. ✅ **Natural Language** - "Hi harrisonenergy Team" flows perfectly
+4. ✅ **Consistent Tone** - Always addressing the organization
+5. ✅ **Less Personal** - Appropriate for formal business invoices
 
 ---
 
@@ -34,24 +41,26 @@ Email Greeting:  "Hi info Team," ✅
 
 ### **Step-by-Step Process**:
 
-1. **User enters recipient email**: `w4consultings@outlook.com`
+1. **User enters recipient email**: `asalas@harrisonenergy.com`
 
-2. **Backend extracts username**: 
+2. **Backend extracts domain name**: 
    ```javascript
-   const emailUsername = recipient.split('@')[0]
-   // Result: "w4consultings"
+   const domain = email.split('@')[1].split('.')[0]
+   // asalas@harrisonenergy.com → "harrisonenergy"
+   // john@microsoft.com → "microsoft"
+   // info@apple.com → "apple"
    ```
 
-3. **Creates personalized greeting**:
+3. **Creates professional greeting**:
    ```javascript
-   const personalizedGreeting = `${emailUsername} Team`
-   // Result: "w4consultings Team"
+   const personalizedGreeting = `${domain} Team`
+   // Result: "harrisonenergy Team"
    ```
 
 4. **Replaces generic greeting in email**:
    ```javascript
    // Before: "Hi Valued Customer,"
-   // After:  "Hi w4consultings Team,"
+   // After:  "Hi harrisonenergy Team,"
    ```
 
 5. **Sends personalized email** to recipient
@@ -60,11 +69,11 @@ Email Greeting:  "Hi info Team," ✅
 
 ## 📧 **EXAMPLE EMAILS**
 
-### **Example 1: w4consultings@outlook.com**
+### **Example 1: asalas@harrisonenergy.com**
 ```
 Subject: Invoice PO-67823 - RGBRNE Mechanical
 
-Hi w4consultings Team,  ← Personalized!
+Hi harrisonenergy Team,  ← Company domain!
 
 Thank you for your business. This confirms completion of 
 the following work:
@@ -78,11 +87,11 @@ PAYMENT DUE: January 29, 2026
 [ View Service Report ]
 ```
 
-### **Example 2: john.smith@company.com**
+### **Example 2: john@microsoft.com**
 ```
 Subject: Invoice PO-54392 - RGBRNE Mechanical
 
-Hi john.smith Team,  ← Personalized!
+Hi microsoft Team,  ← Company domain!
 
 Thank you for your business. This confirms completion of 
 the following work:
@@ -96,11 +105,11 @@ PAYMENT DUE: January 29, 2026
 [ Review Inspection ]
 ```
 
-### **Example 3: info@business.net**
+### **Example 3: support@apple.com**
 ```
 Subject: Invoice PO-89234 - RGBRNE Mechanical
 
-Hi info Team,  ← Personalized!
+Hi apple Team,  ← Company domain!
 
 Thank you for your business. This confirms completion of 
 the following work:
@@ -119,25 +128,25 @@ PAYMENT DUE: January 29, 2026
 ## 💡 **MULTI-RECIPIENT SUPPORT**
 
 ### **When sending to multiple recipients**:
-Each recipient gets their **own personalized greeting**!
+Each recipient gets their **own personalized greeting** based on their company domain!
 
 ```
 Recipients:
-• w4consultings@outlook.com
-• john.smith@company.com
-• info@business.net
+• asalas@harrisonenergy.com
+• john@microsoft.com
+• support@apple.com
 
-Email 1 → w4consultings@outlook.com:
-  "Hi w4consultings Team,"
+Email 1 → asalas@harrisonenergy.com:
+  "Hi harrisonenergy Team,"
 
-Email 2 → john.smith@company.com:
-  "Hi john.smith Team,"
+Email 2 → john@microsoft.com:
+  "Hi microsoft Team,"
 
-Email 3 → info@business.net:
-  "Hi info Team,"
+Email 3 → support@apple.com:
+  "Hi apple Team,"
 ```
 
-**Every recipient sees their own email username in the greeting!** 🎉
+**Every recipient sees their own company name in the greeting!** 🎉
 
 ---
 
@@ -145,15 +154,17 @@ Email 3 → info@business.net:
 
 ### **Code Location**:
 **File**: `/home/user/webapp/src/index.tsx`  
-**Lines**: ~2248-2268
+**Lines**: ~2252-2268
 
 ### **Backend Logic**:
 ```typescript
 // For each recipient, create personalized email
 for (const recipient of recipients) {
-  // Extract username from email (part before @)
-  const emailUsername = recipient.trim().split('@')[0]
-  const personalizedGreeting = `${emailUsername} Team`
+  // Extract domain name from email (part after @, before first .)
+  // Example: asalas@harrisonenergy.com → "harrisonenergy"
+  const emailParts = recipient.trim().split('@')
+  const domain = emailParts[1] ? emailParts[1].split('.')[0] : 'Valued Customer'
+  const personalizedGreeting = `${domain} Team`
   
   // Replace generic greeting with personalized one
   const personalizedHtmlBody = htmlBody.replace(
@@ -173,24 +184,25 @@ for (const recipient of recipients) {
 ```
 
 ### **Key Features**:
-1. ✅ **Extracts username** from email address (part before @)
-2. ✅ **Adds "Team" suffix** for professional tone
+1. ✅ **Extracts domain name** from email address (part after @, before first .)
+2. ✅ **Adds "Team" suffix** for professional B2B tone
 3. ✅ **Personalizes HTML version** of email
 4. ✅ **Personalizes plain text version** of email
-5. ✅ **Works for multiple recipients** (each gets their own greeting)
+5. ✅ **Works for multiple recipients** (each gets their own company greeting)
 
 ---
 
-## 📊 **USERNAME EXTRACTION EXAMPLES**
+## 📊 **DOMAIN EXTRACTION EXAMPLES**
 
-| Email Address | Extracted Username | Greeting |
-|--------------|-------------------|----------|
-| `w4consultings@outlook.com` | `w4consultings` | `Hi w4consultings Team,` |
-| `john.smith@company.com` | `john.smith` | `Hi john.smith Team,` |
-| `info@business.net` | `info` | `Hi info Team,` |
-| `support@example.org` | `support` | `Hi support Team,` |
-| `jane.doe123@mail.com` | `jane.doe123` | `Hi jane.doe123 Team,` |
-| `admin@domain.co.uk` | `admin` | `Hi admin Team,` |
+| Email Address | Extracted Domain | Greeting |
+|--------------|------------------|----------|
+| `asalas@harrisonenergy.com` | `harrisonenergy` | `Hi harrisonenergy Team,` |
+| `john@microsoft.com` | `microsoft` | `Hi microsoft Team,` |
+| `support@apple.com` | `apple` | `Hi apple Team,` |
+| `info@google.co.uk` | `google` | `Hi google Team,` |
+| `admin@amazon.ca` | `amazon` | `Hi amazon Team,` |
+| `contact@tesla.io` | `tesla` | `Hi tesla Team,` |
+| `sales@ibm.net` | `ibm` | `Hi ibm Team,` |
 
 ---
 

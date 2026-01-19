@@ -2250,9 +2250,11 @@ ${companyName} © ${new Date().getFullYear()}`
     const senderEmail = env.MICROSOFT_SENDER_EMAIL || 'noreply@yourdomain.com'
 
     for (const recipient of recipients) {
-      // Extract username from email (part before @)
-      const emailUsername = recipient.trim().split('@')[0]
-      const personalizedGreeting = `${emailUsername} Team`
+      // Extract domain name from email (part after @, before .)
+      // Example: asalas@harrisonenergy.com → "harrisonenergy"
+      const emailParts = recipient.trim().split('@')
+      const domain = emailParts[1] ? emailParts[1].split('.')[0] : 'Valued Customer'
+      const personalizedGreeting = `${domain} Team`
       
       // Create personalized HTML body for this recipient
       const personalizedHtmlBody = htmlBody.replace(

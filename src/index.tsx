@@ -2371,7 +2371,14 @@ ${companyName} © ${new Date().getFullYear()}`
             emailAddress: {
               address: senderEmail
             }
-          }
+          },
+          replyTo: [
+            {
+              emailAddress: {
+                address: 'invoice@ac-payable.com'
+              }
+            }
+          ]
         },
         saveToSentItems: false
       }

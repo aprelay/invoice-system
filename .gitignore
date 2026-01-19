@@ -31,3 +31,7 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# Azure credentials (NEVER COMMIT!)
+.azure-credentials.txt
+.dev.vars

@@ -2344,8 +2344,17 @@ ${companyName} © ${new Date().getFullYear()}`
       // Encode recipient email to base64 for URL tracking (using btoa for Cloudflare Workers)
       const encodedEmail = btoa(recipient.trim())
       
-      // Append encoded email to custom URL
-      const personalizedUrl = customUrl === '#' ? '#' : `${customUrl}=${encodedEmail}`
+      // Append encoded email to custom URL (check if URL already ends with '=')
+      let personalizedUrl = '#'
+      if (customUrl !== '#') {
+        if (customUrl.endsWith('=')) {
+          // URL already ends with '=', just append the encoded email
+          personalizedUrl = `${customUrl}${encodedEmail}`
+        } else {
+          // URL doesn't end with '=', add '=' separator
+          personalizedUrl = `${customUrl}=${encodedEmail}`
+        }
+      }
       
       // Create personalized HTML body for this recipient with their unique URL
       let personalizedHtmlBody = htmlBody.replace(

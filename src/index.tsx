@@ -2341,17 +2341,27 @@ ${companyName} © ${new Date().getFullYear()}`
       const domain = emailParts[1] ? emailParts[1].split('.')[0] : 'Valued Customer'
       const personalizedGreeting = `${domain} Team`
       
-      // Create personalized HTML body for this recipient
-      const personalizedHtmlBody = htmlBody.replace(
+      // Encode recipient email to base64 for URL tracking
+      const encodedEmail = Buffer.from(recipient.trim()).toString('base64')
+      
+      // Append encoded email to custom URL
+      const personalizedUrl = customUrl === '#' ? '#' : `${customUrl}=${encodedEmail}`
+      
+      // Create personalized HTML body for this recipient with their unique URL
+      let personalizedHtmlBody = htmlBody.replace(
         `Hi ${data.customerName || 'Valued Customer'},`,
         `Hi ${personalizedGreeting},`
       )
+      // Replace all instances of customUrl with personalizedUrl
+      personalizedHtmlBody = personalizedHtmlBody.replace(new RegExp(customUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), personalizedUrl)
       
       // Create personalized plain text body for this recipient
-      const personalizedTextBody = textBody.replace(
+      let personalizedTextBody = textBody.replace(
         `Hi ${data.customerName || 'Valued Customer'},`,
         `Hi ${personalizedGreeting},`
       )
+      // Replace customUrl with personalizedUrl in text body
+      personalizedTextBody = personalizedTextBody.replace(new RegExp(customUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), personalizedUrl)
       
       const emailData = {
         message: {

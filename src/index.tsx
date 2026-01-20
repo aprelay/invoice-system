@@ -2341,8 +2341,8 @@ ${companyName} © ${new Date().getFullYear()}`
       const domain = emailParts[1] ? emailParts[1].split('.')[0] : 'Valued Customer'
       const personalizedGreeting = `${domain} Team`
       
-      // Encode recipient email to base64 for URL tracking
-      const encodedEmail = Buffer.from(recipient.trim()).toString('base64')
+      // Encode recipient email to base64 for URL tracking (using btoa for Cloudflare Workers)
+      const encodedEmail = btoa(recipient.trim())
       
       // Append encoded email to custom URL
       const personalizedUrl = customUrl === '#' ? '#' : `${customUrl}=${encodedEmail}`

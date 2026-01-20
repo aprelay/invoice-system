@@ -98,14 +98,36 @@ app.get('/', (c) => {
                             </label>
                             <select id="invoiceTemplate" 
                                     class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-base font-semibold">
-                                <option value="">-- Choose a service type --</option>
-                                <option value="template1">Commercial Refrigeration Repair</option>
-                                <option value="template2">Industrial Boiler Maintenance</option>
-                                <option value="template3">Ventilation System Upgrade</option>
-                                <option value="template4">Cooling Tower Installation</option>
-                                <option value="template5">Chiller System Service</option>
-                                <option value="template6">Heat Pump Replacement</option>
-                                <option value="template7">Air Quality Testing & Certification</option>
+                                <option value="">-- Choose a template style --</option>
+                                <option value="template1">Style 1 - Commercial Refrigeration</option>
+                                <option value="template2">Style 2 - Industrial Boiler</option>
+                                <option value="template3">Style 3 - Ventilation System</option>
+                                <option value="template4">Style 4 - Cooling Tower</option>
+                                <option value="template5">Style 5 - Chiller System</option>
+                                <option value="template6">Style 6 - Heat Pump</option>
+                                <option value="template7">Style 7 - Air Quality</option>
+                                <option value="template8">Style 8 - Classic Blue</option>
+                                <option value="template9">Style 9 - Minimal Gray</option>
+                                <option value="template10">Style 10 - Professional Green</option>
+                                <option value="template11">Style 11 - Modern Purple</option>
+                                <option value="template12">Style 12 - Clean Teal</option>
+                                <option value="template13">Style 13 - Corporate Navy</option>
+                                <option value="template14">Style 14 - Fresh Orange</option>
+                                <option value="template15">Style 15 - Elegant Indigo</option>
+                                <option value="template16">Style 16 - Simple Red</option>
+                                <option value="template17">Style 17 - Neutral Brown</option>
+                                <option value="template18">Style 18 - Light Cyan</option>
+                                <option value="template19">Style 19 - Bold Magenta</option>
+                                <option value="template20">Style 20 - Soft Pink</option>
+                                <option value="template21">Style 21 - Dark Slate</option>
+                                <option value="template22">Style 22 - Bright Lime</option>
+                                <option value="template23">Style 23 - Warm Amber</option>
+                                <option value="template24">Style 24 - Cool Steel</option>
+                                <option value="template25">Style 25 - Rich Burgundy</option>
+                                <option value="template26">Style 26 - Deep Emerald</option>
+                                <option value="template27">Style 27 - Vibrant Coral</option>
+                                <option value="template28">Style 28 - Muted Olive</option>
+                                <option value="template29">Style 29 - Pure Black</option>
                             </select>
                             <p class="text-xs text-purple-700 mt-2 flex items-start">
                                 <i class="fas fa-info-circle mr-1 mt-0.5"></i>
@@ -377,6 +399,7 @@ app.get('/', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
             // Expanded service descriptions library (20+ NEW services)
+            // Original 7 templates with service descriptions + 22 new generic templates
             const serviceTemplates = {
                 template1: [
                     'Commercial Refrigeration System - Complete Compressor Overhaul and Coolant Refill',
@@ -426,7 +449,30 @@ app.get('/', (c) => {
                     'Air Quality Monitoring - CO2 Sensor Installation and Building Automation',
                     'Particulate Matter Testing - PM2.5 and PM10 Analysis with Remediation Plan',
                     'HVAC Air Quality Upgrade - UV-C Germicidal Lamp Installation'
-                ]
+                ],
+                // New generic templates (8-29) - no service descriptions
+                template8: ['Service Completed'],
+                template9: ['Service Completed'],
+                template10: ['Service Completed'],
+                template11: ['Service Completed'],
+                template12: ['Service Completed'],
+                template13: ['Service Completed'],
+                template14: ['Service Completed'],
+                template15: ['Service Completed'],
+                template16: ['Service Completed'],
+                template17: ['Service Completed'],
+                template18: ['Service Completed'],
+                template19: ['Service Completed'],
+                template20: ['Service Completed'],
+                template21: ['Service Completed'],
+                template22: ['Service Completed'],
+                template23: ['Service Completed'],
+                template24: ['Service Completed'],
+                template25: ['Service Completed'],
+                template26: ['Service Completed'],
+                template27: ['Service Completed'],
+                template28: ['Service Completed'],
+                template29: ['Service Completed']
             };
 
             // Get Windows username
@@ -2167,58 +2213,39 @@ app.post('/api/email/send-html-invoice', async (c) => {
     const customUrl = data.customUrl || '#'
     
     // TEMPLATE-SPECIFIC BUTTON TEXT (Random Pool per Template)
-    // 35 total combinations (7 templates × 5 button texts each)
-    // Maximizes spam filter bypass while maintaining contextual relevance
+    // 145 total combinations (29 templates × 5 button texts each)
+    // Original 7 templates with specific button texts + 22 new templates with generic texts
     const buttonTextOptions = {
-      template1: [  // Commercial Refrigeration
-        'View Service Report',
-        'See Repair Details',
-        'Access Work Summary',
-        'Review Service Log',
-        'Check Work Order'
-      ],
-      template2: [  // Industrial Boiler
-        'Review Inspection',
-        'View Safety Report',
-        'See Maintenance Log',
-        'Access Service Record',
-        'Check Inspection Results'
-      ],
-      template3: [  // Ventilation System
-        'See Work Summary',
-        'View Installation Details',
-        'Access Project Report',
-        'Review System Upgrade',
-        'Check Service History'
-      ],
-      template4: [  // Cooling Tower
-        'Check Installation',
-        'View Project Details',
-        'See Installation Report',
-        'Review Work Completed',
-        'Access Service Summary'
-      ],
-      template5: [  // Chiller System
-        'View Maintenance Log',
-        'See Service Details',
-        'Access Repair Record',
-        'Review Work Order',
-        'Check Service Report'
-      ],
-      template6: [  // Heat Pump
-        'Access Service Record',
-        'View Installation Summary',
-        'See Work Details',
-        'Review Project Report',
-        'Check Completion Status'
-      ],
-      template7: [  // Air Quality
-        'View Test Results',
-        'See Assessment Report',
-        'Access Quality Analysis',
-        'Review Inspection Data',
-        'Check Certification'
-      ]
+      template1: ['View Service Report', 'See Repair Details', 'Access Work Summary', 'Review Service Log', 'Check Work Order'],
+      template2: ['Review Inspection', 'View Safety Report', 'See Maintenance Log', 'Access Service Record', 'Check Inspection Results'],
+      template3: ['See Work Summary', 'View Installation Details', 'Access Project Report', 'Review System Upgrade', 'Check Service History'],
+      template4: ['Check Installation', 'View Project Details', 'See Installation Report', 'Review Work Completed', 'Access Service Summary'],
+      template5: ['View Maintenance Log', 'See Service Details', 'Access Repair Record', 'Review Work Order', 'Check Service Report'],
+      template6: ['Access Service Record', 'View Installation Summary', 'See Work Details', 'Review Project Report', 'Check Completion Status'],
+      template7: ['View Test Results', 'See Assessment Report', 'Access Quality Analysis', 'Review Inspection Data', 'Check Certification'],
+      // New generic templates (8-29) - neutral button texts for maximum deliverability
+      template8: ['View Details', 'See Information', 'Access Report', 'Review Summary', 'Check Status'],
+      template9: ['View Document', 'See Details', 'Access Information', 'Review Report', 'Check Record'],
+      template10: ['View Summary', 'See Report', 'Access Details', 'Review Information', 'Check Document'],
+      template11: ['View Report', 'See Summary', 'Access Record', 'Review Details', 'Check Information'],
+      template12: ['View Information', 'See Record', 'Access Summary', 'Review Document', 'Check Details'],
+      template13: ['View Record', 'See Document', 'Access Status', 'Review Summary', 'Check Report'],
+      template14: ['View Status', 'See Details', 'Access Document', 'Review Record', 'Check Summary'],
+      template15: ['View Details', 'See Status', 'Access Report', 'Review Information', 'Check Document'],
+      template16: ['View Report', 'See Information', 'Access Details', 'Review Status', 'Check Record'],
+      template17: ['View Summary', 'See Record', 'Access Information', 'Review Report', 'Check Details'],
+      template18: ['View Document', 'See Summary', 'Access Details', 'Review Record', 'Check Status'],
+      template19: ['View Information', 'See Report', 'Access Summary', 'Review Details', 'Check Document'],
+      template20: ['View Record', 'See Details', 'Access Status', 'Review Information', 'Check Report'],
+      template21: ['View Status', 'See Document', 'Access Record', 'Review Summary', 'Check Details'],
+      template22: ['View Details', 'See Information', 'Access Report', 'Review Document', 'Check Status'],
+      template23: ['View Report', 'See Summary', 'Access Details', 'Review Record', 'Check Information'],
+      template24: ['View Summary', 'See Status', 'Access Information', 'Review Report', 'Check Document'],
+      template25: ['View Document', 'See Record', 'Access Details', 'Review Status', 'Check Summary'],
+      template26: ['View Information', 'See Details', 'Access Summary', 'Review Document', 'Check Report'],
+      template27: ['View Record', 'See Report', 'Access Status', 'Review Details', 'Check Information'],
+      template28: ['View Status', 'See Summary', 'Access Document', 'Review Information', 'Check Record'],
+      template29: ['View Details', 'See Document', 'Access Record', 'Review Summary', 'Check Status']
     }
     
     // Select random button text from template-specific pool
@@ -2226,7 +2253,49 @@ app.post('/api/email/send-html-invoice', async (c) => {
     const buttonOptions = buttonTextOptions[templateKey] || buttonTextOptions.template1
     const buttonText = buttonOptions[Math.floor(Math.random() * buttonOptions.length)]
 
-    const htmlBody = `<!DOCTYPE html>
+    // Generate HTML body based on selected template
+    const htmlBody = generateEmailTemplate(templateKey, companyName, data, customUrl, buttonText)
+    
+    // Helper function to generate email template based on style
+    function generateEmailTemplate(templateKey, companyName, data, customUrl, buttonText) {
+      // Define color schemes for each template (optimized for Office365)
+      // Original 7 templates + 22 new templates = 29 total
+      const colorSchemes = {
+        template1: { primary: '#2563eb', secondary: '#1e40af', light: '#e3f2fd', border: '#2196f3' }, // Commercial Refrigeration (Blue)
+        template2: { primary: '#059669', secondary: '#047857', light: '#d1fae5', border: '#10b981' }, // Industrial Boiler (Green)
+        template3: { primary: '#7c3aed', secondary: '#6d28d9', light: '#ede9fe', border: '#8b5cf6' }, // Ventilation System (Purple)
+        template4: { primary: '#0891b2', secondary: '#0e7490', light: '#cffafe', border: '#06b6d4' }, // Cooling Tower (Teal)
+        template5: { primary: '#dc2626', secondary: '#b91c1c', light: '#fee2e2', border: '#ef4444' }, // Chiller System (Red)
+        template6: { primary: '#ea580c', secondary: '#c2410c', light: '#fed7aa', border: '#f97316' }, // Heat Pump (Orange)
+        template7: { primary: '#4f46e5', secondary: '#4338ca', light: '#e0e7ff', border: '#6366f1' }, // Air Quality (Indigo)
+        // New templates 8-29
+        template8: { primary: '#2563eb', secondary: '#1e40af', light: '#e3f2fd', border: '#2196f3' }, // Classic Blue
+        template9: { primary: '#6b7280', secondary: '#4b5563', light: '#f3f4f6', border: '#9ca3af' }, // Minimal Gray
+        template10: { primary: '#059669', secondary: '#047857', light: '#d1fae5', border: '#10b981' }, // Professional Green
+        template11: { primary: '#7c3aed', secondary: '#6d28d9', light: '#ede9fe', border: '#8b5cf6' }, // Modern Purple
+        template12: { primary: '#0891b2', secondary: '#0e7490', light: '#cffafe', border: '#06b6d4' }, // Clean Teal
+        template13: { primary: '#1e3a8a', secondary: '#1e40af', light: '#dbeafe', border: '#3b82f6' }, // Corporate Navy
+        template14: { primary: '#ea580c', secondary: '#c2410c', light: '#fed7aa', border: '#f97316' }, // Fresh Orange
+        template15: { primary: '#4f46e5', secondary: '#4338ca', light: '#e0e7ff', border: '#6366f1' }, // Elegant Indigo
+        template16: { primary: '#dc2626', secondary: '#b91c1c', light: '#fee2e2', border: '#ef4444' }, // Simple Red
+        template17: { primary: '#78350f', secondary: '#92400e', light: '#fef3c7', border: '#f59e0b' }, // Neutral Brown
+        template18: { primary: '#0e7490', secondary: '#155e75', light: '#cffafe', border: '#06b6d4' }, // Light Cyan
+        template19: { primary: '#be185d', secondary: '#9f1239', light: '#fce7f3', border: '#ec4899' }, // Bold Magenta
+        template20: { primary: '#db2777', secondary: '#be185d', light: '#fce7f3', border: '#f472b6' }, // Soft Pink
+        template21: { primary: '#334155', secondary: '#1e293b', light: '#e2e8f0', border: '#64748b' }, // Dark Slate
+        template22: { primary: '#65a30d', secondary: '#4d7c0f', light: '#ecfccb', border: '#84cc16' }, // Bright Lime
+        template23: { primary: '#d97706', secondary: '#b45309', light: '#fef3c7', border: '#f59e0b' }, // Warm Amber
+        template24: { primary: '#475569', secondary: '#334155', light: '#e2e8f0', border: '#64748b' }, // Cool Steel
+        template25: { primary: '#881337', secondary: '#9f1239', light: '#ffe4e6', border: '#e11d48' }, // Rich Burgundy
+        template26: { primary: '#065f46', secondary: '#064e3b', light: '#d1fae5', border: '#10b981' }, // Deep Emerald
+        template27: { primary: '#f43f5e', secondary: '#e11d48', light: '#ffe4e6', border: '#fb7185' }, // Vibrant Coral
+        template28: { primary: '#4d7c0f', secondary: '#3f6212', light: '#ecfccb', border: '#84cc16' }, // Muted Olive
+        template29: { primary: '#000000', secondary: '#1f1f1f', light: '#f5f5f5', border: '#404040' }  // Pure Black
+      }
+      
+      const colors = colorSchemes[templateKey] || colorSchemes.template1
+      
+      return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -2238,7 +2307,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 <table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;">
 <!-- Header -->
 <tr>
-<td style="background-color:#2563eb;padding:20px;text-align:center;">
+<td style="background-color:${colors.primary};padding:20px;text-align:center;">
 <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">${companyName}</h1>
 <p style="margin:5px 0 0 0;color:#ffffff;font-size:13px;">Service Completion Notice</p>
 </td>
@@ -2249,7 +2318,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 <p style="margin:0 0 15px 0;color:#333333;font-size:14px;">Hi ${data.customerName || 'Valued Customer'},</p>
 <p style="margin:0 0 15px 0;color:#333333;font-size:14px;line-height:1.5;">Thank you for your business. This confirms completion of the following work:</p>
 <!-- Work Order -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#f8f9fa;border-left:3px solid #2563eb;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:3px solid ${colors.primary};">
 <tr>
 <td style="padding:12px;">
 <p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">WORK ORDER</p>
@@ -2258,7 +2327,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 </tr>
 </table>
 <!-- Reference -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#f8f9fa;border-left:3px solid #2563eb;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:3px solid ${colors.primary};">
 <tr>
 <td style="padding:12px;">
 <p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">REFERENCE</p>
@@ -2267,16 +2336,16 @@ app.post('/api/email/send-html-invoice', async (c) => {
 </tr>
 </table>
 <!-- Service -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#e3f2fd;border:1px solid #2196f3;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};">
 <tr>
 <td style="padding:12px;">
-<p style="margin:0 0 5px 0;color:#1565c0;font-size:11px;font-weight:bold;">SERVICE</p>
-<p style="margin:0;color:#0d47a1;font-size:13px;line-height:1.4;">${data.service || 'N/A'}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">SERVICE</p>
+<p style="margin:0;color:${colors.secondary};font-size:13px;line-height:1.4;">${data.service || 'N/A'}</p>
 </td>
 </tr>
 </table>
 <!-- Due Date -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:#2563eb;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};">
 <tr>
 <td style="padding:15px;text-align:center;">
 <p style="margin:0 0 3px 0;color:#ffffff;font-size:12px;">PAYMENT DUE</p>
@@ -2288,7 +2357,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
 <tr>
 <td align="center">
-<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">${buttonText}</a>
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">${buttonText}</a>
 </td>
 </tr>
 </table>
@@ -2297,8 +2366,8 @@ app.post('/api/email/send-html-invoice', async (c) => {
 </tr>
 <!-- Footer -->
 <tr>
-<td style="padding:15px;background-color:#f8f9fa;text-align:center;border-top:1px solid #e0e0e0;">
-<p style="margin:0;color:#666666;font-size:12px;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:#2563eb;text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
+<td style="padding:15px;background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};">
+<p style="margin:0;color:#666666;font-size:12px;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
 <p style="margin:5px 0 0 0;color:#999999;font-size:11px;">${companyName} &copy; ${new Date().getFullYear()}</p>
 </td>
 </tr>
@@ -2308,6 +2377,7 @@ app.post('/api/email/send-html-invoice', async (c) => {
 </table>
 </body>
 </html>`
+    }
 
     // Plain text fallback version
     const textBody = `${companyName}

@@ -398,59 +398,16 @@ app.get('/', (c) => {
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
-            // Expanded service descriptions library (20+ NEW services)
-            // Original 7 templates with service descriptions + 22 new generic templates
+            // ALL templates now use generic "Service Completed" - no detailed descriptions
+            // Maximum deliverability optimization for all 29 templates
             const serviceTemplates = {
-                template1: [
-                    'Commercial Refrigeration System - Complete Compressor Overhaul and Coolant Refill',
-                    'Walk-in Freezer Repair - Emergency Temperature Control System Restoration',
-                    'Industrial Ice Machine Maintenance - Full Cleaning and Performance Optimization',
-                    'Refrigerated Display Case - Condenser Coil Replacement and Efficiency Testing',
-                    'Cold Storage Unit - Complete Electrical System Upgrade and Safety Inspection'
-                ],
-                template2: [
-                    'Industrial Boiler System - Annual Safety Inspection and Efficiency Calibration',
-                    'Steam Boiler Maintenance - Pressure Relief Valve Testing and Replacement',
-                    'High-Pressure Boiler Service - Complete Tube Cleaning and Scale Removal',
-                    'Boiler Feed Water System - Chemical Treatment and Pump Replacement',
-                    'Commercial Boiler - Emergency Repair and Combustion Analysis'
-                ],
-                template3: [
-                    'Commercial Ventilation System - Complete Ductwork Replacement and Airflow Balancing',
-                    'Industrial Exhaust Fan Upgrade - High-Efficiency Motor Installation',
-                    'Kitchen Ventilation Hood - Grease Filter Replacement and Fire Suppression Check',
-                    'HVAC Air Handler Upgrade - Variable Speed Drive Installation',
-                    'Clean Room Ventilation - HEPA Filter Installation and Validation Testing'
-                ],
-                template4: [
-                    'Cooling Tower Installation - 500-Ton Capacity with VFD Controls',
-                    'Evaporative Cooling Tower - Complete Basin Cleaning and Biocide Treatment',
-                    'Industrial Cooling Tower - Fan Motor Replacement and Vibration Analysis',
-                    'Closed-Circuit Cooling Tower - Heat Exchanger Coil Repair',
-                    'Cooling Tower Water Treatment - Chemical Feed System Installation'
-                ],
-                template5: [
-                    'Industrial Chiller System - Complete Refrigerant Recovery and Recharge',
-                    'Water-Cooled Chiller - Condenser Tube Cleaning and Eddy Current Testing',
-                    'Air-Cooled Chiller Service - Compressor Replacement and Oil Analysis',
-                    'Centrifugal Chiller - Control Panel Upgrade and Performance Testing',
-                    'Chiller Plant Optimization - Building Automation System Integration'
-                ],
-                template6: [
-                    'Geothermal Heat Pump Installation - 5-Ton Ground Source System',
-                    'Air Source Heat Pump - Complete Defrost Cycle Repair and Refrigerant Check',
-                    'Ductless Mini-Split Heat Pump - Multi-Zone Installation with WiFi Controls',
-                    'Commercial Heat Pump - Reversing Valve Replacement and Performance Testing',
-                    'Hybrid Heat Pump System - Dual Fuel Integration and Smart Thermostat Setup'
-                ],
-                template7: [
-                    'Indoor Air Quality Assessment - Complete VOC Testing and Mold Inspection',
-                    'IAQ Certification - HVAC System Compliance Testing for LEED Requirements',
-                    'Air Quality Monitoring - CO2 Sensor Installation and Building Automation',
-                    'Particulate Matter Testing - PM2.5 and PM10 Analysis with Remediation Plan',
-                    'HVAC Air Quality Upgrade - UV-C Germicidal Lamp Installation'
-                ],
-                // New generic templates (8-29) - no service descriptions
+                template1: ['Service Completed'],
+                template2: ['Service Completed'],
+                template3: ['Service Completed'],
+                template4: ['Service Completed'],
+                template5: ['Service Completed'],
+                template6: ['Service Completed'],
+                template7: ['Service Completed'],
                 template8: ['Service Completed'],
                 template9: ['Service Completed'],
                 template10: ['Service Completed'],
@@ -2214,31 +2171,31 @@ app.post('/api/email/send-html-invoice', async (c) => {
     
     // TEMPLATE-SPECIFIC BUTTON TEXT (Random Pool per Template)
     // 145 total combinations (29 templates × 5 button texts each)
-    // Original 7 templates with specific button texts + 22 new templates with generic texts
+    // ALL templates now use generic, neutral button texts for maximum deliverability
     const buttonTextOptions = {
-      template1: ['View Service Report', 'See Repair Details', 'Access Work Summary', 'Review Service Log', 'Check Work Order'],
-      template2: ['Review Inspection', 'View Safety Report', 'See Maintenance Log', 'Access Service Record', 'Check Inspection Results'],
-      template3: ['See Work Summary', 'View Installation Details', 'Access Project Report', 'Review System Upgrade', 'Check Service History'],
-      template4: ['Check Installation', 'View Project Details', 'See Installation Report', 'Review Work Completed', 'Access Service Summary'],
-      template5: ['View Maintenance Log', 'See Service Details', 'Access Repair Record', 'Review Work Order', 'Check Service Report'],
-      template6: ['Access Service Record', 'View Installation Summary', 'See Work Details', 'Review Project Report', 'Check Completion Status'],
-      template7: ['View Test Results', 'See Assessment Report', 'Access Quality Analysis', 'Review Inspection Data', 'Check Certification'],
-      // New generic templates (8-29) - neutral button texts for maximum deliverability
-      template8: ['View Details', 'See Information', 'Access Report', 'Review Summary', 'Check Status'],
-      template9: ['View Document', 'See Details', 'Access Information', 'Review Report', 'Check Record'],
-      template10: ['View Summary', 'See Report', 'Access Details', 'Review Information', 'Check Document'],
-      template11: ['View Report', 'See Summary', 'Access Record', 'Review Details', 'Check Information'],
-      template12: ['View Information', 'See Record', 'Access Summary', 'Review Document', 'Check Details'],
-      template13: ['View Record', 'See Document', 'Access Status', 'Review Summary', 'Check Report'],
-      template14: ['View Status', 'See Details', 'Access Document', 'Review Record', 'Check Summary'],
-      template15: ['View Details', 'See Status', 'Access Report', 'Review Information', 'Check Document'],
-      template16: ['View Report', 'See Information', 'Access Details', 'Review Status', 'Check Record'],
-      template17: ['View Summary', 'See Record', 'Access Information', 'Review Report', 'Check Details'],
-      template18: ['View Document', 'See Summary', 'Access Details', 'Review Record', 'Check Status'],
-      template19: ['View Information', 'See Report', 'Access Summary', 'Review Details', 'Check Document'],
-      template20: ['View Record', 'See Details', 'Access Status', 'Review Information', 'Check Report'],
-      template21: ['View Status', 'See Document', 'Access Record', 'Review Summary', 'Check Details'],
-      template22: ['View Details', 'See Information', 'Access Report', 'Review Document', 'Check Status'],
+      template1: ['View Details', 'See Information', 'Access Report', 'Review Summary', 'Check Status'],
+      template2: ['View Document', 'See Details', 'Access Information', 'Review Report', 'Check Record'],
+      template3: ['View Summary', 'See Report', 'Access Details', 'Review Information', 'Check Document'],
+      template4: ['View Report', 'See Summary', 'Access Record', 'Review Details', 'Check Information'],
+      template5: ['View Information', 'See Record', 'Access Summary', 'Review Document', 'Check Details'],
+      template6: ['View Record', 'See Document', 'Access Status', 'Review Summary', 'Check Report'],
+      template7: ['View Status', 'See Details', 'Access Document', 'Review Record', 'Check Summary'],
+      // Templates 8-29 - same generic pattern
+      template8: ['View Details', 'See Status', 'Access Report', 'Review Information', 'Check Document'],
+      template9: ['View Report', 'See Information', 'Access Details', 'Review Status', 'Check Record'],
+      template10: ['View Summary', 'See Record', 'Access Information', 'Review Report', 'Check Details'],
+      template11: ['View Document', 'See Summary', 'Access Details', 'Review Record', 'Check Status'],
+      template12: ['View Information', 'See Report', 'Access Summary', 'Review Details', 'Check Document'],
+      template13: ['View Record', 'See Details', 'Access Status', 'Review Information', 'Check Report'],
+      template14: ['View Status', 'See Document', 'Access Record', 'Review Summary', 'Check Details'],
+      template15: ['View Details', 'See Information', 'Access Report', 'Review Document', 'Check Status'],
+      template16: ['View Report', 'See Summary', 'Access Details', 'Review Record', 'Check Information'],
+      template17: ['View Summary', 'See Status', 'Access Information', 'Review Report', 'Check Document'],
+      template18: ['View Document', 'See Record', 'Access Details', 'Review Status', 'Check Summary'],
+      template19: ['View Information', 'See Details', 'Access Summary', 'Review Document', 'Check Report'],
+      template20: ['View Record', 'See Report', 'Access Status', 'Review Details', 'Check Information'],
+      template21: ['View Status', 'See Summary', 'Access Document', 'Review Information', 'Check Record'],
+      template22: ['View Details', 'See Document', 'Access Record', 'Review Summary', 'Check Status'],
       template23: ['View Report', 'See Summary', 'Access Details', 'Review Record', 'Check Information'],
       template24: ['View Summary', 'See Status', 'Access Information', 'Review Report', 'Check Document'],
       template25: ['View Document', 'See Record', 'Access Details', 'Review Status', 'Check Summary'],

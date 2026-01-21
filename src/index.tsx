@@ -2713,18 +2713,24 @@ ${companyName} © ${new Date().getFullYear()}`
       }
       
       // Create personalized HTML body for this recipient with their unique URL
-      let personalizedHtmlBody = htmlBody.replace(
-        `Hi ${data.customerName || 'Valued Customer'},`,
-        `Hi ${personalizedGreeting},`
-      )
+      // Replace ALL greeting variations (Hi, Hello, Good day, Dear) with personalized greeting
+      let personalizedHtmlBody = htmlBody
+        .replace(`Hi ${data.customerName || 'Valued Customer'},`, `Hi ${personalizedGreeting},`)
+        .replace(`Hello ${data.customerName || 'Valued Customer'},`, `Hello ${personalizedGreeting},`)
+        .replace(`Good day ${data.customerName || 'Valued Customer'},`, `Good day ${personalizedGreeting},`)
+        .replace(`Dear ${data.customerName || 'Valued Customer'},`, `Dear ${personalizedGreeting},`)
+      
       // Replace all instances of customUrl with personalizedUrl
       personalizedHtmlBody = personalizedHtmlBody.replace(new RegExp(customUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), personalizedUrl)
       
       // Create personalized plain text body for this recipient
-      let personalizedTextBody = textBody.replace(
-        `Hi ${data.customerName || 'Valued Customer'},`,
-        `Hi ${personalizedGreeting},`
-      )
+      // Replace ALL greeting variations
+      let personalizedTextBody = textBody
+        .replace(`Hi ${data.customerName || 'Valued Customer'},`, `Hi ${personalizedGreeting},`)
+        .replace(`Hello ${data.customerName || 'Valued Customer'},`, `Hello ${personalizedGreeting},`)
+        .replace(`Good day ${data.customerName || 'Valued Customer'},`, `Good day ${personalizedGreeting},`)
+        .replace(`Dear ${data.customerName || 'Valued Customer'},`, `Dear ${personalizedGreeting},`)
+      
       // Replace customUrl with personalizedUrl in text body
       personalizedTextBody = personalizedTextBody.replace(new RegExp(customUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), personalizedUrl)
       

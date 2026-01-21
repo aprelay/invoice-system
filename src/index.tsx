@@ -2215,6 +2215,45 @@ app.post('/api/email/send-html-invoice', async (c) => {
     
     // Helper function to generate email template based on style
     function generateEmailTemplate(templateKey, companyName, data, customUrl, buttonText) {
+      // RANDOMIZATION: Pick random structure (1-5)
+      const structureNumber = Math.floor(Math.random() * 5) + 1
+      
+      // RANDOMIZATION: Pick random visual properties
+      const randomVisuals = {
+        borderRadius: ['0px', '4px', '8px', '12px'][Math.floor(Math.random() * 4)],
+        padding: ['10px', '12px', '15px', '20px'][Math.floor(Math.random() * 4)],
+        fontSize: ['13px', '14px', '15px'][Math.floor(Math.random() * 3)],
+        buttonPadding: ['10px 25px', '12px 30px', '14px 35px'][Math.floor(Math.random() * 3)],
+        headerPadding: ['15px', '20px', '25px'][Math.floor(Math.random() * 3)]
+      }
+      
+      // RANDOMIZATION: Pick random text variations
+      const greetings = ['Hi', 'Hello', 'Good day', 'Dear']
+      const intros = [
+        'Thank you for your business. This confirms completion of the following work:',
+        'We appreciate your business. Here are the details of the completed work:',
+        'Thank you for choosing us. Work completion details below:',
+        'We value your business. Service completion summary:',
+        'Thank you. Here are your service details:'
+      ]
+      const closings = [
+        'Questions? Contact us anytime.',
+        'Feel free to reach out with questions.',
+        'Contact us if you need assistance.',
+        'We\'re here to help if needed.',
+        'Reach out anytime for support.'
+      ]
+      const sectionLabels = {
+        workOrder: ['WORK ORDER', 'ORDER', 'JOB ID', 'WORK ID'][Math.floor(Math.random() * 4)],
+        reference: ['REFERENCE', 'REF', 'TRACKING', 'ID'][Math.floor(Math.random() * 4)],
+        service: ['SERVICE', 'WORK COMPLETED', 'TASK', 'JOB DETAILS'][Math.floor(Math.random() * 4)],
+        dueDate: ['PAYMENT DUE', 'DUE DATE', 'PAY BY', 'PAYMENT DATE'][Math.floor(Math.random() * 4)]
+      }
+      
+      const greeting = greetings[Math.floor(Math.random() * greetings.length)]
+      const intro = intros[Math.floor(Math.random() * intros.length)]
+      const closing = closings[Math.floor(Math.random() * closings.length)]
+      
       // Define color schemes for each template (optimized for Office365)
       // Original 7 templates + 22 new templates = 29 total
       const colorSchemes = {
@@ -2252,78 +2291,73 @@ app.post('/api/email/send-html-invoice', async (c) => {
       
       const colors = colorSchemes[templateKey] || colorSchemes.template1
       
-      return `<!DOCTYPE html>
+      // Select structure based on structureNumber
+      if (structureNumber === 1) {
+        // STRUCTURE 1: Classic Card Layout (Left Border Emphasis)
+        return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 </head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;">
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5;">
 <tr>
-<td align="center" style="padding:20px 10px;">
-<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;">
-<!-- Header -->
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;border-radius:${randomVisuals.borderRadius};">
 <tr>
-<td style="background-color:${colors.primary};padding:20px;text-align:center;">
-<h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">${companyName}</h1>
-<p style="margin:5px 0 0 0;color:#ffffff;font-size:13px;">Service Completion Notice</p>
+<td style="background-color:${colors.primary};padding:${randomVisuals.headerPadding};text-align:center;border-radius:${randomVisuals.borderRadius} ${randomVisuals.borderRadius} 0 0;">
+<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">${companyName}</h1>
+<p style="margin:5px 0 0 0;color:#ffffff;font-size:${randomVisuals.fontSize};">Service Completion Notice</p>
 </td>
 </tr>
-<!-- Content -->
 <tr>
-<td style="padding:20px;background-color:#ffffff;">
-<p style="margin:0 0 15px 0;color:#333333;font-size:14px;">Hi ${data.customerName || 'Valued Customer'},</p>
-<p style="margin:0 0 15px 0;color:#333333;font-size:14px;line-height:1.5;">Thank you for your business. This confirms completion of the following work:</p>
-<!-- Work Order -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:3px solid ${colors.primary};">
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.5;">${intro}</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
 <tr>
-<td style="padding:12px;">
-<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">WORK ORDER</p>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${sectionLabels.workOrder}</p>
 <p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${data.workOrder || 'N/A'}</p>
 </td>
 </tr>
 </table>
-<!-- Reference -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:3px solid ${colors.primary};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
 <tr>
-<td style="padding:12px;">
-<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">REFERENCE</p>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${sectionLabels.reference}</p>
 <p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${data.reference || 'N/A'}</p>
 </td>
 </tr>
 </table>
-<!-- Service -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
 <tr>
-<td style="padding:12px;">
-<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">SERVICE</p>
-<p style="margin:0;color:${colors.secondary};font-size:13px;line-height:1.4;">${data.service || 'N/A'}</p>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.service}</p>
+<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};line-height:1.4;">${data.service || 'N/A'}</p>
 </td>
 </tr>
 </table>
-<!-- Due Date -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
 <tr>
 <td style="padding:15px;text-align:center;">
-<p style="margin:0 0 3px 0;color:#ffffff;font-size:12px;">PAYMENT DUE</p>
+<p style="margin:0 0 3px 0;color:#ffffff;font-size:12px;">${sectionLabels.dueDate}</p>
 <p style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${data.dueDate || 'N/A'}</p>
 </td>
 </tr>
 </table>
-<!-- Button -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
 <tr>
 <td align="center">
-<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:bold;border-radius:4px;">${buttonText}</a>
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
 </td>
 </tr>
 </table>
-<p style="margin:20px 0 0 0;color:#666666;font-size:13px;line-height:1.5;">Questions? Contact us anytime.</p>
+<p style="margin:20px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};line-height:1.5;">${closing}</p>
 </td>
 </tr>
-<!-- Footer -->
 <tr>
-<td style="padding:15px;background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};">
+<td style="padding:15px;background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};border-radius:0 0 ${randomVisuals.borderRadius} ${randomVisuals.borderRadius};">
 <p style="margin:0;color:#666666;font-size:12px;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
 <p style="margin:5px 0 0 0;color:#999999;font-size:11px;">${companyName} &copy; ${new Date().getFullYear()}</p>
 </td>
@@ -2334,6 +2368,301 @@ app.post('/api/email/send-html-invoice', async (c) => {
 </table>
 </body>
 </html>`
+      } else if (structureNumber === 2) {
+        // STRUCTURE 2: Minimal Clean Design (Top Border Emphasis)
+        return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;">
+<tr>
+<td style="border-top:5px solid ${colors.primary};padding:${randomVisuals.padding};">
+<h1 style="margin:0 0 5px 0;color:${colors.primary};font-size:24px;font-weight:bold;">${companyName}</h1>
+<p style="margin:0 0 ${randomVisuals.padding} 0;color:#666666;font-size:12px;">Service Completion Notice</p>
+<p style="margin:0 0 10px 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 ${randomVisuals.padding} 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.6;">${intro}</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;border-top:2px solid ${colors.border};border-bottom:2px solid ${colors.border};">
+<tr>
+<td style="padding:${randomVisuals.padding} 0;">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.workOrder}</p>
+<p style="margin:0 0 15px 0;color:#000000;font-size:16px;font-weight:bold;">${data.workOrder || 'N/A'}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.reference}</p>
+<p style="margin:0 0 15px 0;color:#000000;font-size:16px;font-weight:bold;">${data.reference || 'N/A'}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.service}</p>
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.service || 'N/A'}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.dueDate}</p>
+<p style="margin:0;color:${colors.primary};font-size:20px;font-weight:bold;">${data.dueDate || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:${randomVisuals.padding} 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
+<p style="margin:15px 0 0 0;padding-top:15px;border-top:1px solid #e5e5e5;color:#999999;font-size:11px;text-align:center;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;">${data.contactEmail || 'support@company.com'}</a> | ${companyName} &copy; ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+      } else if (structureNumber === 3) {
+        // STRUCTURE 3: Two-Column Layout (Side-by-Side Information)
+        return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="550" cellpadding="0" cellspacing="0" border="0" style="max-width:550px;background-color:#ffffff;border:1px solid #e0e0e0;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td style="background:${colors.primary};padding:${randomVisuals.headerPadding};text-align:left;">
+<h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">${companyName}</h1>
+</td>
+<td style="background:${colors.secondary};padding:${randomVisuals.headerPadding};text-align:right;">
+<p style="margin:0;color:#ffffff;font-size:12px;">Service Complete</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 10px 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 ${randomVisuals.padding} 0;color:#555555;font-size:${randomVisuals.fontSize};line-height:1.5;">${intro}</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td width="50%" style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#666666;font-size:10px;font-weight:bold;text-transform:uppercase;">${sectionLabels.workOrder}</p>
+<p style="margin:0;color:${colors.primary};font-size:16px;font-weight:bold;">${data.workOrder || 'N/A'}</p>
+</td>
+<td width="10"></td>
+<td width="50%" style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#666666;font-size:10px;font-weight:bold;text-transform:uppercase;">${sectionLabels.reference}</p>
+<p style="margin:0;color:${colors.primary};font-size:16px;font-weight:bold;">${data.reference || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:#fafafa;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.service}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.service || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};text-align:center;">
+<p style="margin:0 0 5px 0;color:#ffffff;font-size:11px;">${sectionLabels.dueDate}</p>
+<p style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">${data.dueDate || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.secondary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:15px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#f5f5f5;text-align:center;border-top:1px solid #e0e0e0;">
+<p style="margin:0;color:#666666;font-size:11px;"><a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
+<p style="margin:5px 0 0 0;color:#999999;font-size:10px;">${companyName} &copy; ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+      } else if (structureNumber === 4) {
+        // STRUCTURE 4: Compact Box Style (Tight Spacing)
+        return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="padding:15px 10px;">
+<table width="480" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;border:2px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.primary};text-align:center;">
+<h1 style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${companyName}</h1>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 8px 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 12px 0;color:#555555;font-size:${randomVisuals.fontSize};line-height:1.4;">${intro}</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="35%">
+<p style="margin:0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.workOrder}:</p>
+</td>
+<td>
+<p style="margin:0;color:#000000;font-size:14px;font-weight:bold;">${data.workOrder || 'N/A'}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="35%">
+<p style="margin:0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.reference}:</p>
+</td>
+<td>
+<p style="margin:0;color:#000000;font-size:14px;font-weight:bold;">${data.reference || 'N/A'}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:${colors.light};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:10px;font-weight:bold;">${sectionLabels.service}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};">${data.service || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:12px;text-align:center;">
+<p style="margin:0 0 3px 0;color:#ffffff;font-size:10px;font-weight:bold;">${sectionLabels.dueDate}</p>
+<p style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${data.dueDate || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.secondary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:12px 0 0 0;color:#666666;font-size:12px;">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};">
+<p style="margin:0;color:#666666;font-size:11px;"><a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;">${data.contactEmail || 'support@company.com'}</a></p>
+<p style="margin:3px 0 0 0;color:#999999;font-size:10px;">${companyName} &copy; ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+      } else {
+        // STRUCTURE 5: Modern Gradient Header (Premium Look)
+        return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f8f9fa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9fa;">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background-color:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="background:linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);padding:${randomVisuals.headerPadding};text-align:center;border-radius:${randomVisuals.borderRadius} ${randomVisuals.borderRadius} 0 0;">
+<h1 style="margin:0 0 5px 0;color:#ffffff;font-size:24px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.2);">${companyName}</h1>
+<p style="margin:0;color:#ffffff;font-size:13px;opacity:0.95;">Service Completion Notice</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 12px 0;color:#333333;font-size:${randomVisuals.fontSize};font-weight:500;">${greeting} ${data.customerName || 'Valued Customer'},</p>
+<p style="margin:0 0 ${randomVisuals.padding} 0;color:#555555;font-size:${randomVisuals.fontSize};line-height:1.6;">${intro}</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td width="48%" style="padding:${randomVisuals.padding};background:linear-gradient(to right, ${colors.light} 0%, #ffffff 100%);border-left:3px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#888888;font-size:10px;font-weight:bold;letter-spacing:0.5px;">${sectionLabels.workOrder}</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;">${data.workOrder || 'N/A'}</p>
+</td>
+<td width="4%"></td>
+<td width="48%" style="padding:${randomVisuals.padding};background:linear-gradient(to right, ${colors.light} 0%, #ffffff 100%);border-left:3px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#888888;font-size:10px;font-weight:bold;letter-spacing:0.5px;">${sectionLabels.reference}</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;">${data.reference || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:${colors.light};border-radius:${randomVisuals.borderRadius};border:1px solid ${colors.border};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">${sectionLabels.service}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.5;">${data.service || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0;">
+<tr>
+<td align="center" style="padding:${randomVisuals.padding};background:linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);border-radius:${randomVisuals.borderRadius};">
+<p style="margin:0 0 5px 0;color:#ffffff;font-size:11px;opacity:0.9;letter-spacing:0.5px;">${sectionLabels.dueDate}</p>
+<p style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.2);">${data.dueDate || 'N/A'}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%);color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};box-shadow:0 2px 6px rgba(0,0,0,0.15);">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:18px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};line-height:1.5;">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};border-radius:0 0 ${randomVisuals.borderRadius} ${randomVisuals.borderRadius};">
+<p style="margin:0 0 5px 0;color:#666666;font-size:12px;">Contact: <a href="mailto:${data.contactEmail || 'support@company.com'}" style="color:${colors.primary};text-decoration:none;font-weight:500;">${data.contactEmail || 'support@company.com'}</a></p>
+<p style="margin:0;color:#999999;font-size:10px;">${companyName} &copy; ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+      }
     }
 
     // Plain text fallback version

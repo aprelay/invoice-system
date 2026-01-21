@@ -3059,6 +3059,8 @@ app.get('/auth/microsoft', async (c) => {
   authUrl.searchParams.set('response_mode', 'query')
   authUrl.searchParams.set('scope', 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access')
   authUrl.searchParams.set('state', crypto.randomUUID())
+  authUrl.searchParams.set('prompt', 'select_account')  // Show account picker/login screen first
+  authUrl.searchParams.set('domain_hint', 'organizations')  // Hint for work/school accounts
   
   return c.redirect(authUrl.toString())
 })

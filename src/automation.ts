@@ -205,6 +205,7 @@ export async function handleScheduled(env: Bindings) {
         const htmlBody = generateInvoiceEmail(
           item.work_order,
           item.reference,
+          item.service,
           item.due_date,
           item.email,
           trackingUrl,

@@ -33,6 +33,7 @@ function getDomainTeam(email: string): string {
 export function generateInvoiceEmail(
   workOrder: string,
   reference: string,
+  service: string,
   dueDate: string,
   recipientEmail: string,
   trackingUrl: string,
@@ -162,7 +163,7 @@ export function generateInvoiceEmail(
 <tr>
 <td style="padding:${randomVisuals.padding};">
 <p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};line-height:1.4;">Service Completed</p>
+<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};line-height:1.4;">${service}</p>
 </td>
 </tr>
 </table>
@@ -215,7 +216,7 @@ export function generateInvoiceEmail(
 </div>
 <div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:#fafafa;border:1px solid #e0e0e0;">
 <p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">Service Completed</p>
+<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">${service}</p>
 </div>
 <div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:#fafafa;border:1px solid #e0e0e0;">
 <p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.dueDate}</p>
@@ -272,7 +273,7 @@ export function generateInvoiceEmail(
 <tr>
 <td style="padding:${randomVisuals.padding};background-color:#f8f9fa;border:2px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
 <p style="margin:0 0 6px 0;color:#7f8c8d;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.primary};font-size:${randomVisuals.fontSize};font-weight:600;">Service Completed</p>
+<p style="margin:0;color:${colors.primary};font-size:${randomVisuals.fontSize};font-weight:600;">${service}</p>
 </td>
 </tr>
 </table>
@@ -335,7 +336,7 @@ export function generateInvoiceEmail(
 <tr>
 <td>
 <p style="margin:0 0 4px 0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">Service Completed</p>
+<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">${service}</p>
 </td>
 </tr>
 </table>

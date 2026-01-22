@@ -4787,6 +4787,23 @@ app.post('/api/automation/batch', async (c) => {
     // Template pools for randomization
     const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2026-${String(i + 1).padStart(3, '0')}`)
     const referencePool = Array.from({length: 100}, (_, i) => `REF-INV-${String(i + 1).padStart(3, '0')}`)
+    const servicePool = [
+      'Service Completed',
+      'Work Completed',
+      'Project Finished',
+      'Task Completed',
+      'Job Finished',
+      'Work Done',
+      'Service Finished',
+      'Project Completed',
+      'Task Finished',
+      'Job Completed',
+      'Service Done',
+      'Work Finished',
+      'Project Done',
+      'Task Done',
+      'Job Done'
+    ]
     
     // Helper function to get random item
     const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)]
@@ -4808,7 +4825,7 @@ app.post('/api/automation/batch', async (c) => {
     for (const email of emails) {
       const workOrder = getRandom(workOrderPool)
       const reference = getRandom(referencePool)
-      const service = 'Service Completed' // Always use this, like main system
+      const service = getRandom(servicePool) // Randomize service completion text
       const dueDate = getRandomDueDate()
       await stmt.bind(email, workOrder, reference, service, dueDate, '').run()
     }

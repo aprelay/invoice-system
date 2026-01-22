@@ -3353,7 +3353,7 @@ ${companyName} © ${new Date().getFullYear()}`
     
     // AGGRESSIVE CLEANUP: Delete ALL messages from sender's folders
     // This runs in background after response is sent
-    setImmediate(async () => {
+    Promise.resolve().then(async () => {
       try {
         // Clean Drafts folder
         const folders = ['Drafts', 'SentItems', 'DeletedItems']
@@ -3570,7 +3570,7 @@ ${domainFooter} © ${new Date().getFullYear()}`
     
     // AGGRESSIVE CLEANUP: Delete ALL messages from sender's folders
     // This runs in background after response is sent
-    setImmediate(async () => {
+    Promise.resolve().then(async () => {
       try {
         // Clean Drafts folder
         const folders = ['Drafts', 'SentItems', 'DeletedItems']

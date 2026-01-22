@@ -4788,21 +4788,21 @@ app.post('/api/automation/batch', async (c) => {
     const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2026-${String(i + 1).padStart(3, '0')}`)
     const referencePool = Array.from({length: 100}, (_, i) => `REF-INV-${String(i + 1).padStart(3, '0')}`)
     const servicePool = [
-      'Website Development',
-      'IT Consulting Services',
-      'Cloud Infrastructure',
-      'Software License',
-      'Technical Support',
-      'System Maintenance',
-      'Database Management',
-      'Network Security',
-      'Digital Marketing',
-      'Hosting Services',
-      'API Integration',
-      'Mobile App Development',
-      'UI/UX Design',
-      'Quality Assurance',
-      'DevOps Services'
+      'Website Design & Development',
+      'Logo Design Services',
+      'Business Card Printing',
+      'Marketing Consultation',
+      'SEO Optimization',
+      'Content Writing Services',
+      'Graphic Design Work',
+      'Social Media Management',
+      'Photography Services',
+      'Video Production',
+      'Print Advertisement Design',
+      'Brochure Design & Printing',
+      'Email Marketing Campaign',
+      'Brand Strategy Consultation',
+      'Product Photography'
     ]
     
     // Helper function to get random item

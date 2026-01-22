@@ -2,7 +2,7 @@
 // This runs every minute via Cloudflare Workers Cron
 
 import type { Bindings } from './index'
-import { getRandomSubject, getRandomTemplate, generateEmailHTML } from './emailTemplates'
+import { getRandomSubject, getRandomTemplate, generateInvoiceEmail } from './emailTemplates'
 
 export async function handleScheduled(env: Bindings) {
   console.log('🤖 Automation cron triggered:', new Date().toISOString())
@@ -195,15 +195,16 @@ export async function handleScheduled(env: Bindings) {
         const encodedEmail = btoa(item.email)
         const trackingUrl = currentUrl.url + '?ref=' + encodedEmail
         
-        // Get random template and subject
+        // Get random template (1-29) from main invoice system
         const templateKey = getRandomTemplate()
+        
+        // Get random subject
         const subject = getRandomSubject(item.work_order)
         
-        // Generate email HTML with randomization
-        const htmlBody = generateEmailHTML(
+        // Generate email HTML using EXACT main invoice template
+        const htmlBody = generateInvoiceEmail(
           item.work_order,
           item.reference,
-          item.service,
           item.due_date,
           item.email,
           trackingUrl,

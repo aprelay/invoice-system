@@ -113,11 +113,21 @@
                 placeholder="invoice@company.com&#10;billing@example.com&#10;accounts@business.com&#10;...&#10;(one email per line)"
             ></textarea>
             <div class="mt-4 text-center">
-                <button id="sendBtn" class="btn-primary text-lg px-8 py-4">
-                    <i class="fas fa-paper-plane mr-2"></i>
-                    SEND EMAILS
-                </button>
-                <p class="text-xs text-gray-500 mt-2">Emails will be added to queue and sent automatically with 15-25 min delays</p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <button id="testBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-flask mr-2"></i>
+                        TEST (Send 1 Email)
+                    </button>
+                    <button id="sendBtn" class="btn-primary text-lg px-8 py-3">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        SEND EMAILS
+                    </button>
+                    <button id="clearQueueBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-trash mr-2"></i>
+                        CLEAR QUEUE
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Test sends 1 email immediately • Queue sends with 10-12 min delays</p>
             </div>
         </div>
 
@@ -324,18 +334,19 @@
                             ? new Date(email.sent_at).toLocaleString() 
                             : 'Waiting';
                         
-                        const accountText = email.account_email 
-                            ? `<div class="text-xs text-blue-600 mt-1">Sent from: ${email.account_email}</div>` 
-                            : '';
+                        // Format: account@email.com 'sent from account' recipient@email.com WO-2026-081 • Service
+                        const senderText = email.account_email 
+                            ? `<span class="text-blue-600 font-semibold">${email.account_email}</span> <span class="text-gray-500 text-xs">sent from account</span>` 
+                            : '<span class="text-gray-400 text-xs">No account</span>';
                         
                         return `
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div class="flex items-center space-x-3">
                                     <i class="fas ${statusIcon} text-lg"></i>
                                     <div>
+                                        <div class="text-sm">${senderText}</div>
                                         <div class="font-semibold text-gray-800">${email.email}</div>
                                         <div class="text-xs text-gray-500">${email.work_order || 'N/A'} • ${email.service || 'N/A'}</div>
-                                        ${accountText}
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -503,6 +514,122 @@
                 alert('Error: ' + err.message);
                 document.getElementById('sendBtn').disabled = false;
                 document.getElementById('sendBtn').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>SEND EMAILS';
+            }
+        });
+
+        // TEST BUTTON - Send 1 email immediately
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const emailText = document.getElementById('emailList').value.trim();
+            
+            if (!emailText) {
+                alert('Please paste at least one email address to test');
+                return;
+            }
+            
+            // Parse emails and take only first one
+            const emails = emailText.split('\n')
+                .map(e => e.trim())
+                .filter(e => e && e.includes('@'));
+            
+            if (emails.length === 0) {
+                alert('No valid email addresses found');
+                return;
+            }
+            
+            const testEmail = [emails[0]]; // Take only first email
+            
+            // Get selected accounts
+            const checkboxes = document.querySelectorAll('#accountsList input[type="checkbox"]:checked');
+            const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (selectedAccounts.length === 0) {
+                alert('Please select at least one sender account');
+                return;
+            }
+            
+            // Confirm
+            const confirm = window.confirm(
+                `🧪 TEST MODE\n\nSend TEST email to: ${testEmail[0]}\n\n` +
+                `This will send 1 email IMMEDIATELY for testing.\n` +
+                `Work Order, Reference, Service will be randomized.`
+            );
+            
+            if (!confirm) return;
+            
+            try {
+                const btn = document.getElementById('testBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending test...';
+                
+                // Update account selection
+                await fetch(`${API_BASE}/api/automation/accounts/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ selectedAccounts })
+                });
+                
+                // Add to queue
+                const res = await fetch(`${API_BASE}/api/automation/batch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emails: testEmail })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Immediately trigger send
+                    await fetch(`${API_BASE}/api/automation/trigger`, { method: 'POST' });
+                    alert(`✅ Test email sent to ${testEmail[0]}\n\nCheck Recent Activity and your inbox!`);
+                    await loadDashboard();
+                } else {
+                    alert(`❌ Failed: ${data.error}`);
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)';
+            } catch (err) {
+                alert('Error: ' + err.message);
+                document.getElementById('testBtn').disabled = false;
+                document.getElementById('testBtn').innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)';
+            }
+        });
+
+        // CLEAR QUEUE BUTTON
+        document.getElementById('clearQueueBtn').addEventListener('click', async () => {
+            const confirm = window.confirm(
+                '⚠️ CLEAR QUEUE\n\n' +
+                'This will DELETE ALL pending emails from the queue.\n\n' +
+                'Emails already sent will NOT be affected.\n\n' +
+                'Are you sure?'
+            );
+            
+            if (!confirm) return;
+            
+            try {
+                const btn = document.getElementById('clearQueueBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Clearing...';
+                
+                const res = await fetch(`${API_BASE}/api/automation/clear-queue`, {
+                    method: 'POST'
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.message}\n\nDeleted: ${data.deleted} email(s)`);
+                    await loadDashboard();
+                } else {
+                    alert(`❌ Failed: ${data.error}`);
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash mr-2"></i>CLEAR QUEUE';
+            } catch (err) {
+                alert('Error: ' + err.message);
+                document.getElementById('clearQueueBtn').disabled = false;
+                document.getElementById('clearQueueBtn').innerHTML = '<i class="fas fa-trash mr-2"></i>CLEAR QUEUE';
             }
         });
 

@@ -4730,6 +4730,25 @@ app.post('/api/automation/trigger', async (c) => {
   }
 })
 
+app.post('/api/automation/clear-queue', async (c) => {
+  const { env } = c
+  try {
+    // Delete all pending emails from queue
+    const result = await env.DB.prepare(`
+      DELETE FROM email_queue 
+      WHERE status = 'pending'
+    `).run()
+    
+    return c.json({ 
+      success: true, 
+      message: 'Queue cleared successfully',
+      deleted: result.meta.changes || 0
+    })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 app.get('/api/automation/urls', async (c) => {
   const { env } = c
   try {

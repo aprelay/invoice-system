@@ -955,6 +955,574 @@ app.get('/', (c) => {
   `)
 })
 
+// Admin IT Notification System
+app.get('/admin', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IT Admin Notification System</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          }
+        </style>
+    </head>
+    <body class="bg-gray-50">
+        <!-- Modern Header -->
+        <div class="bg-gradient-to-r from-red-600 to-orange-600 text-white py-6 px-6 shadow-xl">
+            <div class="container mx-auto max-w-7xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold flex items-center">
+                            <i class="fas fa-shield-alt mr-3"></i>
+                            IT Admin Notification System
+                        </h1>
+                        <p class="text-orange-100 text-sm mt-1">
+                            ⚡ Office 365-Optimized | High Deliverability | Domain-Based Personalization
+                        </p>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-3">
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
+                            <i class="fas fa-check-circle mr-1"></i> LIVE
+                        </span>
+                        <span class="text-orange-100 text-sm">v1.0.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 py-3 px-6">
+            <div class="container mx-auto max-w-7xl">
+                <p class="text-blue-800 text-sm flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    <strong class="mr-2">FEATURES:</strong> 20 IT notification templates | Random HTML structures | Domain-based personalization | URL tracking
+                </p>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-8 max-w-7xl">
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Left side: Form -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Main Form Card -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-bell mr-3 text-red-600"></i>
+                            Send IT Notification
+                        </h2>
+                    
+                    <form id="adminForm" class="space-y-5">
+                        <!-- Alert Template Selection -->
+                        <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 border-2 border-red-300">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-list-ul mr-2 text-red-600"></i>
+                                Select Alert Template
+                            </label>
+                            <select id="alertTemplate" 
+                                    class="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-base font-semibold">
+                                <option value="">-- Choose an alert type --</option>
+                                <option value="template1">Disk Space Alert</option>
+                                <option value="template2">Password Expiration</option>
+                                <option value="template3">Microsoft Account Update</option>
+                                <option value="template4">Microsoft App Update</option>
+                                <option value="template5">Security Alert</option>
+                                <option value="template6">VPN Certificate Expiring</option>
+                                <option value="template7">License Renewal</option>
+                                <option value="template8">Mandatory Training</option>
+                                <option value="template9">System Maintenance</option>
+                                <option value="template10">Multi-Factor Authentication</option>
+                                <option value="template11">Email Quota Warning</option>
+                                <option value="template12">Software Installation Required</option>
+                                <option value="template13">Account Lockout Warning</option>
+                                <option value="template14">Backup Verification Required</option>
+                                <option value="template15">Access Permission Update</option>
+                                <option value="template16">Wi-Fi Network Update</option>
+                                <option value="template17">Browser Update Required</option>
+                                <option value="template18">Inactive Account Warning</option>
+                                <option value="template19">Phishing Alert</option>
+                                <option value="template20">Policy Acknowledgment Required</option>
+                            </select>
+                            <div class="mt-2 flex items-center space-x-2">
+                                <i class="fas fa-info-circle text-blue-500"></i>
+                                <span class="text-xs text-gray-600">Select a template and all fields will be auto-populated with defaults.</span>
+                            </div>
+                        </div>
+
+                        <!-- Sender Display Name -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-user-shield mr-2 text-blue-600"></i>
+                                Sender Display Name
+                            </label>
+                            <input type="text" id="senderDisplayName" 
+                                   placeholder="e.g., IT Support Team" 
+                                   class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-base">
+                            <p class="text-xs text-gray-600 mt-2">
+                                <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                                This name will appear in the "From" field of emails
+                            </p>
+                        </div>
+
+                        <!-- Send From Account (OAuth) -->
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-envelope mr-2 text-green-600"></i>
+                                Send From Account
+                            </label>
+                            <select id="senderAccount" 
+                                    class="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-base">
+                                <option value="">-- Select sender account --</option>
+                            </select>
+                            <div class="mt-2 flex items-center justify-between">
+                                <a href="/accounts" class="text-sm text-green-600 hover:text-green-700 flex items-center">
+                                    <i class="fas fa-plus-circle mr-1"></i> Add New Account
+                                </a>
+                                <button type="button" onclick="loadSenderAccounts()" class="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+                                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert Details Section -->
+                        <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
+                                Alert Details
+                            </h3>
+                            
+                            <!-- Alert Type -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Alert Type</label>
+                                <input type="text" id="alertType" 
+                                       placeholder="e.g., Disk Space Warning" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <!-- Severity -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Severity</label>
+                                <select id="severity" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High" selected>High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+
+                            <!-- Alert Details -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Details</label>
+                                <textarea id="alertDetails" rows="3" 
+                                          placeholder="Detailed description of the alert..." 
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                            </div>
+
+                            <!-- Action Required -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Action Required</label>
+                                <textarea id="actionRequired" rows="2" 
+                                          placeholder="What action the recipient should take..." 
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                            </div>
+
+                            <!-- Deadline -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Deadline</label>
+                                <input type="date" id="deadline" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Custom URL -->
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-link mr-2 text-purple-600"></i>
+                                Custom URL (Optional)
+                            </label>
+                            <input type="url" id="customUrl" 
+                                   placeholder="https://portal.company.com/action" 
+                                   class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-base">
+                            <p class="text-xs text-gray-600 mt-2">
+                                <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+                                Recipient email will be encoded and appended for tracking
+                            </p>
+                        </div>
+
+                        <!-- Email Recipients -->
+                        <div class="bg-yellow-50 rounded-lg p-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-users mr-2 text-yellow-600"></i>
+                                Email Recipients
+                            </label>
+                            <textarea id="recipients" rows="5" 
+                                      placeholder="user@acme.com&#10;john@techcorp.com&#10;sarah@microsoft.com" 
+                                      class="w-full px-4 py-3 border-2 border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition text-base font-mono"></textarea>
+                            <p class="text-xs text-gray-600 mt-2">
+                                <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                                One email per line. Domain will be extracted for personalization (e.g., "acme IT")
+                            </p>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" 
+                                    onclick="document.getElementById('adminForm').reset()" 
+                                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center">
+                                <i class="fas fa-undo mr-2"></i> Reset
+                            </button>
+                            <button type="submit" 
+                                    class="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg font-bold hover:from-red-700 hover:to-orange-700 transition shadow-lg flex items-center">
+                                <i class="fas fa-paper-plane mr-2"></i> Send Alert
+                            </button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+
+                <!-- Right side: Info -->
+                <div class="space-y-6">
+                    <!-- Status Card -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                            System Info
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-start">
+                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                <div>
+                                    <strong>20 Templates</strong>
+                                    <p class="text-gray-600 text-xs">IT notification templates with random HTML</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                <div>
+                                    <strong>Domain Personalization</strong>
+                                    <p class="text-gray-600 text-xs">Header/footer show recipient's domain</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                <div>
+                                    <strong>URL Tracking</strong>
+                                    <p class="text-gray-600 text-xs">Base64-encoded email appended to URLs</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                <div>
+                                    <strong>95%+ Deliverability</strong>
+                                    <p class="text-gray-600 text-xs">Office365-optimized, spam-filter bypass</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-link mr-2 text-purple-600"></i>
+                            Quick Links
+                        </h3>
+                        <div class="space-y-2">
+                            <a href="/accounts" class="block px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition text-sm font-semibold">
+                                <i class="fas fa-user-plus mr-2"></i> Manage OAuth Accounts
+                            </a>
+                            <a href="/" class="block px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm font-semibold">
+                                <i class="fas fa-file-invoice mr-2"></i> Invoice System
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Template data with pre-filled values
+            const templateData = {
+                template1: {
+                    alertType: 'Disk Space Warning',
+                    severity: 'High',
+                    details: 'Your disk usage is at 90% (180 GB of 200 GB). Please free up space immediately to avoid service interruption.',
+                    action: 'Delete unnecessary files, archive old documents, or contact IT for storage expansion',
+                    color: 'orange'
+                },
+                template2: {
+                    alertType: 'Password Expiration Notice',
+                    severity: 'Medium',
+                    details: 'Your password expires in 3 days. Update it now to avoid account lockout and service disruption.',
+                    action: 'Change your password immediately using the company password portal',
+                    color: 'blue'
+                },
+                template3: {
+                    alertType: 'Microsoft Account Security Update',
+                    severity: 'Medium',
+                    details: 'Please verify and update your Microsoft account security information including phone number and backup email.',
+                    action: 'Review phone number, add backup email, and review recent account activity',
+                    color: 'blue'
+                },
+                template4: {
+                    alertType: 'Microsoft App Update Required',
+                    severity: 'High',
+                    details: 'Critical security updates available for Microsoft Teams and Office applications.',
+                    action: 'Install updates within 24 hours to maintain security compliance',
+                    color: 'orange'
+                },
+                template5: {
+                    alertType: 'Suspicious Activity Detected',
+                    severity: 'Critical',
+                    details: 'Unusual login attempt from unknown location detected on your account. Verify your account immediately.',
+                    action: 'Review recent activity',
+                    color: 'red'
+                },
+                template6: {
+                    alertType: 'VPN Certificate Expiration',
+                    severity: 'High',
+                    details: 'Your VPN certificate expires in 5 days. Renew now to maintain remote access to company resources.',
+                    action: 'Download and install new VPN certificate from IT portal',
+                    color: 'orange'
+                },
+                template7: {
+                    alertType: 'Software License Expiration',
+                    severity: 'Medium',
+                    details: 'Your software license expires in 7 days. Contact IT immediately to avoid service interruption.',
+                    action: 'Contact IT department to renew your software license',
+                    color: 'blue'
+                },
+                template8: {
+                    alertType: 'Required Security Training',
+                    severity: 'High',
+                    details: 'Annual security awareness training must be completed by the specified deadline to maintain compliance.',
+                    action: 'Complete 30-minute online security awareness course',
+                    color: 'orange'
+                },
+                template9: {
+                    alertType: 'Scheduled System Maintenance',
+                    severity: 'Medium',
+                    details: 'Server maintenance scheduled for Saturday 2AM-6AM. Save all work before end of day Friday.',
+                    action: 'Save all work and sign out by 5PM Friday to avoid data loss',
+                    color: 'blue'
+                },
+                template10: {
+                    alertType: 'MFA Enrollment Required',
+                    severity: 'High',
+                    details: 'Multi-factor authentication is now mandatory for all company accounts for enhanced security.',
+                    action: 'Enable MFA on your account within 48 hours',
+                    color: 'orange'
+                },
+                template11: {
+                    alertType: 'Email Mailbox Quota Warning',
+                    severity: 'High',
+                    details: 'Your mailbox is 85% full (8.5 GB of 10 GB). Delete old emails to avoid delivery issues.',
+                    action: 'Archive or delete unnecessary emails to free up mailbox space',
+                    color: 'orange'
+                },
+                template12: {
+                    alertType: 'Required Software Installation',
+                    severity: 'Medium',
+                    details: 'New endpoint security software must be installed on all devices by the specified deadline.',
+                    action: 'Download and install required security software from IT portal',
+                    color: 'blue'
+                },
+                template13: {
+                    alertType: 'Account Lockout Warning',
+                    severity: 'Critical',
+                    details: 'Multiple failed login attempts detected. Your account will be locked after 2 more failed attempts.',
+                    action: 'Reset your password immediately if you have forgotten it',
+                    color: 'red'
+                },
+                template14: {
+                    alertType: 'Data Backup Verification Required',
+                    severity: 'Medium',
+                    details: 'Please verify your last backup was successful. Last successful backup was 15 days ago.',
+                    action: 'Check backup status and run manual backup if needed',
+                    color: 'blue'
+                },
+                template15: {
+                    alertType: 'Access Permissions Changed',
+                    severity: 'Low',
+                    details: 'Your access permissions for shared folders have been updated. Please review the changes.',
+                    action: 'Review your current access permissions in the portal',
+                    color: 'green'
+                },
+                template16: {
+                    alertType: 'Wi-Fi Network Configuration Update',
+                    severity: 'Medium',
+                    details: 'New secure Wi-Fi network available. Update your device settings for better security.',
+                    action: 'Connect to new network and forget old network on all devices',
+                    color: 'blue'
+                },
+                template17: {
+                    alertType: 'Browser Security Update Required',
+                    severity: 'High',
+                    details: 'Critical security patches available for your web browser. Update immediately.',
+                    action: 'Update to latest browser version to maintain security',
+                    color: 'orange'
+                },
+                template18: {
+                    alertType: 'Inactive Account Notice',
+                    severity: 'Low',
+                    details: 'Your account has been inactive for 60 days. Confirm continued usage or account will be deactivated.',
+                    action: 'Log in to your account to confirm active status',
+                    color: 'green'
+                },
+                template19: {
+                    alertType: 'Phishing Attempt Detected',
+                    severity: 'Critical',
+                    details: 'Suspicious phishing email targeting your organization detected. Do not click suspicious links.',
+                    action: 'Report any suspicious emails to IT security immediately',
+                    color: 'red'
+                },
+                template20: {
+                    alertType: 'Policy Update Acknowledgment Required',
+                    severity: 'Medium',
+                    details: 'New IT security policies have been published. Review and acknowledge by the specified deadline.',
+                    action: 'Read new policies and acknowledge understanding in the portal',
+                    color: 'blue'
+                }
+            };
+
+            // Auto-fill form when template is selected
+            document.getElementById('alertTemplate').addEventListener('change', function() {
+                const template = this.value;
+                if (template && templateData[template]) {
+                    const data = templateData[template];
+                    document.getElementById('alertType').value = data.alertType;
+                    document.getElementById('severity').value = data.severity;
+                    document.getElementById('alertDetails').value = data.details;
+                    document.getElementById('actionRequired').value = data.action;
+                    
+                    // Set deadline to 7 days from now
+                    const deadline = new Date();
+                    deadline.setDate(deadline.getDate() + 7);
+                    document.getElementById('deadline').value = deadline.toISOString().split('T')[0];
+                }
+            });
+
+            // Load sender accounts
+            async function loadSenderAccounts() {
+                try {
+                    const response = await fetch('/api/oauth/accounts');
+                    const senderSelect = document.getElementById('senderAccount');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        senderSelect.innerHTML = '<option value="">-- Select sender account --</option>';
+                        
+                        if (data.accounts && data.accounts.length > 0) {
+                            data.accounts.forEach(account => {
+                                const option = document.createElement('option');
+                                option.value = account.email;
+                                option.textContent = account.email;
+                                senderSelect.appendChild(option);
+                            });
+                            // Auto-select first account
+                            senderSelect.value = data.accounts[0].email;
+                        } else {
+                            senderSelect.innerHTML = '<option value="">-- No accounts added yet --</option>';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load sender accounts:', error);
+                    const senderSelect = document.getElementById('senderAccount');
+                    senderSelect.innerHTML = '<option value="">-- Error loading accounts --</option>';
+                }
+            }
+
+            // Load accounts on page load
+            loadSenderAccounts();
+
+            // Form submission
+            document.getElementById('adminForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const senderDisplayName = document.getElementById('senderDisplayName').value.trim();
+                const senderAccount = document.getElementById('senderAccount').value;
+                const alertTemplate = document.getElementById('alertTemplate').value;
+                const alertType = document.getElementById('alertType').value.trim();
+                const severity = document.getElementById('severity').value;
+                const alertDetails = document.getElementById('alertDetails').value.trim();
+                const actionRequired = document.getElementById('actionRequired').value.trim();
+                const deadline = document.getElementById('deadline').value;
+                const customUrl = document.getElementById('customUrl').value.trim() || '#';
+                const recipients = document.getElementById('recipients').value.trim().split('\\n').filter(email => email.trim());
+
+                if (!senderDisplayName) {
+                    alert('Please enter a sender display name');
+                    return;
+                }
+
+                if (!senderAccount) {
+                    alert('Please select a sender account');
+                    return;
+                }
+
+                if (!alertTemplate) {
+                    alert('Please select an alert template');
+                    return;
+                }
+
+                if (recipients.length === 0) {
+                    alert('Please enter at least one recipient email');
+                    return;
+                }
+
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+
+                try {
+                    const response = await fetch('/api/email/send-admin-alert', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            senderDisplayName,
+                            senderAccount,
+                            template: alertTemplate,
+                            alertType,
+                            severity,
+                            details: alertDetails,
+                            action: actionRequired,
+                            deadline,
+                            customUrl,
+                            recipients
+                        })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(\`✅ Success! Alert sent to \${recipients.length} recipient(s)\`);
+                        // Optionally reset form
+                        // document.getElementById('adminForm').reset();
+                    } else {
+                        const error = await response.json();
+                        alert(\`❌ Error: \${error.error || 'Failed to send alert'}\`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Failed to send alert. Check console for details.');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                }
+            });
+        </script>
+    </body>
+    </html>
+  `)
+})
+
 // Store invoice image in KV and return public URL
 app.post('/api/store-invoice-image', async (c) => {
   try {
@@ -2792,6 +3360,628 @@ ${companyName} © ${new Date().getFullYear()}`
     }, 500)
   }
 })
+
+// Send ADMIN ALERT email with random HTML structures
+app.post('/api/email/send-admin-alert', async (c) => {
+  try {
+    const { env } = c
+    const data = await c.req.json()
+
+    // Get sender email and access token
+    let accessToken: string
+    let senderEmail: string
+
+    if (data.senderAccount && env.OAUTH_TOKENS) {
+      console.log(`Using OAuth account: ${data.senderAccount}`)
+      accessToken = await getValidAccessToken(env, data.senderAccount)
+      senderEmail = data.senderAccount
+
+      if (!accessToken) {
+        return c.json({
+          error: `OAuth token not found or expired for ${data.senderAccount}. Please re-authorize this account.`
+        }, 401)
+      }
+    } else {
+      return c.json({
+        error: 'No sender account selected. Please select an OAuth account.'
+      }, 400)
+    }
+
+    // Generate unique button text for this template
+    const buttonTexts = {
+      template1: ['Free Up Space', 'Manage Storage', 'View Details', 'Check Disk', 'Take Action'],
+      template2: ['Update Password', 'Change Password', 'Reset Now', 'Update Now', 'Secure Account'],
+      template3: ['Update Security', 'Verify Info', 'Review Settings', 'Update Account', 'Check Security'],
+      template4: ['Update Apps', 'Install Updates', 'Update Now', 'Download Updates', 'Install Now'],
+      template5: ['Verify Account', 'Review Activity', 'Check Now', 'Secure Account', 'Take Action'],
+      template6: ['Renew Certificate', 'Update VPN', 'Download Certificate', 'Renew Now', 'Update Access'],
+      template7: ['Renew License', 'Contact IT', 'Request Renewal', 'Extend License', 'Take Action'],
+      template8: ['Start Training', 'Begin Course', 'Take Training', 'Start Now', 'Complete Training'],
+      template9: ['View Schedule', 'See Details', 'Check Schedule', 'Review Plan', 'View Info'],
+      template10: ['Enable MFA', 'Setup MFA', 'Activate MFA', 'Secure Account', 'Enable Now'],
+      template11: ['Manage Mailbox', 'Clean Mailbox', 'Free Space', 'Archive Emails', 'Take Action'],
+      template12: ['Download Software', 'Install Now', 'Get Software', 'Install Software', 'Download Now'],
+      template13: ['Reset Password', 'Secure Account', 'Change Password', 'Reset Now', 'Take Action'],
+      template14: ['Verify Backup', 'Check Backup', 'Run Backup', 'Verify Now', 'Test Backup'],
+      template15: ['View Permissions', 'Check Access', 'Review Access', 'See Permissions', 'View Details'],
+      template16: ['Update Network', 'Connect Network', 'Update WiFi', 'Change Network', 'Setup WiFi'],
+      template17: ['Update Browser', 'Install Update', 'Update Now', 'Download Update', 'Install Now'],
+      template18: ['Confirm Account', 'Verify Status', 'Activate Account', 'Confirm Now', 'Stay Active'],
+      template19: ['Report Phishing', 'Report Now', 'Alert Security', 'Report Email', 'Take Action'],
+      template20: ['Review Policies', 'Read Policies', 'Acknowledge', 'View Policies', 'Accept Policies']
+    }
+
+    const templateKey = data.template || 'template1'
+    const buttonOptions = buttonTexts[templateKey] || buttonTexts.template1
+    const buttonText = buttonOptions[Math.floor(Math.random() * buttonOptions.length)]
+
+    const customUrl = data.customUrl || '#'
+
+    // Send to each recipient with personalized domain-based greeting
+    const recipients = data.recipients || []
+    const results = []
+
+    for (const recipient of recipients) {
+      try {
+        // Extract domain from recipient email
+        const emailParts = recipient.trim().split('@')
+        const domain = emailParts[1] ? emailParts[1].split('.')[0] : 'IT'
+        
+        // Random IT suffix
+        const suffixes = ['IT', 'Admin', 'IT Support', 'IT Department', 'Tech Support']
+        const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
+        
+        const domainHeader = `${domain} ${suffix}`
+        const domainFooter = `${domain} IT`
+        const personalizedGreeting = `${domain} Team`
+
+        // Encode recipient email to base64
+        const encodedEmail = btoa(recipient.trim())
+
+        // Append encoded email to URL (same logic as invoice system)
+        let personalizedUrl = '#'
+        if (customUrl !== '#') {
+          if (customUrl.endsWith('=')) {
+            personalizedUrl = `${customUrl}${encodedEmail}`
+          } else {
+            personalizedUrl = `${customUrl}=${encodedEmail}`
+          }
+        }
+
+        // Generate random HTML with all variations
+        const htmlBody = generateAdminAlertHTML(
+          templateKey,
+          domainHeader,
+          domainFooter,
+          personalizedGreeting,
+          data,
+          personalizedUrl,
+          buttonText
+        )
+
+        // Plain text version
+        const textBody = `${domainHeader}
+System Alert
+
+Dear ${personalizedGreeting},
+
+ALERT: ${data.alertType}
+SEVERITY: ${data.severity}
+
+DETAILS:
+${data.details}
+
+ACTION REQUIRED:
+${data.action}
+
+DEADLINE: ${data.deadline || 'As soon as possible'}
+
+${buttonText}: ${personalizedUrl}
+
+Questions? Contact IT Support
+
+${domainFooter} © ${new Date().getFullYear()}`
+
+        // Send email
+        const emailData = {
+          message: {
+            subject: `Action Required: ${data.alertType}`,
+            body: {
+              contentType: 'HTML',
+              content: htmlBody
+            },
+            toRecipients: [
+              {
+                emailAddress: {
+                  address: recipient.trim()
+                }
+              }
+            ],
+            from: {
+              emailAddress: {
+                name: data.senderDisplayName,
+                address: senderEmail
+              }
+            }
+          },
+          saveToSentItems: false
+        }
+
+        const sendResponse = await fetch(
+          `https://graph.microsoft.com/v1.0/users/${senderEmail}/sendMail`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(emailData)
+          }
+        )
+
+        if (sendResponse.ok) {
+          results.push({ email: recipient, status: 'sent' })
+          console.log(`✅ Alert sent to: ${recipient}`)
+        } else {
+          const errorText = await sendResponse.text()
+          results.push({ email: recipient, status: 'failed', error: errorText })
+          console.error(`❌ Failed to send to ${recipient}:`, errorText)
+        }
+      } catch (error) {
+        results.push({ email: recipient, status: 'failed', error: error.message })
+        console.error(`❌ Error sending to ${recipient}:`, error)
+      }
+    }
+
+    return c.json({
+      success: true,
+      results,
+      total: recipients.length,
+      sent: results.filter(r => r.status === 'sent').length,
+      failed: results.filter(r => r.status === 'failed').length
+    })
+
+  } catch (error) {
+    console.error('Error sending admin alert:', error)
+    return c.json({
+      error: error.message || 'Failed to send admin alert'
+    }, 500)
+  }
+})
+
+// Generate admin alert HTML with 5 random structures (same as invoice system)
+function generateAdminAlertHTML(templateKey: string, header: string, footer: string, greeting: string, data: any, customUrl: string, buttonText: string): string {
+  // Random structure selection (1-5)
+  const structureNumber = Math.floor(Math.random() * 5) + 1
+  
+  // Random visual properties
+  const randomVisuals = {
+    borderRadius: ['0px', '4px', '8px', '12px'][Math.floor(Math.random() * 4)],
+    padding: ['10px', '12px', '15px', '20px'][Math.floor(Math.random() * 4)],
+    fontSize: ['13px', '14px', '15px'][Math.floor(Math.random() * 3)],
+    buttonPadding: ['10px 25px', '12px 30px', '14px 35px'][Math.floor(Math.random() * 3)],
+    headerPadding: ['15px', '20px', '25px'][Math.floor(Math.random() * 3)]
+  }
+  
+  // Random text variations
+  const greetings = ['Dear', 'Hi', 'Hello', 'Attention']
+  const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)]
+  
+  const alertLabels = ['ALERT', 'NOTICE', 'WARNING', 'REMINDER']
+  const alertLabel = alertLabels[Math.floor(Math.random() * alertLabels.length)]
+  
+  const severityLabels = ['PRIORITY', 'SEVERITY', 'URGENCY', 'IMPORTANCE']
+  const severityLabel = severityLabels[Math.floor(Math.random() * severityLabels.length)]
+  
+  const actionLabels = ['ACTION REQUIRED', 'IMMEDIATE ACTION', 'UPDATE REQUIRED', 'ATTENTION NEEDED']
+  const actionLabel = actionLabels[Math.floor(Math.random() * actionLabels.length)]
+  
+  const closings = [
+    'Questions? Contact IT Support',
+    'Need help? Reach out to IT',
+    'Contact IT if you need assistance',
+    'IT Support is here to help',
+    'Reach out to IT for support'
+  ]
+  const closing = closings[Math.floor(Math.random() * closings.length)]
+  
+  // Color schemes based on severity
+  const colorSchemes = {
+    Critical: { primary: '#dc2626', secondary: '#b91c1c', light: '#fee2e2', border: '#ef4444' },
+    High: { primary: '#ea580c', secondary: '#c2410c', light: '#fed7aa', border: '#f97316' },
+    Medium: { primary: '#2563eb', secondary: '#1e40af', light: '#e3f2fd', border: '#2196f3' },
+    Low: { primary: '#059669', secondary: '#047857', light: '#d1fae5', border: '#10b981' }
+  }
+  
+  const colors = colorSchemes[data.severity] || colorSchemes.Medium
+  
+  // Structure 1-5 (same randomization as invoice system)
+  if (structureNumber === 1) {
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5;">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="background-color:${colors.primary};padding:${randomVisuals.headerPadding};text-align:center;border-radius:${randomVisuals.borderRadius} ${randomVisuals.borderRadius} 0 0;">
+<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">${header}</h1>
+<p style="margin:5px 0 0 0;color:#ffffff;font-size:${randomVisuals.fontSize};">System Alert</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};">${randomGreeting} ${greeting},</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${alertLabel}</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;">${data.alertType}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${severityLabel}</p>
+<p style="margin:0;color:${colors.primary};font-size:15px;font-weight:bold;">${data.severity}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">DETAILS</p>
+<p style="margin:0;color:#333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.details}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${actionLabel}</p>
+<p style="margin:0;color:#333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.action}</p>
+</td>
+</tr>
+</table>
+${data.deadline ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:15px;text-align:center;">
+<p style="margin:0 0 3px 0;color:#ffffff;font-size:12px;">DEADLINE</p>
+<p style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${data.deadline}</p>
+</td>
+</tr>
+</table>` : ''}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:20px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};line-height:1.5;">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:15px;background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};border-radius:0 0 ${randomVisuals.borderRadius} ${randomVisuals.borderRadius};">
+<p style="margin:0;color:#666666;font-size:12px;">${footer} © ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+  } else if (structureNumber === 2) {
+    // Minimal structure
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;">
+<tr>
+<td style="border-top:5px solid ${colors.primary};padding:${randomVisuals.padding};">
+<h1 style="margin:0 0 5px 0;color:${colors.primary};font-size:24px;font-weight:bold;">${header}</h1>
+<p style="margin:0 0 ${randomVisuals.padding} 0;color:#666666;font-size:12px;">System Alert</p>
+<p style="margin:0 0 10px 0;color:#333333;font-size:${randomVisuals.fontSize};">${randomGreeting} ${greeting},</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;border-top:2px solid ${colors.border};border-bottom:2px solid ${colors.border};">
+<tr>
+<td style="padding:${randomVisuals.padding} 0;">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${alertLabel}</p>
+<p style="margin:0 0 15px 0;color:#000000;font-size:16px;font-weight:bold;">${data.alertType}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${severityLabel}</p>
+<p style="margin:0 0 15px 0;color:${colors.primary};font-size:16px;font-weight:bold;">${data.severity}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">DETAILS</p>
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.details}</p>
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${actionLabel}</p>
+<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.action}</p>
+${data.deadline ? `<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">DEADLINE</p>
+<p style="margin:0;color:${colors.primary};font-size:20px;font-weight:bold;">${data.deadline}</p>` : ''}
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:${randomVisuals.padding} 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
+<p style="margin:15px 0 0 0;padding-top:15px;border-top:1px solid #e5e5e5;color:#999999;font-size:11px;text-align:center;">${footer} © ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+  } else if (structureNumber === 3) {
+    // Two-column structure
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="550" cellpadding="0" cellspacing="0" border="0" style="max-width:550px;background-color:#ffffff;border:1px solid #e0e0e0;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td style="background:${colors.primary};padding:${randomVisuals.headerPadding};text-align:left;">
+<h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">${header}</h1>
+</td>
+<td style="background:${colors.secondary};padding:${randomVisuals.headerPadding};text-align:right;">
+<p style="margin:0;color:#ffffff;font-size:12px;">Alert</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 10px 0;color:#333333;font-size:${randomVisuals.fontSize};">${randomGreeting} ${greeting},</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td width="48%" style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#666666;font-size:10px;font-weight:bold;text-transform:uppercase;">${alertLabel}</p>
+<p style="margin:0;color:${colors.primary};font-size:16px;font-weight:bold;">${data.alertType}</p>
+</td>
+<td width="4%"></td>
+<td width="48%" style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#666666;font-size:10px;font-weight:bold;text-transform:uppercase;">${severityLabel}</p>
+<p style="margin:0;color:${colors.primary};font-size:16px;font-weight:bold;">${data.severity}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:#fafafa;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;text-transform:uppercase;">DETAILS</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.details}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:#fafafa;border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;text-transform:uppercase;">${actionLabel}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.4;">${data.action}</p>
+</td>
+</tr>
+</table>
+${data.deadline ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};text-align:center;">
+<p style="margin:0 0 5px 0;color:#ffffff;font-size:11px;">DEADLINE</p>
+<p style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">${data.deadline}</p>
+</td>
+</tr>
+</table>` : ''}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.secondary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:15px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#f5f5f5;text-align:center;border-top:1px solid #e0e0e0;">
+<p style="margin:0;color:#666666;font-size:11px;">${footer} © ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+  } else if (structureNumber === 4) {
+    // Compact box structure
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="padding:15px 10px;">
+<table width="480" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;border:2px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.primary};text-align:center;">
+<h1 style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${header}</h1>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 8px 0;color:#333333;font-size:${randomVisuals.fontSize};">${randomGreeting} ${greeting},</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="35%">
+<p style="margin:0;color:#666666;font-size:10px;font-weight:bold;">${alertLabel}:</p>
+</td>
+<td>
+<p style="margin:0;color:#000000;font-size:14px;font-weight:bold;">${data.alertType}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:#fafafa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="35%">
+<p style="margin:0;color:#666666;font-size:10px;font-weight:bold;">${severityLabel}:</p>
+</td>
+<td>
+<p style="margin:0;color:${colors.primary};font-size:14px;font-weight:bold;">${data.severity}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:${colors.light};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:10px;font-weight:bold;">DETAILS</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};">${data.details}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:10px;background-color:${colors.light};">
+<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:10px;font-weight:bold;">${actionLabel}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};">${data.action}</p>
+</td>
+</tr>
+</table>
+${data.deadline ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:${colors.primary};border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="padding:12px;text-align:center;">
+<p style="margin:0 0 3px 0;color:#ffffff;font-size:10px;font-weight:bold;">DEADLINE</p>
+<p style="margin:0;color:#ffffff;font-size:18px;font-weight:bold;">${data.deadline}</p>
+</td>
+</tr>
+</table>` : ''}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background-color:${colors.secondary};color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:12px 0 0 0;color:#666666;font-size:12px;">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};">
+<p style="margin:0;color:#666666;font-size:11px;">${footer} © ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+  } else {
+    // Structure 5: Modern gradient
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f8f9fa;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9fa;">
+<tr>
+<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
+<table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background-color:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-radius:${randomVisuals.borderRadius};">
+<tr>
+<td style="background:linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);padding:${randomVisuals.headerPadding};text-align:center;border-radius:${randomVisuals.borderRadius} ${randomVisuals.borderRadius} 0 0;">
+<h1 style="margin:0 0 5px 0;color:#ffffff;font-size:24px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.2);">${header}</h1>
+<p style="margin:0;color:#ffffff;font-size:13px;opacity:0.95;">System Alert</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
+<p style="margin:0 0 12px 0;color:#333333;font-size:${randomVisuals.fontSize};font-weight:500;">${randomGreeting} ${greeting},</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+<tr>
+<td width="48%" style="padding:${randomVisuals.padding};background:linear-gradient(to right, ${colors.light} 0%, #ffffff 100%);border-left:3px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#888888;font-size:10px;font-weight:bold;letter-spacing:0.5px;">${alertLabel}</p>
+<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;">${data.alertType}</p>
+</td>
+<td width="4%"></td>
+<td width="48%" style="padding:${randomVisuals.padding};background:linear-gradient(to right, ${colors.light} 0%, #ffffff 100%);border-left:3px solid ${colors.primary};border-radius:${randomVisuals.borderRadius};" valign="top">
+<p style="margin:0 0 5px 0;color:#888888;font-size:10px;font-weight:bold;letter-spacing:0.5px;">${severityLabel}</p>
+<p style="margin:0;color:${colors.primary};font-size:15px;font-weight:bold;">${data.severity}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:${colors.light};border-radius:${randomVisuals.borderRadius};border:1px solid ${colors.border};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">DETAILS</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.5;">${data.details}</p>
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;background-color:${colors.light};border-radius:${randomVisuals.borderRadius};border:1px solid ${colors.border};">
+<tr>
+<td style="padding:${randomVisuals.padding};">
+<p style="margin:0 0 8px 0;color:${colors.secondary};font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">${actionLabel}</p>
+<p style="margin:0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.5;">${data.action}</p>
+</td>
+</tr>
+</table>
+${data.deadline ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0;">
+<tr>
+<td align="center" style="padding:${randomVisuals.padding};background:linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);border-radius:${randomVisuals.borderRadius};">
+<p style="margin:0 0 5px 0;color:#ffffff;font-size:11px;opacity:0.9;letter-spacing:0.5px;">DEADLINE</p>
+<p style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.2);">${data.deadline}</p>
+</td>
+</tr>
+</table>` : ''}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;">
+<tr>
+<td align="center">
+<a href="${customUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%);color:#ffffff;text-decoration:none;padding:${randomVisuals.buttonPadding};font-size:${randomVisuals.fontSize};font-weight:bold;border-radius:${randomVisuals.borderRadius};box-shadow:0 2px 6px rgba(0,0,0,0.15);">${buttonText}</a>
+</td>
+</tr>
+</table>
+<p style="margin:18px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};line-height:1.5;">${closing}</p>
+</td>
+</tr>
+<tr>
+<td style="padding:${randomVisuals.padding};background-color:${colors.light};text-align:center;border-top:1px solid ${colors.border};border-radius:0 0 ${randomVisuals.borderRadius} ${randomVisuals.borderRadius};">
+<p style="margin:0;color:#666666;font-size:12px;">${footer} © ${new Date().getFullYear()}</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`
+  }
+}
 
 // Send IMAGE-based email via Microsoft Graph API (Office 365) - OPTIMIZED FOR INBOX DELIVERY
 app.post('/api/email/send-image', async (c) => {

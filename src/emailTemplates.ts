@@ -1,18 +1,73 @@
-// Email template system - Complete copy from main invoice system
-// Uses EXACT same 29 templates with domain-based greetings
+// PRODUCTION-READY Email Templates - Optimized for Office365 Deliverability
+// Maximum inbox delivery, minimal spam signals, human-like variation
 
 export function getRandomSubject(workOrder: string): string {
   const subjects = [
-    `Service Completion - ${workOrder}`,
-    `Work Order Complete - ${workOrder}`,
-    `Invoice Ready - ${workOrder}`,
-    `Payment Details - ${workOrder}`,
-    `Service Invoice - ${workOrder}`,
-    `Completed Work - ${workOrder}`,
-    `Final Invoice - ${workOrder}`,
-    `Work Summary - ${workOrder}`,
-    `Invoice Document - ${workOrder}`,
-    `Payment Information - ${workOrder}`
+    // Professional & Direct
+    `Invoice ${workOrder} - Payment Due`,
+    `Account Statement ${workOrder}`,
+    `Billing Notice: ${workOrder}`,
+    `Payment Required - Order ${workOrder}`,
+    `Invoice for Services: ${workOrder}`,
+    
+    // Friendly & Conversational
+    `Thanks! Your invoice ${workOrder} is ready`,
+    `Quick reminder about ${workOrder}`,
+    `Payment info for order ${workOrder}`,
+    `Your account statement (${workOrder})`,
+    `Finishing up ${workOrder}`,
+    
+    // Urgent but Professional
+    `Action needed: ${workOrder} payment`,
+    `Please review invoice ${workOrder}`,
+    `${workOrder} - Review & Pay`,
+    `Important: ${workOrder} billing`,
+    `Time-sensitive: ${workOrder}`,
+    
+    // Business Casual
+    `Order ${workOrder} - Ready for Payment`,
+    `Re: Your invoice ${workOrder}`,
+    `Following up on ${workOrder}`,
+    `${workOrder} Account Update`,
+    `Payment details - ${workOrder}`,
+    
+    // Simple & Clean
+    `Invoice ${workOrder}`,
+    `Order ${workOrder} Complete`,
+    `Billing ${workOrder}`,
+    `Statement ${workOrder}`,
+    `Account ${workOrder}`,
+    
+    // Personal Touch
+    `Regarding your order ${workOrder}`,
+    `Update on ${workOrder}`,
+    `${workOrder} - Ready to Review`,
+    `Completed: ${workOrder}`,
+    `Final notice ${workOrder}`,
+    
+    // Professional Variations
+    `Payment Information - Ref: ${workOrder}`,
+    `Account Activity: ${workOrder}`,
+    `Service Billing - ${workOrder}`,
+    `Transaction ${workOrder} Details`,
+    `Invoice Notification ${workOrder}`,
+    
+    // Additional Unique Subjects
+    `${workOrder} Requires Attention`,
+    `Your ${workOrder} Invoice`,
+    `Processing ${workOrder}`,
+    `Order Summary ${workOrder}`,
+    `Billing Update ${workOrder}`,
+    `Account Notice ${workOrder}`,
+    `Payment Status ${workOrder}`,
+    `Invoice Details ${workOrder}`,
+    `Statement Ready ${workOrder}`,
+    `Order ${workOrder} Info`,
+    `${workOrder} Documentation`,
+    `Review ${workOrder}`,
+    `Urgent: ${workOrder}`,
+    `Attention Required ${workOrder}`,
+    `${workOrder} Payment Info`
   ]
   
   return subjects[Math.floor(Math.random() * subjects.length)]
@@ -23,13 +78,13 @@ export function getRandomTemplate(): string {
   return `template${templateNumber}`
 }
 
-// Extract domain from email for greeting
-function getDomainTeam(email: string): string {
-  const domain = email.split('@')[1]?.split('.')[0] || 'valued customer'
-  return domain
+// Extract domain from email for personalized greeting
+function getDomainName(email: string): string {
+  const domain = email.split('@')[1]?.split('.')[0] || ''
+  return domain.charAt(0).toUpperCase() + domain.slice(1)
 }
 
-// Complete template generator from main system
+// Generate highly-optimized Office365 email template
 export function generateInvoiceEmail(
   workOrder: string,
   reference: string,
@@ -40,325 +95,183 @@ export function generateInvoiceEmail(
   templateKey: string
 ): string {
   
-  // Extract domain for greeting
-  const domainTeam = getDomainTeam(recipientEmail)
+  const domainName = getDomainName(recipientEmail)
   
-  // RANDOMIZATION: Pick random structure (1-5)
-  const structureNumber = Math.floor(Math.random() * 5) + 1
-  
-  // RANDOMIZATION: Pick random visual properties
-  const randomVisuals = {
-    borderRadius: ['0px', '4px', '8px', '12px'][Math.floor(Math.random() * 4)],
-    padding: ['10px', '12px', '15px', '20px'][Math.floor(Math.random() * 4)],
-    fontSize: ['13px', '14px', '15px'][Math.floor(Math.random() * 3)],
-    buttonPadding: ['10px 25px', '12px 30px', '14px 35px'][Math.floor(Math.random() * 3)],
-    headerPadding: ['15px', '20px', '25px'][Math.floor(Math.random() * 3)]
-  }
-  
-  // RANDOMIZATION: Pick random text variations
-  const greetings = ['Hi', 'Hello', 'Good day', 'Dear']
-  const intros = [
-    'Thank you for your business. This confirms completion of the following work:',
-    'We appreciate your business. Here are the details of the completed work:',
-    'Thank you for choosing us. Work completion details below:',
-    'We value your business. Service completion summary:',
-    'Thank you. Here are your service details:'
+  // Random greetings (natural variations)
+  const greetings = [
+    `Hello,`,
+    `Hi there,`,
+    `Good day,`,
+    `Greetings,`,
+    `Hello ${domainName} Team,`,
+    `Hi,`,
+    `Dear Customer,`,
+    `Good afternoon,`
   ]
+  
+  // Random opening lines (professional & natural)
+  const openings = [
+    `Thank you for your business. Your invoice is ready for review.`,
+    `This is a friendly reminder about your recent order.`,
+    `Your account statement is now available.`,
+    `We've completed processing your order.`,
+    `Please review the details below at your convenience.`,
+    `Your payment information is attached below.`,
+    `We wanted to follow up on your recent transaction.`,
+    `Here are the details for your recent service.`
+  ]
+  
+  // Random closing lines
   const closings = [
-    'Questions? Contact us anytime.',
-    'Feel free to reach out with questions.',
-    'Contact us if you need assistance.',
-    'We\'re here to help if needed.',
-    'Reach out anytime for support.'
+    `Thank you for your prompt attention to this matter.`,
+    `We appreciate your business.`,
+    `Please don't hesitate to contact us with any questions.`,
+    `Thank you for choosing our services.`,
+    `We look forward to serving you again.`,
+    `If you have any questions, please let us know.`,
+    `Your satisfaction is our priority.`,
+    `Thank you for your continued partnership.`
   ]
-  const sectionLabels = {
-    workOrder: ['WORK ORDER', 'ORDER', 'JOB ID', 'WORK ID'][Math.floor(Math.random() * 4)],
-    reference: ['INVOICE', 'REFERENCE', 'REF', 'TRACKING'][Math.floor(Math.random() * 4)],
-    service: ['SERVICE', 'WORK COMPLETED', 'TASK', 'JOB DETAILS'][Math.floor(Math.random() * 4)],
-    dueDate: ['PAYMENT DUE', 'DUE DATE', 'PAY BY', 'PAYMENT DATE'][Math.floor(Math.random() * 4)]
-  }
+  
+  // Random call-to-action text
+  const ctaButtons = [
+    'View Invoice',
+    'Review Details',
+    'See Statement',
+    'Check Order',
+    'View Account',
+    'Payment Info',
+    'Order Details',
+    'Review Now'
+  ]
   
   const greeting = greetings[Math.floor(Math.random() * greetings.length)]
-  const intro = intros[Math.floor(Math.random() * intros.length)]
+  const opening = openings[Math.floor(Math.random() * openings.length)]
   const closing = closings[Math.floor(Math.random() * closings.length)]
+  const ctaText = ctaButtons[Math.floor(Math.random() * ctaButtons.length)]
   
-  // Random button text
-  const buttonTexts = ['View Details', 'See Status', 'Access Report', 'Review Information', 'Check Document']
-  const buttonText = buttonTexts[Math.floor(Math.random() * buttonTexts.length)]
+  // Format due date nicely
+  const formattedDate = new Date(dueDate).toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
   
-  // Define color schemes for 29 templates (EXACT copy from main system)
+  // 29 Color schemes (professional & deliverability-optimized)
   const colorSchemes: Record<string, any> = {
-    template1: { primary: '#2563eb', secondary: '#1e40af', light: '#e3f2fd', border: '#2196f3' },
-    template2: { primary: '#059669', secondary: '#047857', light: '#d1fae5', border: '#10b981' },
-    template3: { primary: '#7c3aed', secondary: '#6d28d9', light: '#ede9fe', border: '#8b5cf6' },
-    template4: { primary: '#0891b2', secondary: '#0e7490', light: '#cffafe', border: '#06b6d4' },
-    template5: { primary: '#dc2626', secondary: '#b91c1c', light: '#fee2e2', border: '#ef4444' },
-    template6: { primary: '#ea580c', secondary: '#c2410c', light: '#fed7aa', border: '#f97316' },
-    template7: { primary: '#4f46e5', secondary: '#4338ca', light: '#e0e7ff', border: '#6366f1' },
-    template8: { primary: '#2563eb', secondary: '#1e40af', light: '#e3f2fd', border: '#2196f3' },
-    template9: { primary: '#6b7280', secondary: '#4b5563', light: '#f3f4f6', border: '#9ca3af' },
-    template10: { primary: '#059669', secondary: '#047857', light: '#d1fae5', border: '#10b981' },
-    template11: { primary: '#7c3aed', secondary: '#6d28d9', light: '#ede9fe', border: '#8b5cf6' },
-    template12: { primary: '#0891b2', secondary: '#0e7490', light: '#cffafe', border: '#06b6d4' },
-    template13: { primary: '#1e3a8a', secondary: '#1e40af', light: '#dbeafe', border: '#3b82f6' },
-    template14: { primary: '#ea580c', secondary: '#c2410c', light: '#fed7aa', border: '#f97316' },
-    template15: { primary: '#4f46e5', secondary: '#4338ca', light: '#e0e7ff', border: '#6366f1' },
-    template16: { primary: '#dc2626', secondary: '#b91c1c', light: '#fee2e2', border: '#ef4444' },
-    template17: { primary: '#78350f', secondary: '#92400e', light: '#fef3c7', border: '#f59e0b' },
-    template18: { primary: '#0e7490', secondary: '#155e75', light: '#cffafe', border: '#06b6d4' },
-    template19: { primary: '#be185d', secondary: '#9f1239', light: '#fce7f3', border: '#ec4899' },
-    template20: { primary: '#db2777', secondary: '#be185d', light: '#fce7f3', border: '#f472b6' },
-    template21: { primary: '#334155', secondary: '#1e293b', light: '#e2e8f0', border: '#64748b' },
-    template22: { primary: '#65a30d', secondary: '#4d7c0f', light: '#ecfccb', border: '#84cc16' },
-    template23: { primary: '#d97706', secondary: '#b45309', light: '#fef3c7', border: '#f59e0b' },
-    template24: { primary: '#475569', secondary: '#334155', light: '#e2e8f0', border: '#64748b' },
-    template25: { primary: '#881337', secondary: '#9f1239', light: '#ffe4e6', border: '#e11d48' },
-    template26: { primary: '#065f46', secondary: '#064e3b', light: '#d1fae5', border: '#10b981' },
-    template27: { primary: '#f43f5e', secondary: '#e11d48', light: '#ffe4e6', border: '#fb7185' },
-    template28: { primary: '#4d7c0f', secondary: '#3f6212', light: '#ecfccb', border: '#84cc16' },
-    template29: { primary: '#000000', secondary: '#1f1f1f', light: '#f5f5f5', border: '#404040' }
+    template1: { primary: '#0066CC', secondary: '#004C99', bg: '#F5F9FF', border: '#B3D9FF' },
+    template2: { primary: '#2E7D32', secondary: '#1B5E20', bg: '#F1F8F4', border: '#A5D6A7' },
+    template3: { primary: '#D32F2F', secondary: '#B71C1C', bg: '#FFEBEE', border: '#EF9A9A' },
+    template4: { primary: '#7B1FA2', secondary: '#4A148C', bg: '#F3E5F5', border: '#CE93D8' },
+    template5: { primary: '#F57C00', secondary: '#E65100', bg: '#FFF3E0', border: '#FFB74D' },
+    template6: { primary: '#0097A7', secondary: '#00838F', bg: '#E0F7FA', border: '#80DEEA' },
+    template7: { primary: '#512DA8', secondary: '#311B92', bg: '#EDE7F6', border: '#B39DDB' },
+    template8: { primary: '#C62828', secondary: '#B71C1C', bg: '#FFEBEE', border: '#E57373' },
+    template9: { primary: '#00796B', secondary: '#004D40', bg: '#E0F2F1', border: '#80CBC4' },
+    template10: { primary: '#1976D2', secondary: '#0D47A1', bg: '#E3F2FD', border: '#90CAF9' },
+    template11: { primary: '#5D4037', secondary: '#3E2723', bg: '#EFEBE9', border: '#BCAAA4' },
+    template12: { primary: '#455A64', secondary: '#263238', bg: '#ECEFF1', border: '#90A4AE' },
+    template13: { primary: '#E64A19', secondary: '#BF360C', bg: '#FBE9E7', border: '#FFAB91' },
+    template14: { primary: '#1565C0', secondary: '#0D47A1', bg: '#E3F2FD', border: '#64B5F6' },
+    template15: { primary: '#6A1B9A', secondary: '#4A148C', bg: '#F3E5F5', border: '#BA68C8' },
+    template16: { primary: '#00838F', secondary: '#006064', bg: '#E0F7FA', border: '#4DD0E1' },
+    template17: { primary: '#558B2F', secondary: '#33691E', bg: '#F1F8E9', border: '#9CCC65' },
+    template18: { primary: '#D84315', secondary: '#BF360C', bg: '#FBE9E7', border: '#FF8A65' },
+    template19: { primary: '#303F9F', secondary: '#1A237E', bg: '#E8EAF6', border: '#7986CB' },
+    template20: { primary: '#C2185B', secondary: '#880E4F', bg: '#FCE4EC', border: '#F06292' },
+    template21: { primary: '#0277BD', secondary: '#01579B', bg: '#E1F5FE', border: '#4FC3F7' },
+    template22: { primary: '#689F38', secondary: '#558B2F', bg: '#F1F8E9', border: '#AED581' },
+    template23: { primary: '#F57F17', secondary: '#F57F17', bg: '#FFFDE7', border: '#FFF59D' },
+    template24: { primary: '#0288D1', secondary: '#01579B', bg: '#E1F5FE', border: '#4FC3F7' },
+    template25: { primary: '#5E35B1', secondary: '#4527A0', bg: '#EDE7F6', border: '#9575CD' },
+    template26: { primary: '#00695C', secondary: '#004D40', bg: '#E0F2F1', border: '#4DB6AC' },
+    template27: { primary: '#EF6C00', secondary: '#E65100', bg: '#FFF3E0', border: '#FFB74D' },
+    template28: { primary: '#455A64', secondary: '#37474F', bg: '#ECEFF1', border: '#78909C' },
+    template29: { primary: '#1565C0', secondary: '#0D47A1', bg: '#E3F2FD', border: '#42A5F5' }
   }
   
   const colors = colorSchemes[templateKey] || colorSchemes.template1
   
-  // Select structure based on structureNumber
-  if (structureNumber === 1) {
-    // STRUCTURE 1: Classic Card Layout
-    return `<!DOCTYPE html>
+  // Generate minimal, Office365-optimized HTML
+  return `
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice ${workOrder}</title>
 </head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5;">
-<tr>
-<td align="center" style="padding:${randomVisuals.headerPadding} 10px;">
-<table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width:500px;background-color:#ffffff;border-radius:${randomVisuals.borderRadius};">
-<tr>
-<td style="background-color:${colors.primary};padding:${randomVisuals.headerPadding};text-align:center;border-radius:${randomVisuals.borderRadius} ${randomVisuals.borderRadius} 0 0;">
-<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">Service Completion Notice</h1>
-</td>
-</tr>
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:#ffffff;">
-<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${domainTeam} team,</p>
-<p style="margin:0 0 15px 0;color:#333333;font-size:${randomVisuals.fontSize};line-height:1.5;">${intro}</p>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
-<tr>
-<td style="padding:${randomVisuals.padding};">
-<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${sectionLabels.workOrder}</p>
-<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${workOrder}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border-left:4px solid ${colors.primary};">
-<tr>
-<td style="padding:${randomVisuals.padding};">
-<p style="margin:0 0 3px 0;color:#666666;font-size:11px;font-weight:bold;">${sectionLabels.reference}</p>
-<p style="margin:0;color:#000000;font-size:15px;font-weight:bold;font-family:Courier New,monospace;">${reference}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
-<tr>
-<td style="padding:${randomVisuals.padding};">
-<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};line-height:1.4;">${service}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0;background-color:${colors.light};border:1px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
-<tr>
-<td style="padding:${randomVisuals.padding};">
-<p style="margin:0 0 5px 0;color:${colors.secondary};font-size:11px;font-weight:bold;">${sectionLabels.dueDate}</p>
-<p style="margin:0;color:#000000;font-size:${randomVisuals.fontSize};font-weight:bold;">${dueDate}</p>
-</td>
-</tr>
-</table>
-<p style="text-align:center;margin:20px 0;">
-<a href="${trackingUrl}" style="background:${colors.primary};color:#ffffff;padding:${randomVisuals.buttonPadding};text-decoration:none;border-radius:${randomVisuals.borderRadius};display:inline-block;font-size:${randomVisuals.fontSize};">${buttonText}</a>
-</p>
-<p style="margin:15px 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f5f5f5;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f5f5f5;">
+    <tr>
+      <td style="padding:20px 0;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="padding:30px 40px;background-color:${colors.primary};border-radius:8px 8px 0 0;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:600;">Invoice Statement</h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 20px;color:#333333;font-size:16px;line-height:1.5;">${greeting}</p>
+              
+              <p style="margin:0 0 30px;color:#555555;font-size:15px;line-height:1.6;">${opening}</p>
+              
+              <!-- Invoice Details Box -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:${colors.bg};border-left:4px solid ${colors.primary};border-radius:4px;margin-bottom:30px;">
+                <tr>
+                  <td style="padding:20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding:8px 0;color:#666666;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Order Number</td>
+                        <td style="padding:8px 0;color:#333333;font-size:15px;font-weight:600;text-align:right;">${workOrder}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;color:#666666;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Reference</td>
+                        <td style="padding:8px 0;color:#333333;font-size:15px;font-weight:600;text-align:right;">${reference}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;color:#666666;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Service</td>
+                        <td style="padding:8px 0;color:#333333;font-size:15px;font-weight:600;text-align:right;">${service}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;color:#666666;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;border-top:1px solid ${colors.border};padding-top:12px;">Payment Due</td>
+                        <td style="padding:8px 0;color:${colors.primary};font-size:16px;font-weight:700;text-align:right;border-top:1px solid ${colors.border};padding-top:12px;">${formattedDate}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:30px;">
+                <tr>
+                  <td style="text-align:center;">
+                    <a href="${trackingUrl}" style="display:inline-block;background-color:${colors.primary};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:4px;font-size:15px;font-weight:600;">${ctaText}</a>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="margin:0;color:#555555;font-size:15px;line-height:1.6;">${closing}</p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 40px;background-color:#f9f9f9;border-radius:0 0 8px 8px;border-top:1px solid #e0e0e0;">
+              <p style="margin:0;color:#999999;font-size:12px;line-height:1.5;text-align:center;">This is an automated notification regarding your account.</p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
-</html>`
-  } else if (structureNumber === 2) {
-    // STRUCTURE 2: Minimal Design
-    return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td align="center" style="padding:30px 15px;">
-<table width="550" cellpadding="0" cellspacing="0" border="0" style="max-width:550px;">
-<tr>
-<td style="padding:0 0 ${randomVisuals.padding} 0;border-bottom:3px solid ${colors.primary};">
-<h1 style="margin:0;color:${colors.primary};font-size:24px;font-weight:bold;">Service Completion Notice</h1>
-</td>
-</tr>
-<tr>
-<td style="padding:${randomVisuals.padding} 0;">
-<p style="margin:0 0 ${randomVisuals.padding} 0;color:#333333;font-size:${randomVisuals.fontSize};">${greeting} ${domainTeam} team,</p>
-<p style="margin:0 0 ${randomVisuals.padding} 0;color:#555555;font-size:${randomVisuals.fontSize};line-height:1.6;">${intro}</p>
-<div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:${colors.light};border-left:5px solid ${colors.primary};">
-<p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.workOrder}</p>
-<p style="margin:0;color:#000000;font-size:16px;font-weight:bold;font-family:Courier New,monospace;">${workOrder}</p>
-</div>
-<div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:${colors.light};border-left:5px solid ${colors.primary};">
-<p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.reference}</p>
-<p style="margin:0;color:#000000;font-size:16px;font-weight:bold;font-family:Courier New,monospace;">${reference}</p>
-</div>
-<div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:#fafafa;border:1px solid #e0e0e0;">
-<p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">${service}</p>
-</div>
-<div style="margin:${randomVisuals.padding} 0;padding:${randomVisuals.padding};background-color:#fafafa;border:1px solid #e0e0e0;">
-<p style="margin:0 0 8px 0;color:#888888;font-size:12px;text-transform:uppercase;">${sectionLabels.dueDate}</p>
-<p style="margin:0;color:#000000;font-size:${randomVisuals.fontSize};font-weight:bold;">${dueDate}</p>
-</div>
-<p style="text-align:center;margin:25px 0;">
-<a href="${trackingUrl}" style="display:inline-block;padding:${randomVisuals.buttonPadding};background-color:${colors.primary};color:#ffffff;text-decoration:none;font-size:${randomVisuals.fontSize};font-weight:bold;">${buttonText}</a>
-</p>
-<p style="margin:${randomVisuals.padding} 0 0 0;color:#888888;font-size:${randomVisuals.fontSize};">${closing}</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body>
-</html>`
-  } else if (structureNumber === 3) {
-    // STRUCTURE 3: Modern Box Design
-    return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f8f9fa;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9fa;">
-<tr>
-<td align="center" style="padding:40px 20px;">
-<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-<tr>
-<td style="padding:${randomVisuals.headerPadding};background:linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);text-align:center;">
-<h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:bold;">Service Completion Notice</h1>
-</td>
-</tr>
-<tr>
-<td style="padding:30px ${randomVisuals.padding};">
-<p style="margin:0 0 20px 0;color:#2c3e50;font-size:${randomVisuals.fontSize};">${greeting} ${domainTeam} team,</p>
-<p style="margin:0 0 25px 0;color:#34495e;font-size:${randomVisuals.fontSize};line-height:1.7;">${intro}</p>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};">
-<p style="margin:0 0 6px 0;color:#7f8c8d;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">${sectionLabels.workOrder}</p>
-<p style="margin:0;color:#2c3e50;font-size:17px;font-weight:bold;font-family:Courier New,monospace;">${workOrder}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:${colors.light};border-radius:${randomVisuals.borderRadius};">
-<p style="margin:0 0 6px 0;color:#7f8c8d;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">${sectionLabels.reference}</p>
-<p style="margin:0;color:#2c3e50;font-size:17px;font-weight:bold;font-family:Courier New,monospace;">${reference}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:#f8f9fa;border:2px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
-<p style="margin:0 0 6px 0;color:#7f8c8d;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.primary};font-size:${randomVisuals.fontSize};font-weight:600;">${service}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:#f8f9fa;border:2px solid ${colors.border};border-radius:${randomVisuals.borderRadius};">
-<p style="margin:0 0 6px 0;color:#7f8c8d;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">${sectionLabels.dueDate}</p>
-<p style="margin:0;color:#2c3e50;font-size:${randomVisuals.fontSize};font-weight:bold;">${dueDate}</p>
-</td>
-</tr>
-</table>
-<p style="text-align:center;margin:30px 0;">
-<a href="${trackingUrl}" style="display:inline-block;padding:${randomVisuals.buttonPadding};background-color:${colors.primary};color:#ffffff;text-decoration:none;border-radius:${randomVisuals.borderRadius};font-size:${randomVisuals.fontSize};font-weight:bold;box-shadow:0 3px 6px rgba(0,0,0,0.15);">${buttonText}</a>
-</p>
-<p style="margin:20px 0 0 0;color:#7f8c8d;font-size:${randomVisuals.fontSize};">${closing}</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body>
-</html>`
-  } else {
-    // STRUCTURE 4: Compact Professional
-    return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#ffffff;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td align="center" style="padding:25px 10px;">
-<table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;border:1px solid #ddd;">
-<tr>
-<td style="padding:${randomVisuals.padding};background-color:${colors.primary};border-bottom:4px solid ${colors.secondary};">
-<h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;text-align:center;">Service Completion Notice</h1>
-</td>
-</tr>
-<tr>
-<td style="padding:${randomVisuals.padding};">
-<p style="margin:0 0 ${randomVisuals.padding} 0;color:#222222;font-size:${randomVisuals.fontSize};">${greeting} ${domainTeam} team,</p>
-<p style="margin:0 0 ${randomVisuals.padding} 0;color:#444444;font-size:${randomVisuals.fontSize};line-height:1.5;">${intro}</p>
-<table width="100%" cellpadding="10" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;background-color:${colors.light};">
-<tr>
-<td>
-<p style="margin:0 0 4px 0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.workOrder}</p>
-<p style="margin:0;color:#000000;font-size:14px;font-weight:bold;font-family:Courier New,monospace;">${workOrder}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="10" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;background-color:${colors.light};">
-<tr>
-<td>
-<p style="margin:0 0 4px 0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.reference}</p>
-<p style="margin:0;color:#000000;font-size:14px;font-weight:bold;font-family:Courier New,monospace;">${reference}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="10" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;background-color:#fafafa;border:1px solid ${colors.border};">
-<tr>
-<td>
-<p style="margin:0 0 4px 0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.service}</p>
-<p style="margin:0;color:${colors.secondary};font-size:${randomVisuals.fontSize};">${service}</p>
-</td>
-</tr>
-</table>
-<table width="100%" cellpadding="10" cellspacing="0" border="0" style="margin:${randomVisuals.padding} 0;background-color:#fafafa;border:1px solid ${colors.border};">
-<tr>
-<td>
-<p style="margin:0 0 4px 0;color:#666666;font-size:10px;font-weight:bold;">${sectionLabels.dueDate}</p>
-<p style="margin:0;color:#000000;font-size:${randomVisuals.fontSize};font-weight:bold;">${dueDate}</p>
-</td>
-</tr>
-</table>
-<p style="text-align:center;margin:20px 0;">
-<a href="${trackingUrl}" style="display:inline-block;padding:${randomVisuals.buttonPadding};background-color:${colors.primary};color:#ffffff;text-decoration:none;font-size:${randomVisuals.fontSize};font-weight:bold;">${buttonText}</a>
-</p>
-<p style="margin:${randomVisuals.padding} 0 0 0;color:#666666;font-size:${randomVisuals.fontSize};">${closing}</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body>
-</html>`
-  }
+</html>
+  `.trim()
 }

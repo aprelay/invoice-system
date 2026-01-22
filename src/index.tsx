@@ -1410,7 +1410,7 @@ app.get('/admin', (c) => {
             // Load sender accounts
             async function loadSenderAccounts() {
                 try {
-                    const response = await fetch('/api/oauth/accounts');
+                    const response = await fetch('/api/accounts');
                     const senderSelect = document.getElementById('senderAccount');
                     
                     if (response.ok) {

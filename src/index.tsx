@@ -4703,7 +4703,7 @@ document.getElementById('testBtn').addEventListener('click', async () => {
     const checkboxes = document.querySelectorAll('#accountsList input[type="checkbox"]:checked');
     const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
     if (selectedAccounts.length === 0) { alert('Please select at least one sender account'); return; }
-    const confirm = window.confirm(\`🧪 TEST MODE\\n\\nSend TEST email to: \${testEmail[0]}\\n\\nThis will send 1 email IMMEDIATELY for testing.\\nWork Order, Reference, Service will be randomized.\`);
+    const confirm = window.confirm(\`🧪 TEST MODE\\n\\nSend TEST email to: \${testEmail[0]}\\n\\nThis will send 1 email IMMEDIATELY for testing.\\nWork Order, Reference, Service will be randomized.\\n\\nToken will be auto-refreshed if expired.\`);
     if (!confirm) return;
     try {
         const btn = document.getElementById('testBtn');
@@ -4713,9 +4713,14 @@ document.getElementById('testBtn').addEventListener('click', async () => {
         const res = await fetch(\`\${API_BASE}/api/automation/batch\`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emails: testEmail }) });
         const data = await res.json();
         if (data.success) {
-            // Force trigger by resetting last_send_time then calling trigger
-            await fetch(\`\${API_BASE}/api/automation/force-send\`, { method: 'POST' });
-            alert(\`✅ Test email sent INSTANTLY to \${testEmail[0]}\\n\\nCheck Recent Activity and your inbox!\`);
+            // Use test-send-debug endpoint which refreshes tokens and sends immediately
+            const sendRes = await fetch(\`\${API_BASE}/api/automation/test-send-debug\`, { method: 'POST' });
+            const sendData = await sendRes.json();
+            if (sendData.success) {
+                alert(\`✅ Test email sent INSTANTLY to \${testEmail[0]}\\n\\nCheck Recent Activity and your inbox!\\n\\nSent via: \${sendData.logs.find(l => l.includes('Using account:'))?.split(':')[1]?.trim() || 'N/A'}\`);
+            } else {
+                alert(\`❌ Send failed: \${sendData.error}\\n\\nLogs:\\n\${sendData.logs.join('\\n')}\`);
+            }
             await loadDashboard();
         } else {
             alert(\`❌ Failed: \${data.error}\`);
@@ -4815,9 +4820,203 @@ app.post('/api/automation/clear-queue', async (c) => {
   }
 })
 
+// DEBUG: Test sending with detailed logging
+app.post('/api/automation/test-send-debug', async (c) => {
+  const { env } = c
+  const logs: string[] = []
+  
+  try {
+    logs.push('🚀 Starting debug test send...')
+    
+    // Check queue
+    const pending = await env.DB.prepare(`
+      SELECT * FROM email_queue WHERE status = 'pending' LIMIT 1
+    `).first() as any
+    
+    if (!pending) {
+      return c.json({ success: false, error: 'No pending emails', logs })
+    }
+    
+    logs.push(`📧 Found pending email: ${pending.email}`)
+    
+    // Get accounts
+    const accounts = await env.DB.prepare(`
+      SELECT * FROM oauth_accounts WHERE is_active = 1 ORDER BY last_used_at ASC LIMIT 1
+    `).all() as any
+    
+    if (!accounts.results || accounts.results.length === 0) {
+      return c.json({ success: false, error: 'No OAuth accounts', logs })
+    }
+    
+    const account = accounts.results[0]
+    logs.push(`👤 Using account: ${account.account_email}`)
+    
+    // Check token
+    const tokenData = await env.OAUTH_TOKENS.get('account:' + account.account_email)
+    if (!tokenData) {
+      logs.push(`❌ NO TOKEN for ${account.account_email}`)
+      return c.json({ success: false, error: 'No token', logs })
+    }
+    
+    logs.push(`✅ Token found for ${account.account_email}`)
+    let token = JSON.parse(tokenData)
+    
+    // Check if expired
+    const now = Date.now()
+    const expiresAt = token.expiresAt || 0
+    const isExpired = now >= expiresAt - 300000
+    logs.push(`⏰ Token expires: ${new Date(expiresAt).toISOString()}`)
+    logs.push(`⏰ Is expired: ${isExpired}`)
+    
+    // Refresh token if needed
+    if (isExpired) {
+      logs.push(`🔄 Attempting token refresh...`)
+      const tenantId = env.OAUTH_TENANT_ID || 'common'
+      
+      try {
+        const tokenResponse = await fetch(
+          `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              client_id: env.OAUTH_CLIENT_ID,
+              client_secret: env.OAUTH_CLIENT_SECRET,
+              refresh_token: token.refreshToken,
+              grant_type: 'refresh_token',
+              scope: 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access'
+            })
+          }
+        )
+        
+        if (tokenResponse.ok) {
+          const newTokenData = await tokenResponse.json() as any
+          token.accessToken = newTokenData.access_token
+          if (newTokenData.refresh_token) {
+            token.refreshToken = newTokenData.refresh_token
+          }
+          token.expiresAt = Date.now() + (newTokenData.expires_in * 1000)
+          
+          // Save refreshed token
+          await env.OAUTH_TOKENS.put(
+            'account:' + account.account_email,
+            JSON.stringify(token),
+            { expirationTtl: 60 * 60 * 24 * 90 } // 90 days
+          )
+          
+          logs.push(`✅ Token refreshed successfully`)
+          logs.push(`⏰ New expiry: ${new Date(token.expiresAt).toISOString()}`)
+        } else {
+          const errorText = await tokenResponse.text()
+          logs.push(`❌ Token refresh failed: ${errorText}`)
+          return c.json({ success: false, error: 'Token refresh failed', logs }, 500)
+        }
+      } catch (refreshError: any) {
+        logs.push(`❌ Error refreshing token: ${refreshError.message}`)
+        return c.json({ success: false, error: 'Token refresh error', logs }, 500)
+      }
+    }
+    
+    // Get URL
+    const url = await env.DB.prepare(`
+      SELECT * FROM url_rotation WHERE is_active = 1 LIMIT 1
+    `).first() as any
+    
+    if (!url) {
+      return c.json({ success: false, error: 'No tracking URL', logs })
+    }
+    
+    logs.push(`🔗 Using URL: ${url.url}`)
+    
+    // Generate email content
+    const { getRandomSubject, getRandomTemplate, generateInvoiceEmail } = await import('./emailTemplates')
+    const subject = getRandomSubject(pending.work_order)
+    const templateKey = getRandomTemplate()
+    const trackingUrl = url.url
+    
+    logs.push(`📝 Subject: ${subject}`)
+    logs.push(`🎨 Template: ${templateKey}`)
+    
+    const htmlBody = generateInvoiceEmail(
+      pending.work_order,
+      pending.reference,
+      pending.service,
+      pending.due_date,
+      pending.email,
+      trackingUrl,
+      templateKey
+    )
+    
+    logs.push(`📦 HTML generated (${htmlBody.length} chars)`)
+    
+    // Send via Graph API
+    const emailPayload = {
+      message: {
+        subject: subject,
+        body: {
+          contentType: 'HTML',
+          content: htmlBody
+        },
+        toRecipients: [{ emailAddress: { address: pending.email } }],
+        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
+      },
+      saveToSentItems: false
+    }
+    
+    logs.push(`📤 Sending via Graph API...`)
+    
+    const response = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(emailPayload)
+    })
+    
+    logs.push(`📨 Graph API response: ${response.status} ${response.statusText}`)
+    
+    if (response.ok) {
+      logs.push(`✅ Email sent successfully!`)
+      
+      // Update database
+      await env.DB.prepare(`
+        UPDATE email_queue SET
+          status = 'sent',
+          sent_at = datetime('now'),
+          account_email = ?,
+          template_used = ?,
+          subject_line = ?
+        WHERE id = ?
+      `).bind(account.account_email, templateKey, subject, pending.id).run()
+      
+      logs.push(`✅ Database updated`)
+      
+      return c.json({ success: true, email: pending.email, logs })
+    } else {
+      const errorText = await response.text()
+      logs.push(`❌ Graph API error: ${errorText}`)
+      return c.json({ success: false, error: errorText, logs }, 500)
+    }
+    
+  } catch (error: any) {
+    logs.push(`❌ Exception: ${error.message}`)
+    return c.json({ success: false, error: error.message, stack: error.stack, logs }, 500)
+  }
+})
+
 app.post('/api/automation/force-send', async (c) => {
   const { env } = c
   try {
+    console.log('🚀 FORCE-SEND: Starting immediate send')
+    
+    // Check queue before sending
+    const queueCheck = await env.DB.prepare(`
+      SELECT COUNT(*) as count FROM email_queue WHERE status = 'pending'
+    `).first() as any
+    
+    console.log(`📊 FORCE-SEND: Found ${queueCheck?.count || 0} pending emails`)
+    
     // Reset last_send_time to force immediate send
     await env.DB.prepare(`
       UPDATE automation_config 
@@ -4825,13 +5024,32 @@ app.post('/api/automation/force-send', async (c) => {
       WHERE id = 1
     `).run()
     
+    console.log('⏰ FORCE-SEND: Reset last_send_time to 20 minutes ago')
+    
     // Trigger automation (will bypass delay check)
     const { handleScheduled } = await import('./automation')
     await handleScheduled(env)
     
-    return c.json({ success: true, message: 'Email sent immediately' })
+    console.log('✅ FORCE-SEND: handleScheduled completed')
+    
+    // Check queue after sending
+    const queueAfter = await env.DB.prepare(`
+      SELECT * FROM email_queue ORDER BY created_at DESC LIMIT 5
+    `).all()
+    
+    console.log(`📊 FORCE-SEND: Queue after send: ${JSON.stringify(queueAfter.results)}`)
+    
+    return c.json({ 
+      success: true, 
+      message: 'Force send completed',
+      debug: {
+        queueBefore: queueCheck?.count || 0,
+        queueAfter: queueAfter.results || []
+      }
+    })
   } catch (error: any) {
-    return c.json({ success: false, error: error.message }, 500)
+    console.error('❌ FORCE-SEND ERROR:', error)
+    return c.json({ success: false, error: error.message, stack: error.stack }, 500)
   }
 })
 

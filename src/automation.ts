@@ -115,6 +115,14 @@ export async function handleScheduled(env: Bindings) {
     const account = accounts.results[0]
     console.log('👤 Using account: ' + account.account_email)
     
+    // Update last_used_at IMMEDIATELY to prevent reusing throttled accounts
+    await env.DB.prepare(`
+      UPDATE oauth_accounts 
+      SET last_used_at = datetime('now')
+      WHERE account_email = ?
+    `).bind(account.account_email).run()
+    console.log('⏰ Updated last_used_at for ' + account.account_email)
+    
     // 9. Get pending emails from queue
     const pendingEmails = await env.DB.prepare(`
       SELECT * FROM email_queue WHERE status = 'pending' LIMIT ?

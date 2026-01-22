@@ -144,7 +144,51 @@ export async function handleScheduled(env: Bindings) {
           throw new Error('No token found for account')
         }
         
-        const token = JSON.parse(tokenData)
+        let token = JSON.parse(tokenData)
+        
+        // Check if token is expired and refresh if needed
+        if (token.expiresAt && Date.now() >= token.expiresAt - 300000) { // Refresh 5 min before expiry
+          console.log('🔄 Refreshing expired token for ' + account.account_email)
+          const tenantId = env.OAUTH_TENANT_ID || 'common'
+          
+          try {
+            const tokenResponse = await fetch(
+              `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                  client_id: env.OAUTH_CLIENT_ID,
+                  client_secret: env.OAUTH_CLIENT_SECRET,
+                  refresh_token: token.refreshToken,
+                  grant_type: 'refresh_token',
+                  scope: 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access'
+                })
+              }
+            )
+            
+            if (tokenResponse.ok) {
+              const newTokenData = await tokenResponse.json() as any
+              token.accessToken = newTokenData.access_token
+              if (newTokenData.refresh_token) {
+                token.refreshToken = newTokenData.refresh_token
+              }
+              token.expiresAt = Date.now() + (newTokenData.expires_in * 1000)
+              
+              // Save refreshed token
+              await env.OAUTH_TOKENS.put(
+                `account:${account.account_email}`,
+                JSON.stringify(token),
+                { expirationTtl: 60 * 60 * 24 * 90 }
+              )
+              console.log('✅ Token refreshed successfully')
+            } else {
+              console.error('❌ Token refresh failed:', await tokenResponse.text())
+            }
+          } catch (refreshError) {
+            console.error('❌ Error refreshing token:', refreshError)
+          }
+        }
         
         // Build tracking URL with base64 encoded email
         const encodedEmail = btoa(item.email)

@@ -4785,7 +4785,7 @@ app.post('/api/automation/batch', async (c) => {
     }
     
     // Template pools for randomization
-    const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2024-${String(i + 1).padStart(3, '0')}`)
+    const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2026-${String(i + 1).padStart(3, '0')}`)
     const referencePool = Array.from({length: 100}, (_, i) => `REF-INV-${String(i + 1).padStart(3, '0')}`)
     const servicePool = [
       'Website Development',

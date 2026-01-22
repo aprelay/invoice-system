@@ -4875,7 +4875,8 @@ app.post('/api/automation/sync-accounts', async (c) => {
       return c.json({ success: false, error: 'No OAuth accounts found in KV' }, 404)
     }
     let synced = 0
-    for (let i = 0; i < Math.min(keys.keys.length, 10); i++) {
+    // Sync ALL accounts from KV (no limit)
+    for (let i = 0; i < keys.keys.length; i++) {
       const key = keys.keys[i]
       const email = key.name.replace('account:', '')
       await env.DB.prepare('INSERT INTO oauth_accounts (account_email, account_index, is_active) VALUES (?, ?, 1) ON CONFLICT(account_email) DO UPDATE SET is_active = 1, account_index = excluded.account_index').bind(email, i).run()

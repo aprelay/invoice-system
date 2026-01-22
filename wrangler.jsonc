@@ -3,6 +3,13 @@
   "name": "invoice-system",
   "compatibility_date": "2026-01-15",
   "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "invoice-automation",
+      "database_id": "923b491e-5cc9-4e0b-82cf-1df59c9659e8"
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "PDF_CACHE",

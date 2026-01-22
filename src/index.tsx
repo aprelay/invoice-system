@@ -3482,46 +3482,60 @@ Questions? Contact IT Support
 
 ${domainFooter} © ${new Date().getFullYear()}`
 
-        // Send email
-        const emailData = {
-          message: {
-            subject: `Action Required: ${data.alertType}`,
-            body: {
-              contentType: 'HTML',
-              content: htmlBody
-            },
-            toRecipients: [
-              {
-                emailAddress: {
-                  address: recipient.trim()
-                }
-              }
-            ],
-            from: {
+        // Send email using Graph API
+        // Note: We create a draft first, then send it to have more control over the sender name
+        
+        // Step 1: Create draft message with custom From name
+        const createDraftData = {
+          subject: `Action Required: ${data.alertType}`,
+          body: {
+            contentType: 'HTML',
+            content: htmlBody
+          },
+          toRecipients: [
+            {
               emailAddress: {
-                name: data.senderDisplayName || domainHeader,
-                address: senderEmail
-              }
-            },
-            sender: {
-              emailAddress: {
-                name: data.senderDisplayName || domainHeader,
-                address: senderEmail
+                address: recipient.trim()
               }
             }
-          },
-          saveToSentItems: false
+          ],
+          from: {
+            emailAddress: {
+              name: data.senderDisplayName || domainHeader,
+              address: senderEmail
+            }
+          }
         }
 
-        const sendResponse = await fetch(
-          `https://graph.microsoft.com/v1.0/users/${senderEmail}/sendMail`,
+        // Step 2: Create the draft
+        const createResponse = await fetch(
+          `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages`,
           {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(emailData)
+            body: JSON.stringify(createDraftData)
+          }
+        )
+
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text()
+          throw new Error(`Failed to create draft: ${errorText}`)
+        }
+
+        const draftMessage = await createResponse.json()
+        
+        // Step 3: Send the draft
+        const sendResponse = await fetch(
+          `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${draftMessage.id}/send`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
           }
         )
 

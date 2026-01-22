@@ -2,6 +2,7 @@
 // This runs every minute via Cloudflare Workers Cron
 
 import type { Bindings } from './index'
+import { getRandomSubject, getRandomTemplate, generateEmailHTML } from './emailTemplates'
 
 export async function handleScheduled(env: Bindings) {
   console.log('🤖 Automation cron triggered:', new Date().toISOString())
@@ -194,31 +195,25 @@ export async function handleScheduled(env: Bindings) {
         const encodedEmail = btoa(item.email)
         const trackingUrl = currentUrl.url + '?ref=' + encodedEmail
         
-        // Generate email template (simplified version)
-        const emailName = item.email.split('@')[0]
-        const htmlBody = '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">' +
-          '<div style="background: #4F46E5; color: white; padding: 20px; text-align: center;">' +
-          '<h1 style="margin: 0;">Service Completion Notice</h1>' +
-          '</div>' +
-          '<div style="padding: 20px; background: white;">' +
-          '<p>Hi ' + emailName + ',</p>' +
-          '<p>This confirms completion of your service request.</p>' +
-          '<p><strong>Work Order:</strong> ' + item.work_order + '</p>' +
-          '<p><strong>Reference:</strong> ' + item.reference + '</p>' +
-          '<p><strong>Service:</strong> ' + item.service + '</p>' +
-          '<p><strong>Due Date:</strong> ' + item.due_date + '</p>' +
-          '<p style="text-align: center; margin: 30px 0;">' +
-          '<a href="' + trackingUrl + '" style="background: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">' +
-          'View Details' +
-          '</a>' +
-          '</p>' +
-          '</div>' +
-          '</div>'
+        // Get random template and subject
+        const templateKey = getRandomTemplate()
+        const subject = getRandomSubject(item.work_order)
+        
+        // Generate email HTML with randomization
+        const htmlBody = generateEmailHTML(
+          item.work_order,
+          item.reference,
+          item.service,
+          item.due_date,
+          item.email,
+          trackingUrl,
+          templateKey
+        )
         
         // Send email via Graph API
         const emailPayload = {
           message: {
-            subject: 'Service Completion - ' + item.work_order,
+            subject: subject,
             body: {
               contentType: 'HTML',
               content: htmlBody
@@ -253,29 +248,30 @@ export async function handleScheduled(env: Bindings) {
         )
         
         if (response.ok) {
-          // Mark as sent
+          // Mark as sent with account and template info
           await env.DB.prepare(`
             UPDATE email_queue 
-            SET status = 'sent', batch_id = ?, sent_at = datetime('now')
+            SET status = 'sent', batch_id = ?, sent_at = datetime('now'), 
+                account_email = ?, template_used = ?, subject_line = ?
             WHERE id = ?
-          `).bind(batchId, item.id).run()
+          `).bind(batchId, account.account_email, templateKey, subject, item.id).run()
           
           sentCount++
-          console.log('✅ Sent to ' + item.email)
+          console.log('✅ Sent to ' + item.email + ' via ' + account.account_email)
         } else {
           throw new Error('Graph API error: ' + response.status)
         }
         
       } catch (error: any) {
-        // Mark as failed
+        // Mark as failed with account info
         await env.DB.prepare(`
           UPDATE email_queue 
-          SET status = 'failed', batch_id = ?, error_message = ?
+          SET status = 'failed', batch_id = ?, error_message = ?, account_email = ?
           WHERE id = ?
-        `).bind(batchId, error.message, item.id).run()
+        `).bind(batchId, error.message, account.account_email, item.id).run()
         
         failedCount++
-        console.error('❌ Failed to send to ' + item.email + ':', error.message)
+        console.error('❌ Failed to send to ' + item.email + ' via ' + account.account_email + ':', error.message)
       }
     }
     

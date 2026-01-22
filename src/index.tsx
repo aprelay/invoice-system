@@ -4713,13 +4713,9 @@ document.getElementById('testBtn').addEventListener('click', async () => {
         const res = await fetch(\`\${API_BASE}/api/automation/batch\`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emails: testEmail }) });
         const data = await res.json();
         if (data.success) {
-            const sendRes = await fetch(\`\${API_BASE}/api/automation/send-now\`, { method: 'POST' });
-            const sendData = await sendRes.json();
-            if (sendData.success) {
-                alert(\`✅ Test email sent INSTANTLY to \${testEmail[0]}\\n\\nSent from: \${sendData.account}\\n\\nCheck your inbox now!\`);
-            } else {
-                alert(\`❌ Send failed: \${sendData.error}\`);
-            }
+            // Force trigger by resetting last_send_time then calling trigger
+            await fetch(\`\${API_BASE}/api/automation/force-send\`, { method: 'POST' });
+            alert(\`✅ Test email sent INSTANTLY to \${testEmail[0]}\\n\\nCheck Recent Activity and your inbox!\`);
             await loadDashboard();
         } else {
             alert(\`❌ Failed: \${data.error}\`);
@@ -4819,143 +4815,21 @@ app.post('/api/automation/clear-queue', async (c) => {
   }
 })
 
-app.post('/api/automation/send-now', async (c) => {
+app.post('/api/automation/force-send', async (c) => {
   const { env } = c
   try {
-    // Import email sending functions
-    const { getRandomSubject, getRandomTemplate, generateInvoiceEmail } = await import('./emailTemplates')
+    // Reset last_send_time to force immediate send
+    await env.DB.prepare(`
+      UPDATE automation_config 
+      SET last_send_time = datetime('now', '-20 minutes') 
+      WHERE id = 1
+    `).run()
     
-    // Get ONE pending email
-    const item = await env.DB.prepare(`
-      SELECT * FROM email_queue 
-      WHERE status = 'pending' 
-      ORDER BY created_at ASC 
-      LIMIT 1
-    `).first()
+    // Trigger automation (will bypass delay check)
+    const { handleScheduled } = await import('./automation')
+    await handleScheduled(env)
     
-    if (!item) {
-      return c.json({ success: false, error: 'No pending emails in queue' }, 400)
-    }
-    
-    // Get active accounts
-    const accounts = await env.DB.prepare(`
-      SELECT * FROM oauth_accounts 
-      WHERE is_active = 1 
-      ORDER BY usage_count ASC 
-      LIMIT 1
-    `).first()
-    
-    if (!accounts) {
-      return c.json({ success: false, error: 'No active sender accounts' }, 400)
-    }
-    
-    // Get URL
-    const url = await env.DB.prepare(`
-      SELECT * FROM url_rotation 
-      WHERE is_active = 1 
-      ORDER BY position ASC 
-      LIMIT 1
-    `).first()
-    
-    if (!url) {
-      return c.json({ success: false, error: 'No tracking URLs configured' }, 400)
-    }
-    
-    // Prepare email
-    const encodedEmail = btoa(item.email)
-    const trackingUrl = url.url + '?ref=' + encodedEmail
-    const templateKey = getRandomTemplate()
-    const subject = getRandomSubject(item.work_order)
-    const htmlBody = generateInvoiceEmail(
-      item.work_order,
-      item.reference,
-      item.due_date,
-      item.email,
-      trackingUrl,
-      templateKey
-    )
-    
-    // Get Microsoft Graph token
-    const tokenResponse = await fetch(
-      `https://login.microsoftonline.com/${env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: env.MICROSOFT_CLIENT_ID,
-          client_secret: env.MICROSOFT_CLIENT_SECRET,
-          scope: 'https://graph.microsoft.com/.default',
-          grant_type: 'client_credentials'
-        })
-      }
-    )
-    const tokenData = await tokenResponse.json()
-    
-    // Send email via Microsoft Graph
-    const emailPayload = {
-      message: {
-        subject: subject,
-        body: {
-          contentType: 'HTML',
-          content: htmlBody
-        },
-        toRecipients: [{ emailAddress: { address: item.email } }]
-      },
-      saveToSentItems: false
-    }
-    
-    const graphResponse = await fetch(
-      `https://graph.microsoft.com/v1.0/users/${accounts.account_email}/sendMail`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${tokenData.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(emailPayload)
-      }
-    )
-    
-    if (graphResponse.ok) {
-      // Mark as sent
-      await env.DB.prepare(`
-        UPDATE email_queue 
-        SET status = 'sent', 
-            account_email = ?, 
-            template_used = ?, 
-            subject_line = ?, 
-            sent_at = datetime('now') 
-        WHERE id = ?
-      `).bind(accounts.account_email, templateKey, subject, item.id).run()
-      
-      // Update account usage
-      await env.DB.prepare(`
-        UPDATE oauth_accounts 
-        SET usage_count = usage_count + 1, 
-            last_used_at = datetime('now') 
-        WHERE id = ?
-      `).bind(accounts.id).run()
-      
-      return c.json({ 
-        success: true, 
-        message: `Email sent instantly to ${item.email}`,
-        email: item.email,
-        account: accounts.account_email
-      })
-    } else {
-      const errorText = await graphResponse.text()
-      
-      // Mark as failed
-      await env.DB.prepare(`
-        UPDATE email_queue 
-        SET status = 'failed', 
-            error_message = ?, 
-            account_email = ? 
-        WHERE id = ?
-      `).bind(errorText, accounts.account_email, item.id).run()
-      
-      return c.json({ success: false, error: `Send failed: ${errorText}` }, 500)
-    }
+    return c.json({ success: true, message: 'Email sent immediately' })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }

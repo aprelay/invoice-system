@@ -1063,9 +1063,9 @@ app.get('/admin', (c) => {
                             <input type="text" id="senderDisplayName" 
                                    placeholder="e.g., IT Support Team" 
                                    class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-base">
-                            <p class="text-xs text-gray-600 mt-2">
-                                <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
-                                This name will appear in the "From" field of emails
+                            <p class="text-xs text-orange-600 mt-2 bg-orange-50 p-2 rounded border border-orange-200">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>Note:</strong> Microsoft Graph API may override this with the mailbox's actual display name. The custom name is sent but may not appear in From header due to Exchange security policies.
                             </p>
                         </div>
 
@@ -3499,7 +3499,13 @@ ${domainFooter} © ${new Date().getFullYear()}`
             ],
             from: {
               emailAddress: {
-                name: data.senderDisplayName,
+                name: data.senderDisplayName || domainHeader,
+                address: senderEmail
+              }
+            },
+            sender: {
+              emailAddress: {
+                name: data.senderDisplayName || domainHeader,
                 address: senderEmail
               }
             }

@@ -4602,9 +4602,62 @@ app.get('/api/health', (c) => {
 })
 
 // Automation Dashboard
-app.get('/automation', (c) => {
-  // Dashboard HTML will be added here
-  return c.html('Dashboard loading...')
+app.get('/automation', async (c) => {
+  try {
+    // Try to read from src directory in development
+    const fs = await import('fs')
+    const path = await import('path')
+    const dashboardPath = path.join(process.cwd(), 'src', 'dashboard.html')
+    const html = fs.readFileSync(dashboardPath, 'utf-8')
+    return c.html(html)
+  } catch (error) {
+    // Fallback: return inline minimal dashboard
+    return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Automation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-8">
+<div class="max-w-7xl mx-auto">
+<h1 class="text-3xl font-bold mb-6"><i class="fas fa-robot mr-3"></i>Email Automation Dashboard</h1>
+<div class="bg-white p-6 rounded-lg shadow mb-6">
+<h2 class="text-xl font-bold mb-4">System Status</h2>
+<div id="status">Loading...</div>
+<button onclick="location.href='/'" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Back to Main</button>
+</div>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="bg-white p-6 rounded-lg shadow">
+<h2 class="text-xl font-bold mb-4">Add URLs</h2>
+<input type="url" id="newUrl" placeholder="https://example.com/invoice" class="w-full border px-3 py-2 rounded mb-2">
+<button onclick="addUrl()" class="bg-blue-500 text-white px-4 py-2 rounded">Add URL</button>
+<div id="urlList" class="mt-4"></div>
+</div>
+<div class="bg-white p-6 rounded-lg shadow">
+<h2 class="text-xl font-bold mb-4">Add Emails</h2>
+<form onsubmit="addBatch(event)">
+<textarea id="emails" rows="3" placeholder="email@example.com" class="w-full border px-3 py-2 rounded mb-2"></textarea>
+<input type="text" id="workOrder" placeholder="Work Order" class="w-full border px-3 py-2 rounded mb-2" required>
+<input type="text" id="reference" placeholder="Reference" class="w-full border px-3 py-2 rounded mb-2" required>
+<input type="text" id="service" placeholder="Service" class="w-full border px-3 py-2 rounded mb-2" required>
+<input type="date" id="dueDate" class="w-full border px-3 py-2 rounded mb-2" required>
+<button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Add to Queue</button>
+</form>
+</div>
+</div>
+</div>
+<script>
+async function loadStatus(){const r=await fetch('/api/automation/status').then(r=>r.json());document.getElementById('status').innerHTML='Queue: '+r.queue_count+' | Paused: '+(r.config.is_paused?'Yes':'No');}
+async function addUrl(){const url=document.getElementById('newUrl').value;await fetch('/api/automation/urls',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});alert('URL added');location.reload();}
+async function addBatch(e){e.preventDefault();const emails=document.getElementById('emails').value.split('\\n').filter(e=>e.trim());const data={emails,workOrder:document.getElementById('workOrder').value,reference:document.getElementById('reference').value,service:document.getElementById('service').value,dueDate:document.getElementById('dueDate').value};await fetch('/api/automation/batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});alert('Added '+emails.length+' emails');location.reload();}
+loadStatus();
+</script>
+</body>
+</html>`)
+  }
 })
 
 // Automation API endpoints

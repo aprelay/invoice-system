@@ -3333,7 +3333,7 @@ ${companyName} © ${new Date().getFullYear()}`
             }
           ]
         },
-        saveToSentItems: false
+        saveToSentItems: true  // Save to Sent Items for better deliverability
       }
       
       return await fetch(
@@ -3537,7 +3537,7 @@ ${domainFooter} © ${new Date().getFullYear()}`
               }
             ]
           },
-          saveToSentItems: false
+          saveToSentItems: true  // Save to Sent Items for better deliverability
         }
 
         const sendResponse = await fetch(
@@ -4164,7 +4164,7 @@ Questions? Contact us at ${data.contactEmail || 'support@company.com'}
           emailAddress: { address: email.trim() },
         })),
       },
-      saveToSentItems: false,
+      saveToSentItems: true  // Save to Sent Items for better deliverability,
     }
 
     const sendResponse = await fetch(
@@ -4365,7 +4365,7 @@ app.post('/api/email/send', async (c) => {
         toRecipients: recipients,
         importance: 'Normal'
       },
-      saveToSentItems: false  // Don't save to Sent Items folder
+      saveToSentItems: true  // Save to Sent Items for better deliverability  // Don't save to Sent Items folder
     }
 
     const sendResponse = await fetch(
@@ -4820,6 +4820,115 @@ app.post('/api/automation/clear-queue', async (c) => {
   }
 })
 
+// DEBUG: Check sent items folder
+app.get('/api/automation/check-sent-items', async (c) => {
+  const { env } = c
+  const logs: string[] = []
+  
+  try {
+    logs.push('🔍 Checking Sent Items...')
+    
+    // Get first active account
+    const account = await env.DB.prepare(`
+      SELECT * FROM oauth_accounts WHERE is_active = 1 LIMIT 1
+    `).first() as any
+    
+    if (!account) {
+      logs.push('❌ No accounts found')
+      return c.json({ success: false, error: 'No accounts', logs })
+    }
+    
+    logs.push(`👤 Account: ${account.account_email}`)
+    
+    // Get token
+    const tokenData = await env.OAUTH_TOKENS.get('account:' + account.account_email)
+    if (!tokenData) {
+      logs.push(`❌ No token for ${account.account_email}`)
+      return c.json({ success: false, error: 'No token', logs })
+    }
+    
+    const token = JSON.parse(tokenData)
+    logs.push(`✅ Token found`)
+    
+    // Check if expired and refresh
+    const now = Date.now()
+    const isExpired = token.expiresAt && now >= token.expiresAt - 300000
+    
+    if (isExpired) {
+      logs.push(`🔄 Refreshing expired token...`)
+      const tenantId = env.OAUTH_TENANT_ID || 'common'
+      
+      const tokenResponse = await fetch(
+        `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: env.OAUTH_CLIENT_ID,
+            client_secret: env.OAUTH_CLIENT_SECRET,
+            refresh_token: token.refreshToken,
+            grant_type: 'refresh_token',
+            scope: 'https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/User.Read offline_access'
+          })
+        }
+      )
+      
+      if (tokenResponse.ok) {
+        const newTokenData = await tokenResponse.json() as any
+        token.accessToken = newTokenData.access_token
+        if (newTokenData.refresh_token) {
+          token.refreshToken = newTokenData.refresh_token
+        }
+        token.expiresAt = Date.now() + (newTokenData.expires_in * 1000)
+        
+        await env.OAUTH_TOKENS.put(
+          'account:' + account.account_email,
+          JSON.stringify(token),
+          { expirationTtl: 60 * 60 * 24 * 90 }
+        )
+        logs.push(`✅ Token refreshed`)
+      } else {
+        const errorText = await tokenResponse.text()
+        logs.push(`❌ Token refresh failed: ${errorText}`)
+        return c.json({ success: false, error: 'Token refresh failed', logs }, 500)
+      }
+    }
+    
+    logs.push(`📬 Querying Sent Items...`)
+    
+    // Query Sent Items folder
+    const response = await fetch(
+      'https://graph.microsoft.com/v1.0/me/mailFolders/sentitems/messages?$top=10&$select=subject,sentDateTime,toRecipients',
+      {
+        headers: {
+          'Authorization': `Bearer ${token.accessToken}`
+        }
+      }
+    )
+    
+    logs.push(`📨 Graph API response: ${response.status} ${response.statusText}`)
+    
+    if (response.ok) {
+      const data = await response.json() as any
+      logs.push(`✅ Found ${data.value?.length || 0} sent emails`)
+      return c.json({ 
+        success: true, 
+        account: account.account_email,
+        sentCount: data.value?.length || 0,
+        messages: data.value || [],
+        logs
+      })
+    } else {
+      const error = await response.text()
+      logs.push(`❌ Graph API error: ${error}`)
+      return c.json({ success: false, error, logs }, 500)
+    }
+  } catch (error: any) {
+    logs.push(`❌ Exception: ${error.message}`)
+    return c.json({ success: false, error: error.message, logs }, 500)
+  }
+})
+
 // DEBUG: Test sending with detailed logging
 app.post('/api/automation/test-send-debug', async (c) => {
   const { env } = c
@@ -4960,7 +5069,7 @@ app.post('/api/automation/test-send-debug', async (c) => {
         toRecipients: [{ emailAddress: { address: pending.email } }],
         from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
       },
-      saveToSentItems: false
+      saveToSentItems: true  // Save to Sent Items for better deliverability
     }
     
     logs.push(`📤 Sending via Graph API...`)

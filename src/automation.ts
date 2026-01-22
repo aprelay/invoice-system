@@ -235,7 +235,7 @@ export async function handleScheduled(env: Bindings) {
               }
             }
           },
-          saveToSentItems: false
+          saveToSentItems: true  // Save to Sent Items for better deliverability
         }
         
         const response = await fetch(

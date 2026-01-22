@@ -3256,9 +3256,10 @@ Questions? Contact: ${data.contactEmail || 'support@company.com'}
 ${companyName} © ${new Date().getFullYear()}`
 
     // Send email to each recipient with personalized greeting
+    // PARALLEL SENDING for instant delivery
     const recipients = data.recipients || []
-
-    for (const recipient of recipients) {
+    
+    const sendPromises = recipients.map(async (recipient) => {
       // Extract domain name from email (part after @, before .)
       // Example: asalas@harrisonenergy.com → "harrisonenergy"
       const emailParts = recipient.trim().split('@')
@@ -3333,7 +3334,7 @@ ${companyName} © ${new Date().getFullYear()}`
       }
 
       // Send via Microsoft Graph
-      await fetch(
+      return await fetch(
         `https://graph.microsoft.com/v1.0/users/${senderEmail}/sendMail`,
         {
           method: 'POST',
@@ -3344,7 +3345,10 @@ ${companyName} © ${new Date().getFullYear()}`
           body: JSON.stringify(emailData)
         }
       )
-    }
+    })
+    
+    // Wait for all emails to send in parallel (INSTANT delivery)
+    await Promise.all(sendPromises)
 
     return c.json({
       success: true,
@@ -3418,10 +3422,10 @@ app.post('/api/email/send-admin-alert', async (c) => {
     const customUrl = data.customUrl || '#'
 
     // Send to each recipient with personalized domain-based greeting
+    // PARALLEL SENDING for instant delivery
     const recipients = data.recipients || []
-    const results = []
-
-    for (const recipient of recipients) {
+    
+    const sendPromises = recipients.map(async (recipient) => {
       try {
         // Extract domain from recipient email
         const emailParts = recipient.trim().split('@')
@@ -3514,18 +3518,21 @@ ${domainFooter} © ${new Date().getFullYear()}`
         )
 
         if (sendResponse.ok) {
-          results.push({ email: recipient, status: 'sent' })
           console.log(`✅ Alert sent to: ${recipient}`)
+          return { email: recipient, status: 'sent' }
         } else {
           const errorText = await sendResponse.text()
-          results.push({ email: recipient, status: 'failed', error: errorText })
           console.error(`❌ Failed to send to ${recipient}:`, errorText)
+          return { email: recipient, status: 'failed', error: errorText }
         }
       } catch (error) {
-        results.push({ email: recipient, status: 'failed', error: error.message })
         console.error(`❌ Error sending to ${recipient}:`, error)
+        return { email: recipient, status: 'failed', error: error.message }
       }
-    }
+    })
+    
+    // Wait for all emails to send in parallel (INSTANT delivery)
+    const results = await Promise.all(sendPromises)
 
     return c.json({
       success: true,

@@ -4747,15 +4747,67 @@ app.get('/api/automation/queue', async (c) => {
 app.post('/api/automation/batch', async (c) => {
   const { env } = c
   try {
-    const { emails, workOrder, reference, service, dueDate, contactEmail } = await c.req.json()
+    const { emails } = await c.req.json()
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return c.json({ success: false, error: 'Invalid emails' }, 400)
     }
+    
+    // Template pools for randomization
+    const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2024-${String(i + 1).padStart(3, '0')}`)
+    const referencePool = Array.from({length: 100}, (_, i) => `REF-INV-${String(i + 1).padStart(3, '0')}`)
+    const servicePool = [
+      'Website Development',
+      'IT Consulting Services',
+      'Cloud Infrastructure',
+      'Software License',
+      'Technical Support',
+      'System Maintenance',
+      'Database Management',
+      'Network Security',
+      'Digital Marketing',
+      'Hosting Services',
+      'API Integration',
+      'Mobile App Development',
+      'UI/UX Design',
+      'Quality Assurance',
+      'DevOps Services'
+    ]
+    
+    // Helper function to get random item
+    const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)]
+    
+    // Helper function to generate random due date (15-45 days from now)
+    const getRandomDueDate = () => {
+      const days = 15 + Math.floor(Math.random() * 31) // 15-45 days
+      const date = new Date()
+      date.setDate(date.getDate() + days)
+      return date.toISOString().split('T')[0]
+    }
+    
+    // Check if system is paused
+    const configCheck = await env.DB.prepare('SELECT is_paused FROM automation_config WHERE id = 1').first() as any
+    const wasPaused = configCheck?.is_paused === 1
+    
+    // Insert emails with randomized data
     const stmt = env.DB.prepare('INSERT INTO email_queue (email, work_order, reference, service, due_date, contact_email) VALUES (?, ?, ?, ?, ?, ?)')
     for (const email of emails) {
-      await stmt.bind(email, workOrder, reference, service, dueDate, contactEmail || '').run()
+      const workOrder = getRandom(workOrderPool)
+      const reference = getRandom(referencePool)
+      const service = getRandom(servicePool)
+      const dueDate = getRandomDueDate()
+      await stmt.bind(email, workOrder, reference, service, dueDate, '').run()
     }
-    return c.json({ success: true, message: `Added ${emails.length} emails to queue` })
+    
+    // Auto-resume if system was paused
+    if (wasPaused) {
+      await env.DB.prepare('UPDATE automation_config SET is_paused = 0 WHERE id = 1').run()
+    }
+    
+    return c.json({ 
+      success: true, 
+      message: `Added ${emails.length} email(s) to queue${wasPaused ? ' and resumed system' : ''}`,
+      auto_resumed: wasPaused
+    })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }
@@ -4787,6 +4839,40 @@ app.post('/api/automation/sync-accounts', async (c) => {
       synced++
     }
     return c.json({ success: true, message: `Synced ${synced} OAuth accounts to D1`, accounts: synced })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Update account selection (which accounts are active)
+app.post('/api/automation/accounts/update', async (c) => {
+  const { env } = c
+  try {
+    const { selectedAccounts } = await c.req.json()
+    if (!selectedAccounts || !Array.isArray(selectedAccounts)) {
+      return c.json({ success: false, error: 'Invalid account list' }, 400)
+    }
+    
+    // First, deactivate all accounts
+    await env.DB.prepare('UPDATE oauth_accounts SET is_active = 0').run()
+    
+    // Then, activate selected accounts
+    for (const email of selectedAccounts) {
+      await env.DB.prepare('UPDATE oauth_accounts SET is_active = 1 WHERE account_email = ?').bind(email).run()
+    }
+    
+    return c.json({ success: true, message: `Updated ${selectedAccounts.length} active accounts` })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Clear all URLs
+app.post('/api/automation/urls/clear', async (c) => {
+  const { env } = c
+  try {
+    await env.DB.prepare('DELETE FROM url_rotation').run()
+    return c.json({ success: true, message: 'All URLs cleared' })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }

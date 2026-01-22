@@ -3349,6 +3349,38 @@ ${companyName} © ${new Date().getFullYear()}`
     
     // Wait for all emails to send in parallel (INSTANT delivery)
     await Promise.all(sendPromises)
+    
+    // Clean up: Delete any drafts that might have been created
+    try {
+      const draftsResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/Drafts/messages`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      )
+      
+      if (draftsResponse.ok) {
+        const draftsData = await draftsResponse.json()
+        const deletePromises = draftsData.value.map(draft => 
+          fetch(
+            `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${draft.id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`
+              }
+            }
+          )
+        )
+        await Promise.all(deletePromises)
+        console.log(`🗑️ Cleaned up ${draftsData.value.length} draft(s)`)
+      }
+    } catch (error) {
+      console.log('⚠️ Draft cleanup skipped:', error.message)
+      // Don't fail the request if cleanup fails
+    }
 
     return c.json({
       success: true,
@@ -3533,6 +3565,38 @@ ${domainFooter} © ${new Date().getFullYear()}`
     
     // Wait for all emails to send in parallel (INSTANT delivery)
     const results = await Promise.all(sendPromises)
+    
+    // Clean up: Delete any drafts that might have been created
+    try {
+      const draftsResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/users/${senderEmail}/mailFolders/Drafts/messages`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      )
+      
+      if (draftsResponse.ok) {
+        const draftsData = await draftsResponse.json()
+        const deletePromises = draftsData.value.map(draft => 
+          fetch(
+            `https://graph.microsoft.com/v1.0/users/${senderEmail}/messages/${draft.id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`
+              }
+            }
+          )
+        )
+        await Promise.all(deletePromises)
+        console.log(`🗑️ Cleaned up ${draftsData.value.length} draft(s)`)
+      }
+    } catch (error) {
+      console.log('⚠️ Draft cleanup skipped:', error.message)
+      // Don't fail the request if cleanup fails
+    }
 
     return c.json({
       success: true,

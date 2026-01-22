@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
 
-type Bindings = {
+export type Bindings = {
   DROPBOX_ACCESS_TOKEN: string
   MICROSOFT_CLIENT_ID: string
   MICROSOFT_TENANT_ID: string
@@ -14,6 +14,7 @@ type Bindings = {
   PDF_CACHE: KVNamespace
   INVOICE_IMAGE_CACHE: KVNamespace
   OAUTH_TOKENS: KVNamespace
+  DB: D1Database
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -2783,16 +2784,16 @@ app.post('/api/email/send-html-invoice', async (c) => {
     
     // Helper function to generate email template based on style
     function generateEmailTemplate(templateKey, companyName, data, customUrl, buttonText) {
-      // OFFICE365-OPTIMIZED: Pick random structure (1-3 instead of 1-5 for better deliverability)
-      const structureNumber = Math.floor(Math.random() * 3) + 1
+      // RANDOMIZATION: Pick random structure (1-5)
+      const structureNumber = Math.floor(Math.random() * 5) + 1
       
-      // OFFICE365-OPTIMIZED: Simplified visual properties (reduced variations for consistency)
+      // RANDOMIZATION: Pick random visual properties
       const randomVisuals = {
-        borderRadius: ['0px', '6px'][Math.floor(Math.random() * 2)],
-        padding: ['15px', '20px'][Math.floor(Math.random() * 2)],
-        fontSize: ['14px', '15px'][Math.floor(Math.random() * 2)],
-        buttonPadding: ['12px 30px', '14px 35px'][Math.floor(Math.random() * 2)],
-        headerPadding: ['20px', '25px'][Math.floor(Math.random() * 2)]
+        borderRadius: ['0px', '4px', '8px', '12px'][Math.floor(Math.random() * 4)],
+        padding: ['10px', '12px', '15px', '20px'][Math.floor(Math.random() * 4)],
+        fontSize: ['13px', '14px', '15px'][Math.floor(Math.random() * 3)],
+        buttonPadding: ['10px 25px', '12px 30px', '14px 35px'][Math.floor(Math.random() * 3)],
+        headerPadding: ['15px', '20px', '25px'][Math.floor(Math.random() * 3)]
       }
       
       // RANDOMIZATION: Pick random text variations
@@ -4600,6 +4601,20 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// Automation API endpoints
+app.get('/api/automation/status', async (c) => {
+  const { env } = c
+  try {
+    if (!env.DB) {
+      return c.json({ success: false, error: 'Database not configured' }, 500)
+    }
+    const config = await env.DB.prepare('SELECT * FROM automation_config WHERE id = 1').first()
+    return c.json({ success: true, config })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 // Dropbox setup guide
 app.get('/setup-guide', async (c) => {
   try {
@@ -4944,3 +4959,4 @@ async function getValidAccessToken(env: Bindings, email: string): Promise<string
 }
 
 export default app
+

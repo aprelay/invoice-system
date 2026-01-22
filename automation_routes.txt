@@ -1,0 +1,55 @@
+// ==========================================
+// AUTOMATION ROUTES (Insert before health check)
+// ==========================================
+
+// Automation Dashboard
+app.get('/automation', (c) => {
+  const dashboardHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Automation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Content will be loaded via JavaScript -->
+    <div id="app">Loading...</div>
+    <script>
+      // Dashboard code here
+      document.getElementById('app').innerHTML = 'Automation Dashboard - Coming Soon';
+    </script>
+</body>
+</html>`
+  
+  return c.html(dashboardHTML)
+})
+
+// Get automation status
+app.get('/api/automation/status', async (c) => {
+  const { env } = c
+  
+  try {
+    const config = await env.DB.prepare(`
+      SELECT * FROM automation_config WHERE id = 1
+    `).first()
+    
+    const queueCount = await env.DB.prepare(`
+      SELECT COUNT(*) as count FROM email_queue WHERE status = 'pending'
+    `).first()
+    
+    return c.json({
+      success: true,
+      is_paused: config?.is_paused === 1,
+      queue_count: queueCount?.count || 0,
+      last_send_time: config?.last_send_time || null,
+      next_send_time: config?.next_send_time || null,
+      current_url_position: config?.current_url_position || 0
+    })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// Health check endpoint

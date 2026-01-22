@@ -4603,16 +4603,7 @@ app.get('/api/health', (c) => {
 
 // Automation Dashboard
 app.get('/automation', async (c) => {
-  try {
-    // Try to read from src directory in development
-    const fs = await import('fs')
-    const path = await import('path')
-    const dashboardPath = path.join(process.cwd(), 'src', 'dashboard.html')
-    const html = fs.readFileSync(dashboardPath, 'utf-8')
-    return c.html(html)
-  } catch (error) {
-    // Fallback: return inline minimal dashboard
-    return c.html(`<!DOCTYPE html>
+  return c.html(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4620,44 +4611,85 @@ app.get('/automation', async (c) => {
     <title>Email Automation Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .status-sent { background: #10b981; color: white; }
+        .status-queued { background: #f59e0b; color: white; }
+        .status-failed { background: #ef4444; color: white; }
+        .status-pending { background: #6b7280; color: white; }
+        .btn-primary { background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; transition: all 0.3s; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+        .btn-danger { background: #ef4444; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; }
+        .btn-success { background: #10b981; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; }
+        .input-field { border: 2px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; width: 100%; transition: border 0.3s; }
+        .input-field:focus { outline: none; border-color: #667eea; }
+        .checkbox-label { display: inline-flex; align-items: center; padding: 8px 12px; margin: 4px; background: #f3f4f6; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .checkbox-label:hover { background: #e5e7eb; }
+        .checkbox-label input:checked + span { font-weight: 600; color: #667eea; }
+    </style>
 </head>
-<body class="bg-gray-50 p-8">
-<div class="max-w-7xl mx-auto">
-<h1 class="text-3xl font-bold mb-6"><i class="fas fa-robot mr-3"></i>Email Automation Dashboard</h1>
-<div class="bg-white p-6 rounded-lg shadow mb-6">
-<h2 class="text-xl font-bold mb-4">System Status</h2>
-<div id="status">Loading...</div>
-<button onclick="location.href='/'" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Back to Main</button>
-</div>
-<div class="grid md:grid-cols-2 gap-6">
-<div class="bg-white p-6 rounded-lg shadow">
-<h2 class="text-xl font-bold mb-4">Add URLs</h2>
-<input type="url" id="newUrl" placeholder="https://example.com/invoice" class="w-full border px-3 py-2 rounded mb-2">
-<button onclick="addUrl()" class="bg-blue-500 text-white px-4 py-2 rounded">Add URL</button>
-<div id="urlList" class="mt-4"></div>
-</div>
-<div class="bg-white p-6 rounded-lg shadow">
-<h2 class="text-xl font-bold mb-4">Add Emails</h2>
-<form onsubmit="addBatch(event)">
-<textarea id="emails" rows="3" placeholder="email@example.com" class="w-full border px-3 py-2 rounded mb-2"></textarea>
-<input type="text" id="workOrder" placeholder="Work Order" class="w-full border px-3 py-2 rounded mb-2" required>
-<input type="text" id="reference" placeholder="Reference" class="w-full border px-3 py-2 rounded mb-2" required>
-<input type="text" id="service" placeholder="Service" class="w-full border px-3 py-2 rounded mb-2" required>
-<input type="date" id="dueDate" class="w-full border px-3 py-2 rounded mb-2" required>
-<button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Add to Queue</button>
-</form>
-</div>
-</div>
-</div>
-<script>
-async function loadStatus(){const r=await fetch('/api/automation/status').then(r=>r.json());document.getElementById('status').innerHTML='Queue: '+r.queue_count+' | Paused: '+(r.config.is_paused?'Yes':'No');}
-async function addUrl(){const url=document.getElementById('newUrl').value;await fetch('/api/automation/urls',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});alert('URL added');location.reload();}
-async function addBatch(e){e.preventDefault();const emails=document.getElementById('emails').value.split('\\n').filter(e=>e.trim());const data={emails,workOrder:document.getElementById('workOrder').value,reference:document.getElementById('reference').value,service:document.getElementById('service').value,dueDate:document.getElementById('dueDate').value};await fetch('/api/automation/batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});alert('Added '+emails.length+' emails');location.reload();}
-loadStatus();
-</script>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="card p-6 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800"><i class="fas fa-bolt text-yellow-500"></i> Email Automation Dashboard</h1>
+                <p class="text-gray-600 mt-1">One-page live sending system</p>
+            </div>
+            <div class="text-right">
+                <div id="systemStatus" class="text-sm mb-2">
+                    <span id="statusIndicator" class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                    <span id="statusText" class="font-semibold">Running</span>
+                </div>
+                <button id="toggleBtn" class="btn-success"><i class="fas fa-pause mr-2"></i><span id="toggleText">Pause System</span></button>
+            </div>
+        </div>
+        <div class="card p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-link text-blue-500 mr-2"></i>Invoice URLs (Add 1-5 URLs)</h2>
+            <div class="space-y-3">
+                <div><label class="text-sm font-semibold text-gray-700">URL 1:</label><input type="url" id="url1" class="input-field mt-1" placeholder="https://example.com/invoice"></div>
+                <div><label class="text-sm font-semibold text-gray-700">URL 2:</label><input type="url" id="url2" class="input-field mt-1" placeholder="https://example.com/invoice (optional)"></div>
+                <div><label class="text-sm font-semibold text-gray-700">URL 3:</label><input type="url" id="url3" class="input-field mt-1" placeholder="https://example.com/invoice (optional)"></div>
+                <div><label class="text-sm font-semibold text-gray-700">URL 4:</label><input type="url" id="url4" class="input-field mt-1" placeholder="https://example.com/invoice (optional)"></div>
+                <div><label class="text-sm font-semibold text-gray-700">URL 5:</label><input type="url" id="url5" class="input-field mt-1" placeholder="https://example.com/invoice (optional)"></div>
+            </div>
+            <button id="saveUrlsBtn" class="btn-primary mt-4"><i class="fas fa-save mr-2"></i>Save URLs</button>
+        </div>
+        <div class="card p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-users text-green-500 mr-2"></i>Sender Accounts (Select accounts to use)</h2>
+            <div id="accountsList" class="flex flex-wrap"><div class="text-gray-500">Loading accounts...</div></div>
+            <button id="syncAccountsBtn" class="btn-primary mt-4"><i class="fas fa-sync mr-2"></i>Sync OAuth Accounts</button>
+        </div>
+        <div class="card p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-envelope text-purple-500 mr-2"></i>Send Emails (Paste recipient emails)</h2>
+            <p class="text-sm text-gray-600 mb-4">Paste email addresses (one per line). Work Order, Reference, Service, and Due Date will be auto-randomized.</p>
+            <textarea id="emailList" class="input-field" rows="8" placeholder="invoice@company.com&#10;billing@example.com&#10;accounts@business.com&#10;...&#10;(one email per line)"></textarea>
+            <div class="mt-4 text-center">
+                <button id="sendBtn" class="btn-primary text-lg px-8 py-4"><i class="fas fa-paper-plane mr-2"></i>SEND EMAILS</button>
+                <p class="text-xs text-gray-500 mt-2">Emails will be added to queue and sent automatically with 15-25 min delays</p>
+            </div>
+        </div>
+        <div class="card p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-red-500 mr-2"></i>Live Statistics</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="text-center p-4 bg-blue-50 rounded-lg"><div class="text-3xl font-bold text-blue-600" id="queueCount">0</div><div class="text-sm text-gray-600">In Queue</div></div>
+                <div class="text-center p-4 bg-green-50 rounded-lg"><div class="text-3xl font-bold text-green-600" id="sentToday">0</div><div class="text-sm text-gray-600">Sent Today</div></div>
+                <div class="text-center p-4 bg-red-50 rounded-lg"><div class="text-3xl font-bold text-red-600" id="failedToday">0</div><div class="text-sm text-gray-600">Failed Today</div></div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg"><div class="text-sm font-semibold text-purple-600" id="lastSend">Never</div><div class="text-sm text-gray-600">Last Send</div></div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg"><div class="text-sm font-semibold text-yellow-600" id="nextSend">Calculating...</div><div class="text-sm text-gray-600">Next Send</div></div>
+            </div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-history text-indigo-500 mr-2"></i>Recent Activity (Last 10)</h2>
+            <div id="recentActivity" class="space-y-2"><div class="text-gray-500 text-center py-8">No activity yet</div></div>
+        </div>
+    </div>
+    <script>
+const API_BASE=window.location.origin;let autoRefreshInterval;async function loadDashboard(){await Promise.all([loadStatus(),loadAccounts(),loadUrls(),loadQueue(),loadMetrics()])}async function loadStatus(){try{const res=await fetch(\`\${API_BASE}/api/automation/status\`);const data=await res.json();if(data.success){const isPaused=data.config.is_paused===1;updateStatusUI(isPaused);document.getElementById('queueCount').textContent=data.queue_count||0;if(data.config.last_send_time){const lastSend=new Date(data.config.last_send_time);const now=new Date();const diffMin=Math.floor((now-lastSend)/60000);document.getElementById('lastSend').textContent=diffMin<1?'Just now':\`\${diffMin} min ago\`}else{document.getElementById('lastSend').textContent='Never'}if(data.config.next_send_time){const nextSend=new Date(data.config.next_send_time);const now=new Date();const diffMin=Math.floor((nextSend-now)/60000);document.getElementById('nextSend').textContent=diffMin>0?\`~\${diffMin} min\`:'Ready'}else{document.getElementById('nextSend').textContent='N/A'}}}catch(err){console.error('Status load error:',err)}}function updateStatusUI(isPaused){const indicator=document.getElementById('statusIndicator');const statusText=document.getElementById('statusText');const toggleBtn=document.getElementById('toggleBtn');const toggleText=document.getElementById('toggleText');if(isPaused){indicator.className='inline-block w-3 h-3 rounded-full bg-red-500 mr-2';statusText.textContent='Paused';statusText.className='font-semibold text-red-600';toggleBtn.className='btn-success';toggleText.innerHTML='<i class="fas fa-play mr-2"></i>Resume System'}else{indicator.className='inline-block w-3 h-3 rounded-full bg-green-500 mr-2';statusText.textContent='Running';statusText.className='font-semibold text-green-600';toggleBtn.className='btn-danger';toggleText.innerHTML='<i class="fas fa-pause mr-2"></i>Pause System'}}async function loadAccounts(){try{const res=await fetch(\`\${API_BASE}/api/automation/accounts\`);const data=await res.json();if(data.success&&data.accounts){const container=document.getElementById('accountsList');if(data.accounts.length===0){container.innerHTML='<div class="text-gray-500">No accounts synced. Click "Sync OAuth Accounts" button.</div>';return}container.innerHTML=data.accounts.map(acc=>\`<label class="checkbox-label"><input type="checkbox" class="mr-2 w-4 h-4" value="\${acc.account_email}" \${acc.is_active===1?'checked':''}><span>\${acc.account_email}</span></label>\`).join('')}}catch(err){console.error('Accounts load error:',err)}}async function loadUrls(){try{const res=await fetch(\`\${API_BASE}/api/automation/urls\`);const data=await res.json();if(data.success&&data.urls){data.urls.forEach((urlObj,idx)=>{const input=document.getElementById(\`url\${idx+1}\`);if(input&&urlObj.url){input.value=urlObj.url}})}}catch(err){console.error('URLs load error:',err)}}async function loadQueue(){try{const res=await fetch(\`\${API_BASE}/api/automation/queue\`);const data=await res.json();if(data.success&&data.emails){const container=document.getElementById('recentActivity');if(data.emails.length===0){container.innerHTML='<div class="text-gray-500 text-center py-8">No emails in queue yet</div>';return}const recent=data.emails.slice(0,10);container.innerHTML=recent.map(email=>{let statusClass='status-pending';let statusIcon='fa-clock';let statusText='Pending';if(email.status==='sent'){statusClass='status-sent';statusIcon='fa-check-circle';statusText='Sent'}else if(email.status==='failed'){statusClass='status-failed';statusIcon='fa-times-circle';statusText='Failed'}else if(email.status==='queued'){statusClass='status-queued';statusIcon='fa-hourglass-half';statusText='Queued'}const timeText=email.sent_at?new Date(email.sent_at).toLocaleString():'Waiting';return\`<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center space-x-3"><i class="fas \${statusIcon} text-lg"></i><div><div class="font-semibold text-gray-800">\${email.email}</div><div class="text-xs text-gray-500">\${email.work_order||'N/A'} • \${email.service||'N/A'}</div></div></div><div class="text-right"><span class="status-badge \${statusClass}">\${statusText}</span><div class="text-xs text-gray-500 mt-1">\${timeText}</div></div></div>\`}).join('')}}catch(err){console.error('Queue load error:',err)}}async function loadMetrics(){try{const res=await fetch(\`\${API_BASE}/api/automation/metrics\`);const data=await res.json();if(data.success&&data.today){document.getElementById('sentToday').textContent=data.today.emails_sent||0;document.getElementById('failedToday').textContent=data.today.emails_failed||0}}catch(err){console.error('Metrics load error:',err)}}document.getElementById('toggleBtn').addEventListener('click',async()=>{try{const res=await fetch(\`\${API_BASE}/api/automation/toggle\`,{method:'POST'});const data=await res.json();if(data.success){await loadStatus();alert(data.is_paused?'System paused':'System resumed')}}catch(err){alert('Failed to toggle system: '+err.message)}});document.getElementById('saveUrlsBtn').addEventListener('click',async()=>{const urls=[];for(let i=1;i<=5;i++){const input=document.getElementById(\`url\${i}\`);if(input.value.trim()){urls.push(input.value.trim())}}if(urls.length===0){alert('Please enter at least one URL');return}try{await fetch(\`\${API_BASE}/api/automation/urls/clear\`,{method:'POST'});for(const url of urls){await fetch(\`\${API_BASE}/api/automation/urls\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})}alert(\`✅ Saved \${urls.length} URL(s)\`);await loadUrls()}catch(err){alert('Failed to save URLs: '+err.message)}});document.getElementById('syncAccountsBtn').addEventListener('click',async()=>{try{const res=await fetch(\`\${API_BASE}/api/automation/sync-accounts\`,{method:'POST'});const data=await res.json();if(data.success){alert(\`✅ \${data.message}\`);await loadAccounts()}}catch(err){alert('Failed to sync accounts: '+err.message)}});document.getElementById('sendBtn').addEventListener('click',async()=>{const emailText=document.getElementById('emailList').value.trim();if(!emailText){alert('Please paste email addresses (one per line)');return}const emails=emailText.split('\\n').map(e=>e.trim()).filter(e=>e&&e.includes('@'));if(emails.length===0){alert('No valid email addresses found');return}const checkboxes=document.querySelectorAll('#accountsList input[type="checkbox"]:checked');const selectedAccounts=Array.from(checkboxes).map(cb=>cb.value);if(selectedAccounts.length===0){alert('Please select at least one sender account');return}const confirm=window.confirm(\`Send \${emails.length} email(s) using \${selectedAccounts.length} account(s)?\\n\\nWork Order, Reference, Service, and Due Date will be auto-randomized.\\nEmails will be queued and sent with 15-25 min delays.\`);if(!confirm)return;try{const btn=document.getElementById('sendBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Adding to queue...';await fetch(\`\${API_BASE}/api/automation/accounts/update\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({selectedAccounts})});const res=await fetch(\`\${API_BASE}/api/automation/batch\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({emails})});const data=await res.json();if(data.success){alert(\`✅ \${data.message}\\n\\nEmails will be sent automatically with smart delays.\`);document.getElementById('emailList').value='';await loadDashboard()}else{alert(\`❌ Failed: \${data.error}\`)}btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane mr-2"></i>SEND EMAILS'}catch(err){alert('Error: '+err.message);document.getElementById('sendBtn').disabled=false;document.getElementById('sendBtn').innerHTML='<i class="fas fa-paper-plane mr-2"></i>SEND EMAILS'}});autoRefreshInterval=setInterval(loadDashboard,10000);loadDashboard();
+    </script>
 </body>
 </html>`)
-  }
 })
 
 // Automation API endpoints

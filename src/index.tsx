@@ -4770,7 +4770,7 @@ app.get('/api/automation/queue', async (c) => {
   const { env } = c
   try {
     const queue = await env.DB.prepare('SELECT * FROM email_queue ORDER BY created_at DESC LIMIT 50').all()
-    return c.json(queue.results || [])
+    return c.json({ success: true, emails: queue.results || [] })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }
@@ -4850,7 +4850,7 @@ app.get('/api/automation/metrics', async (c) => {
   try {
     const today = new Date().toISOString().split('T')[0]
     const metrics = await env.DB.prepare('SELECT * FROM metrics WHERE date = ?').bind(today).first()
-    return c.json(metrics || { emails_sent: 0, emails_failed: 0, batches_completed: 0 })
+    return c.json({ success: true, today: metrics || { emails_sent: 0, emails_failed: 0, batches_completed: 0 } })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }

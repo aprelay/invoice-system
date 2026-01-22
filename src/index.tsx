@@ -4856,6 +4856,17 @@ app.get('/api/automation/metrics', async (c) => {
   }
 })
 
+// Get all accounts
+app.get('/api/automation/accounts', async (c) => {
+  const { env } = c
+  try {
+    const accounts = await env.DB.prepare('SELECT * FROM oauth_accounts ORDER BY account_index ASC').all()
+    return c.json({ success: true, accounts: accounts.results || [] })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 app.post('/api/automation/sync-accounts', async (c) => {
   const { env } = c
   try {

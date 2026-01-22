@@ -4835,6 +4835,55 @@ app.post('/api/automation/force-send', async (c) => {
   }
 })
 
+app.get('/api/automation/check-tokens', async (c) => {
+  const { env } = c
+  try {
+    // Get all active accounts
+    const accounts = await env.DB.prepare(`
+      SELECT account_email FROM oauth_accounts WHERE is_active = 1
+    `).all()
+    
+    const results = []
+    for (const account of accounts.results) {
+      const tokenData = await env.OAUTH_TOKENS.get('account:' + account.account_email)
+      let tokenInfo = null
+      if (tokenData) {
+        try {
+          const token = JSON.parse(tokenData)
+          const isExpired = token.expiresAt && Date.now() >= token.expiresAt
+          tokenInfo = {
+            hasAccessToken: !!token.accessToken,
+            hasRefreshToken: !!token.refreshToken,
+            expiresAt: token.expiresAt ? new Date(token.expiresAt).toISOString() : 'unknown',
+            isExpired: isExpired
+          }
+        } catch (e) {
+          tokenInfo = { error: 'Invalid token format' }
+        }
+      }
+      results.push({
+        email: account.account_email,
+        hasToken: !!tokenData,
+        status: tokenData ? (tokenInfo.isExpired ? 'EXPIRED ⚠️' : 'Connected ✓') : 'NOT CONNECTED ❌',
+        tokenInfo: tokenInfo
+      })
+    }
+    
+    return c.json({ 
+      success: true, 
+      accounts: results,
+      summary: {
+        total: results.length,
+        connected: results.filter(r => r.hasToken && !r.tokenInfo?.isExpired).length,
+        expired: results.filter(r => r.tokenInfo?.isExpired).length,
+        missing: results.filter(r => !r.hasToken).length
+      }
+    })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 app.get('/api/automation/urls', async (c) => {
   const { env } = c
   try {

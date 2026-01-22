@@ -142,7 +142,8 @@ export async function handleScheduled(env: Bindings) {
         // Get OAuth token
         const tokenData = await env.OAUTH_TOKENS.get('account:' + account.account_email)
         if (!tokenData) {
-          throw new Error('No token found for account')
+          console.error('❌ NO OAUTH TOKEN for ' + account.account_email)
+          throw new Error('No OAuth token found for account: ' + account.account_email + '. Please connect this account via OAuth.')
         }
         
         let token = JSON.parse(tokenData)

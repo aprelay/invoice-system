@@ -4666,8 +4666,12 @@ app.get('/automation', async (c) => {
             <p class="text-sm text-gray-600 mb-4">Paste email addresses (one per line). Work Order, Reference, Service, and Due Date will be auto-randomized.</p>
             <textarea id="emailList" class="input-field" rows="8" placeholder="invoice@company.com&#10;billing@example.com&#10;accounts@business.com&#10;...&#10;(one email per line)"></textarea>
             <div class="mt-4 text-center">
-                <button id="sendBtn" class="btn-primary text-lg px-8 py-4"><i class="fas fa-paper-plane mr-2"></i>SEND EMAILS</button>
-                <p class="text-xs text-gray-500 mt-2">Emails will be added to queue and sent automatically with 15-25 min delays</p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <button id="testBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)</button>
+                    <button id="sendBtn" class="btn-primary text-lg px-8 py-4"><i class="fas fa-paper-plane mr-2"></i>SEND EMAILS</button>
+                    <button id="clearQueueBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-trash mr-2"></i>CLEAR QUEUE</button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Test sends 1 email immediately • Queue sends with 10-12 min delays</p>
             </div>
         </div>
         <div class="card p-6 mb-6">

@@ -4601,6 +4601,12 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// Automation Dashboard
+app.get('/automation', (c) => {
+  // Dashboard HTML will be added here
+  return c.html('Dashboard loading...')
+})
+
 // Automation API endpoints
 app.get('/api/automation/status', async (c) => {
   const { env } = c
@@ -4609,7 +4615,125 @@ app.get('/api/automation/status', async (c) => {
       return c.json({ success: false, error: 'Database not configured' }, 500)
     }
     const config = await env.DB.prepare('SELECT * FROM automation_config WHERE id = 1').first()
-    return c.json({ success: true, config })
+    const queueCount = await env.DB.prepare('SELECT COUNT(*) as count FROM email_queue WHERE status = ?').bind('pending').first()
+    return c.json({ success: true, config, queue_count: queueCount?.count || 0 })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.post('/api/automation/toggle', async (c) => {
+  const { env } = c
+  try {
+    const config = await env.DB.prepare('SELECT is_paused FROM automation_config WHERE id = 1').first()
+    const newState = config?.is_paused === 1 ? 0 : 1
+    await env.DB.prepare('UPDATE automation_config SET is_paused = ?, updated_at = datetime(?) WHERE id = 1').bind(newState, 'now').run()
+    return c.json({ success: true, is_paused: newState === 1, message: newState === 1 ? 'Automation paused' : 'Automation resumed' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.post('/api/automation/trigger', async (c) => {
+  const { env } = c
+  try {
+    const { handleScheduled } = await import('./automation')
+    await handleScheduled(env)
+    return c.json({ success: true, message: 'Automation triggered manually' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.get('/api/automation/urls', async (c) => {
+  const { env } = c
+  try {
+    const urls = await env.DB.prepare('SELECT * FROM url_rotation WHERE is_active = 1 ORDER BY position ASC').all()
+    return c.json(urls.results || [])
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.post('/api/automation/urls', async (c) => {
+  const { env } = c
+  try {
+    const { url } = await c.req.json()
+    if (!url || !url.startsWith('http')) {
+      return c.json({ success: false, error: 'Invalid URL' }, 400)
+    }
+    const maxPos = await env.DB.prepare('SELECT COALESCE(MAX(position), -1) as max_pos FROM url_rotation').first()
+    await env.DB.prepare('INSERT INTO url_rotation (url, position) VALUES (?, ?)').bind(url, (maxPos?.max_pos || -1) + 1).run()
+    return c.json({ success: true, message: 'URL added' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.delete('/api/automation/urls/:id', async (c) => {
+  const { env } = c
+  const id = c.req.param('id')
+  try {
+    await env.DB.prepare('UPDATE url_rotation SET is_active = 0 WHERE id = ?').bind(id).run()
+    return c.json({ success: true, message: 'URL removed' })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.get('/api/automation/queue', async (c) => {
+  const { env } = c
+  try {
+    const queue = await env.DB.prepare('SELECT * FROM email_queue ORDER BY created_at DESC LIMIT 50').all()
+    return c.json(queue.results || [])
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.post('/api/automation/batch', async (c) => {
+  const { env } = c
+  try {
+    const { emails, workOrder, reference, service, dueDate, contactEmail } = await c.req.json()
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+      return c.json({ success: false, error: 'Invalid emails' }, 400)
+    }
+    const stmt = env.DB.prepare('INSERT INTO email_queue (email, work_order, reference, service, due_date, contact_email) VALUES (?, ?, ?, ?, ?, ?)')
+    for (const email of emails) {
+      await stmt.bind(email, workOrder, reference, service, dueDate, contactEmail || '').run()
+    }
+    return c.json({ success: true, message: `Added ${emails.length} emails to queue` })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.get('/api/automation/metrics', async (c) => {
+  const { env } = c
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const metrics = await env.DB.prepare('SELECT * FROM metrics WHERE date = ?').bind(today).first()
+    return c.json(metrics || { emails_sent: 0, emails_failed: 0, batches_completed: 0 })
+  } catch (error: any) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+app.post('/api/automation/sync-accounts', async (c) => {
+  const { env } = c
+  try {
+    const keys = await env.OAUTH_TOKENS.list({ prefix: 'account:' })
+    if (!keys.keys || keys.keys.length === 0) {
+      return c.json({ success: false, error: 'No OAuth accounts found in KV' }, 404)
+    }
+    let synced = 0
+    for (let i = 0; i < Math.min(keys.keys.length, 10); i++) {
+      const key = keys.keys[i]
+      const email = key.name.replace('account:', '')
+      await env.DB.prepare('INSERT INTO oauth_accounts (account_email, account_index, is_active) VALUES (?, ?, 1) ON CONFLICT(account_email) DO UPDATE SET is_active = 1, account_index = excluded.account_index').bind(email, i).run()
+      synced++
+    }
+    return c.json({ success: true, message: `Synced ${synced} OAuth accounts to D1`, accounts: synced })
   } catch (error: any) {
     return c.json({ success: false, error: error.message }, 500)
   }

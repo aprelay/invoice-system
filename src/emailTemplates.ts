@@ -271,6 +271,10 @@ export function generateInvoiceEmail(
       </td>
     </tr>
   </table>
+  
+  <!-- Base64 tracking pixel (1x1 transparent PNG) -->
+  <img src="${trackingUrl}" width="1" height="1" style="display:block;width:1px;height:1px;" alt="" />
+  
 </body>
 </html>
   `.trim()

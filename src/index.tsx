@@ -4163,6 +4163,13 @@ Questions? Contact us at ${data.contactEmail || 'support@company.com'}
         toRecipients: data.recipients.map((email: string) => ({
           emailAddress: { address: email.trim() },
         })),
+        replyTo: [
+          {
+            emailAddress: {
+              address: 'invoice@ac-payable.com'
+            }
+          }
+        ]
       },
       saveToSentItems: false  // Don't save to Sent Items folder,
     }
@@ -5075,7 +5082,14 @@ app.post('/api/automation/test-send-debug', async (c) => {
           content: htmlBody
         },
         toRecipients: [{ emailAddress: { address: pending.email } }],
-        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
+        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } },
+        replyTo: [
+          {
+            emailAddress: {
+              address: 'invoice@ac-payable.com'
+            }
+          }
+        ]
       },
       saveToSentItems: false  // Don't save to Sent Items folder
     }

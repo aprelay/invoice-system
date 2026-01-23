@@ -218,7 +218,8 @@ export async function handleScheduled(env: Bindings) {
           item.due_date,
           item.email,
           trackingUrl,
-          templateKey
+          templateKey,
+          account.account_email  // Pass sender email for domain matching
         )
         
         // Send email via Graph API

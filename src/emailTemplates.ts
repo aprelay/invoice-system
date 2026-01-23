@@ -92,10 +92,30 @@ export function generateInvoiceEmail(
   dueDate: string,
   recipientEmail: string,
   trackingUrl: string,
-  templateKey: string
+  templateKey: string,
+  senderEmail?: string  // Add sender email to extract domain
 ): string {
   
   const domainName = getDomainName(recipientEmail)
+  
+  // CRITICAL FIX: ALWAYS use sender's own domain for tracking links
+  // GoDaddy flags external links as phishing
+  let safeUrl = '#'  // Default fallback
+  
+  if (senderEmail) {
+    const senderDomain = senderEmail.split('@')[1]
+    const encodedEmail = btoa(recipientEmail)
+    // Use sender's domain with tracking parameter
+    safeUrl = `https://${senderDomain}/?t=${encodedEmail}`
+  } else if (trackingUrl && !trackingUrl.includes('example.com') && !trackingUrl.includes('google.com')) {
+    // Only use trackingUrl if it's not a known external domain
+    safeUrl = trackingUrl
+  }
+  
+  // Fallback: if no URL works, use # to avoid broken links
+  if (!safeUrl || safeUrl === '') {
+    safeUrl = '#'
+  }
   
   // Natural, conversational greetings
   const greetings = [
@@ -239,7 +259,7 @@ export function generateInvoiceEmail(
               
               <!-- Casual link (NOT button-like) -->
               <p style="margin:0 0 25px;color:#34495e;font-size:15px;line-height:1.7;">
-                You can <a href="#" style="color:${colors.primary};text-decoration:none;border-bottom:1px solid ${colors.primary};">${ctaText.toLowerCase()}</a> if you'd like to review everything.
+                You can <a href="${safeUrl}" style="color:${colors.primary};text-decoration:none;border-bottom:1px solid ${colors.primary};">${ctaText.toLowerCase()}</a> if you'd like to review everything.
               </p>
               
               <p style="margin:0;color:#34495e;font-size:15px;line-height:1.7;">${closing}</p>

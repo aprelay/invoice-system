@@ -5081,7 +5081,8 @@ app.post('/api/automation/test-send-debug', async (c) => {
       pending.due_date,
       pending.email,
       trackingUrl,
-      templateKey
+      templateKey,
+      account.account_email  // Pass sender email for domain matching
     )
     
     logs.push(`📦 HTML generated (${htmlBody.length} chars)`)

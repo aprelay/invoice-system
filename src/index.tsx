@@ -4660,6 +4660,21 @@ app.get('/automation', async (c) => {
             <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-envelope text-purple-500 mr-2"></i>Send Emails (Paste recipient emails)</h2>
             <p class="text-sm text-gray-600 mb-4">Paste email addresses (one per line). Work Order, Reference, Service, and Due Date will be auto-randomized.</p>
             <textarea id="emailList" class="input-field" rows="8" placeholder="invoice@company.com&#10;billing@example.com&#10;accounts@business.com&#10;...&#10;(one email per line)"></textarea>
+            
+            <!-- Manual Tracking URL Input -->
+            <div class="mt-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-link text-blue-500 mr-2"></i>Manual Tracking URL (Optional)
+                </label>
+                <input 
+                    type="text" 
+                    id="manualTrackingUrl" 
+                    class="input-field" 
+                    placeholder="https://yourdomain.com (leave empty to use database URL)"
+                />
+                <p class="text-xs text-gray-500 mt-1">Enter your custom tracking URL. Leave empty to use URL from database. The ?ref= parameter will be added automatically.</p>
+            </div>
+            
             <div class="mt-4 text-center">
                 <div class="flex gap-3 justify-center flex-wrap">
                     <button id="testBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-flask mr-2"></i>TEST (Send up to 10)</button>
@@ -4695,10 +4710,21 @@ document.getElementById('testBtn').addEventListener('click', async () => {
     const emails = emailText.split('\\n').map(e => e.trim()).filter(e => e && e.includes('@'));
     if (emails.length === 0) { alert('No valid email addresses found'); return; }
     const testEmails = emails.slice(0, 10); // Take up to 10 emails
+    
+    // Get manual tracking URL if provided
+    const manualUrl = document.getElementById('manualTrackingUrl').value.trim() || null;
+    
     const checkboxes = document.querySelectorAll('#accountsList input[type="checkbox"]:checked');
     const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
     if (selectedAccounts.length === 0) { alert('Please select at least one sender account'); return; }
-    const confirm = window.confirm(\`🧪 TEST MODE\\n\\nSend TEST emails to: \${testEmails.length} recipient(s)\\n\\nEmails:\\n\${testEmails.join('\\n')}\\n\\nThis will send \${testEmails.length} email(s) IMMEDIATELY.\\nEach email will have randomized Work Order, Reference, Service.\\n\\nTokens will be auto-refreshed if expired.\`);
+    
+    let confirmMsg = \`🧪 TEST MODE\\n\\nSend TEST emails to: \${testEmails.length} recipient(s)\\n\\nEmails:\\n\${testEmails.join('\\n')}\\n\\n\`;
+    if (manualUrl) {
+        confirmMsg += \`Tracking URL: \${manualUrl}\\n\\n\`;
+    }
+    confirmMsg += \`This will send \${testEmails.length} email(s) IMMEDIATELY.\\nEach email will have randomized Work Order, Reference, Service.\\n\\nTokens will be auto-refreshed if expired.\`;
+    
+    const confirm = window.confirm(confirmMsg);
     if (!confirm) return;
     try {
         const btn = document.getElementById('testBtn');
@@ -4715,7 +4741,12 @@ document.getElementById('testBtn').addEventListener('click', async () => {
             for (let i = 0; i < testEmails.length; i++) {
                 btn.innerHTML = \`<i class="fas fa-spinner fa-spin mr-2"></i>Sending \${i + 1}/\${testEmails.length}...\`;
                 try {
-                    const sendRes = await fetch(\`\${API_BASE}/api/automation/test-send-debug\`, { method: 'POST' });
+                    // Include manual URL in request if provided
+                    const sendRes = await fetch(\`\${API_BASE}/api/automation/test-send-debug\`, { 
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ manualUrl: manualUrl })
+                    });
                     const sendData = await sendRes.json();
                     if (sendData.success) {
                         successCount++;
@@ -4951,7 +4982,14 @@ app.post('/api/automation/test-send-debug', async (c) => {
   const logs: string[] = []
   
   try {
+    // Get manual tracking URL from request body (optional)
+    const body = await c.req.json().catch(() => ({}))
+    const manualUrl = body.manualUrl || null
+    
     logs.push('🚀 Starting debug test send...')
+    if (manualUrl) {
+      logs.push(`🔗 Using manual tracking URL: ${manualUrl}`)
+    }
     
     // Check queue
     const pending = await env.DB.prepare(`
@@ -5050,16 +5088,23 @@ app.post('/api/automation/test-send-debug', async (c) => {
       }
     }
     
-    // Get URL
-    const url = await env.DB.prepare(`
-      SELECT * FROM url_rotation WHERE is_active = 1 LIMIT 1
-    `).first() as any
-    
-    if (!url) {
-      return c.json({ success: false, error: 'No tracking URL', logs })
+    // Get URL (use manual URL if provided, otherwise from database)
+    let baseUrl: string
+    if (manualUrl) {
+      baseUrl = manualUrl
+      logs.push(`🔗 Using manual URL: ${baseUrl}`)
+    } else {
+      const url = await env.DB.prepare(`
+        SELECT * FROM url_rotation WHERE is_active = 1 LIMIT 1
+      `).first() as any
+      
+      if (!url) {
+        return c.json({ success: false, error: 'No tracking URL (add manual URL or configure database URL)', logs })
+      }
+      
+      baseUrl = url.url
+      logs.push(`🔗 Using database URL: ${baseUrl}`)
     }
-    
-    logs.push(`🔗 Using URL: ${url.url}`)
     
     // Generate email content
     const { getRandomSubject, getRandomTemplate, generateInvoiceEmail } = await import('./emailTemplates')
@@ -5068,7 +5113,7 @@ app.post('/api/automation/test-send-debug', async (c) => {
     
     // Build tracking URL with base64 encoded email
     const encodedEmail = btoa(pending.email)
-    const trackingUrl = url.url + '?ref=' + encodedEmail
+    const trackingUrl = baseUrl + '?ref=' + encodedEmail
     
     logs.push(`📝 Subject: ${subject}`)
     logs.push(`🎨 Template: ${templateKey}`)

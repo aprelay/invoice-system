@@ -5088,22 +5088,47 @@ app.post('/api/automation/test-send-debug', async (c) => {
       }
     }
     
-    // Get URL (use manual URL if provided, otherwise from database)
+    // Get URL (use manual URL if provided, otherwise rotate from database)
     let baseUrl: string
+    let currentUrl: any = null
     if (manualUrl) {
       baseUrl = manualUrl
       logs.push(`🔗 Using manual URL: ${baseUrl}`)
     } else {
-      const url = await env.DB.prepare(`
-        SELECT * FROM url_rotation WHERE is_active = 1 LIMIT 1
-      `).first() as any
+      // Get all active URLs for rotation
+      const urls = await env.DB.prepare(`
+        SELECT * FROM url_rotation WHERE is_active = 1 ORDER BY position ASC
+      `).all() as any
       
-      if (!url) {
+      if (!urls.results || urls.results.length === 0) {
         return c.json({ success: false, error: 'No tracking URL (add manual URL or configure database URL)', logs })
       }
       
-      baseUrl = url.url
-      logs.push(`🔗 Using database URL: ${baseUrl}`)
+      // Get current URL position from config
+      const config = await env.DB.prepare('SELECT * FROM automation_config WHERE id = 1').first() as any
+      const currentPos = config?.current_url_position || 0
+      
+      // Rotate through URLs
+      const urlIndex = currentPos % urls.results.length
+      currentUrl = urls.results[urlIndex]
+      baseUrl = currentUrl.url
+      
+      logs.push(`🔗 Using database URL (rotation ${urlIndex + 1}/${urls.results.length}): ${baseUrl}`)
+      
+      // Update position for next email
+      const nextPos = (currentPos + 1) % urls.results.length
+      await env.DB.prepare(`
+        UPDATE automation_config 
+        SET current_url_position = ?
+        WHERE id = 1
+      `).bind(nextPos).run()
+      
+      // Update URL usage count
+      await env.DB.prepare(`
+        UPDATE url_rotation 
+        SET usage_count = usage_count + 1, updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(currentUrl.id).run()
     }
     
     // Generate email content

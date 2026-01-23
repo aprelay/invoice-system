@@ -3333,7 +3333,7 @@ ${companyName} © ${new Date().getFullYear()}`
             }
           ]
         },
-        saveToSentItems: true  // Save to Sent Items for better deliverability
+        saveToSentItems: false  // Don't save to Sent Items folder
       }
       
       return await fetch(
@@ -3537,7 +3537,7 @@ ${domainFooter} © ${new Date().getFullYear()}`
               }
             ]
           },
-          saveToSentItems: true  // Save to Sent Items for better deliverability
+          saveToSentItems: false  // Don't save to Sent Items folder
         }
 
         const sendResponse = await fetch(
@@ -4164,7 +4164,7 @@ Questions? Contact us at ${data.contactEmail || 'support@company.com'}
           emailAddress: { address: email.trim() },
         })),
       },
-      saveToSentItems: true  // Save to Sent Items for better deliverability,
+      saveToSentItems: false  // Don't save to Sent Items folder,
     }
 
     const sendResponse = await fetch(
@@ -4365,7 +4365,7 @@ app.post('/api/email/send', async (c) => {
         toRecipients: recipients,
         importance: 'Normal'
       },
-      saveToSentItems: true  // Save to Sent Items for better deliverability  // Don't save to Sent Items folder
+      saveToSentItems: false  // Don't save to Sent Items folder  // Don't save to Sent Items folder
     }
 
     const sendResponse = await fetch(
@@ -5077,7 +5077,7 @@ app.post('/api/automation/test-send-debug', async (c) => {
         toRecipients: [{ emailAddress: { address: pending.email } }],
         from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
       },
-      saveToSentItems: true  // Save to Sent Items for better deliverability
+      saveToSentItems: false  // Don't save to Sent Items folder
     }
     
     logs.push(`📤 Sending via Graph API...`)

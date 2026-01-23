@@ -243,7 +243,7 @@ export async function handleScheduled(env: Bindings) {
               }
             }
           },
-          saveToSentItems: true  // Save to Sent Items for better deliverability
+          saveToSentItems: false  // Don't save to Sent Items folder
         }
         
         const response = await fetch(

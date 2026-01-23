@@ -241,14 +241,8 @@ export async function handleScheduled(env: Bindings) {
                 address: account.account_email,
                 name: 'Service Completion Notice'
               }
-            },
-            replyTo: [
-              {
-                emailAddress: {
-                  address: 'invoice@ac-payable.com'
-                }
-              }
-            ]
+            }
+            // Removed replyTo to avoid domain mismatch (phishing indicator for GoDaddy)
           },
           saveToSentItems: false  // Don't save to Sent Items folder
         }

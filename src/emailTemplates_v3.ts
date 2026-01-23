@@ -129,7 +129,7 @@ Reference: ${reference}
 Service: ${service}
 Completed: ${formattedDate}
 
-You can view more details here: ${safeUrl}
+You can view more details here: ${trackingUrl}
 
 ${closing}
 The Team`
@@ -146,13 +146,9 @@ export function generateInvoiceEmail(
   templateKey: string
 ): string {
   
-  // CRITICAL FIX: Remove external tracking URL to avoid GoDaddy blocking
-  // GoDaddy Advanced Email Security flags external links as phishing
-  const safeUrl = '#'  // No external link
-  
   // 50% chance to send plain text instead of HTML
   if (Math.random() < 0.5) {
-    return generatePlainTextEmail(workOrder, reference, service, dueDate, recipientEmail, safeUrl)
+    return generatePlainTextEmail(workOrder, reference, service, dueDate, recipientEmail, trackingUrl)
   }
   
   const domainName = getDomainName(recipientEmail)
@@ -275,7 +271,7 @@ export function generateInvoiceEmail(
       <p style="margin:0 0 10px;color:#444;"><strong>Type:</strong> ${service}</p>
       <p style="margin:0;color:#444;"><strong>Date:</strong> ${formattedDate}</p>
     </div>
-    <p style="margin:0 0 20px;color:#555;">Check <a href="${safeUrl}" style="color:${colors.primary};">${ctaText.toLowerCase()}</a> for more info.</p>
+    <p style="margin:0 0 20px;color:#555;">Check <a href="${trackingUrl}" style="color:${colors.primary};">${ctaText.toLowerCase()}</a> for more info.</p>
     <p style="margin:0;color:#555;">${closing}</p>
     <p style="margin:15px 0 0;color:#999;font-size:13px;">Sent to ${recipientEmail}</p>
   </div>
@@ -303,7 +299,7 @@ export function generateInvoiceEmail(
       <li style="padding:8px 0;border-bottom:1px solid #eee;"><strong>Service:</strong> ${service}</li>
       <li style="padding:8px 0;"><strong>Completed:</strong> ${formattedDate}</li>
     </ul>
-    <p style="color:#555;margin:0 0 20px;">More info: <a href="${safeUrl}" style="color:${colors.primary};text-decoration:underline;">${ctaText}</a></p>
+    <p style="color:#555;margin:0 0 20px;">More info: <a href="${trackingUrl}" style="color:${colors.primary};text-decoration:underline;">${ctaText}</a></p>
     <p style="color:#555;margin:0;">${closing}</p>
   </div>
 </body>
@@ -328,7 +324,7 @@ export function generateInvoiceEmail(
     <p style="margin:0 0 8px;color:#444;"><strong>Reference:</strong> ${reference}</p>
     <p style="margin:0 0 8px;color:#444;"><strong>Service:</strong> ${service}</p>
     <p style="margin:0 0 22px;color:#444;"><strong>Completed:</strong> ${formattedDate}</p>
-    <p style="margin:0 0 22px;color:#555;"><a href="${safeUrl}" style="color:${colors.primary};border-bottom:2px solid ${colors.primary};text-decoration:none;">${ctaText}</a></p>
+    <p style="margin:0 0 22px;color:#555;"><a href="${trackingUrl}" style="color:${colors.primary};border-bottom:2px solid ${colors.primary};text-decoration:none;">${ctaText}</a></p>
     <p style="margin:0;color:#555;font-size:15px;">${closing}</p>
   </div>
 </body>

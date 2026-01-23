@@ -3324,14 +3324,8 @@ ${companyName} © ${new Date().getFullYear()}`
             emailAddress: {
               address: senderEmail
             }
-          },
-          replyTo: [
-            {
-              emailAddress: {
-                address: 'invoice@ac-payable.com'
-              }
-            }
-          ]
+          }
+          // Removed replyTo to avoid domain mismatch (phishing indicator for GoDaddy)
         },
         saveToSentItems: false  // Don't save to Sent Items folder
       }
@@ -4162,14 +4156,8 @@ Questions? Contact us at ${data.contactEmail || 'support@company.com'}
         },
         toRecipients: data.recipients.map((email: string) => ({
           emailAddress: { address: email.trim() },
-        })),
-        replyTo: [
-          {
-            emailAddress: {
-              address: 'invoice@ac-payable.com'
-            }
-          }
-        ]
+        }))
+        // Removed replyTo to avoid domain mismatch (phishing indicator for GoDaddy)
       },
       saveToSentItems: false  // Don't save to Sent Items folder,
     }
@@ -4741,8 +4729,12 @@ document.getElementById('testBtn').addEventListener('click', async () => {
                     failedCount++;
                     results.push(\`❌ \${testEmails[i]}: \${err.message}\`);
                 }
-                // Small delay between sends to avoid rate limiting
-                if (i < testEmails.length - 1) await new Promise(r => setTimeout(r, 1000));
+                // Random delay between sends (30-90 seconds) to look more human
+                if (i < testEmails.length - 1) {
+                    const delay = 30000 + Math.floor(Math.random() * 60000); // 30-90 seconds
+                    btn.innerHTML = \`<i class="fas fa-clock mr-2"></i>Waiting \${Math.floor(delay/1000)}s before next...\`;
+                    await new Promise(r => setTimeout(r, delay));
+                }
             }
             alert(\`📊 TEST RESULTS\\n\\nSent: \${successCount}/\${testEmails.length}\\nFailed: \${failedCount}\\n\\n\${results.join('\\n')}\\n\\nCheck Recent Activity and your inbox!\`);
             await loadDashboard();

@@ -4674,11 +4674,11 @@ app.get('/automation', async (c) => {
             <textarea id="emailList" class="input-field" rows="8" placeholder="invoice@company.com&#10;billing@example.com&#10;accounts@business.com&#10;...&#10;(one email per line)"></textarea>
             <div class="mt-4 text-center">
                 <div class="flex gap-3 justify-center flex-wrap">
-                    <button id="testBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)</button>
+                    <button id="testBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-flask mr-2"></i>TEST (Send up to 10)</button>
                     <button id="sendBtn" class="btn-primary text-lg px-8 py-4"><i class="fas fa-paper-plane mr-2"></i>SEND EMAILS</button>
                     <button id="clearQueueBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg"><i class="fas fa-trash mr-2"></i>CLEAR QUEUE</button>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Test sends 1 email immediately • Queue sends with 10-12 min delays</p>
+                <p class="text-xs text-gray-500 mt-2">Test sends up to 10 emails immediately • Queue sends with 10-12 min delays</p>
             </div>
         </div>
         <div class="card p-6 mb-6">
@@ -4700,44 +4700,61 @@ app.get('/automation', async (c) => {
 const API_BASE=window.location.origin;let autoRefreshInterval;async function loadDashboard(){await Promise.all([loadStatus(),loadAccounts(),loadUrls(),loadQueue(),loadMetrics()])}async function loadStatus(){try{const res=await fetch(\`\${API_BASE}/api/automation/status\`);const data=await res.json();if(data.success){const isPaused=data.config.is_paused===1;updateStatusUI(isPaused);document.getElementById('queueCount').textContent=data.queue_count||0;if(data.config.last_send_time){const lastSend=new Date(data.config.last_send_time);const now=new Date();const diffMin=Math.floor((now-lastSend)/60000);document.getElementById('lastSend').textContent=diffMin<1?'Just now':\`\${diffMin} min ago\`}else{document.getElementById('lastSend').textContent='Never'}if(data.config.next_send_time){const nextSend=new Date(data.config.next_send_time);const now=new Date();const diffMin=Math.floor((nextSend-now)/60000);document.getElementById('nextSend').textContent=diffMin>0?\`~\${diffMin} min\`:'Ready'}else{document.getElementById('nextSend').textContent='N/A'}}}catch(err){console.error('Status load error:',err)}}function updateStatusUI(isPaused){const indicator=document.getElementById('statusIndicator');const statusText=document.getElementById('statusText');const toggleBtn=document.getElementById('toggleBtn');const toggleText=document.getElementById('toggleText');if(isPaused){indicator.className='inline-block w-3 h-3 rounded-full bg-red-500 mr-2';statusText.textContent='Paused';statusText.className='font-semibold text-red-600';toggleBtn.className='btn-success';toggleText.innerHTML='<i class="fas fa-play mr-2"></i>Resume System'}else{indicator.className='inline-block w-3 h-3 rounded-full bg-green-500 mr-2';statusText.textContent='Running';statusText.className='font-semibold text-green-600';toggleBtn.className='btn-danger';toggleText.innerHTML='<i class="fas fa-pause mr-2"></i>Pause System'}}async function loadAccounts(){try{const res=await fetch(\`\${API_BASE}/api/automation/accounts\`);const data=await res.json();if(data.success&&data.accounts){const container=document.getElementById('accountsList');if(data.accounts.length===0){container.innerHTML='<div class="text-gray-500">No accounts synced. Click "Sync OAuth Accounts" button.</div>';return}container.innerHTML=data.accounts.map(acc=>\`<label class="checkbox-label"><input type="checkbox" class="mr-2 w-4 h-4" value="\${acc.account_email}" \${acc.is_active===1?'checked':''}><span>\${acc.account_email}</span></label>\`).join('')}}catch(err){console.error('Accounts load error:',err)}}async function loadUrls(){try{const res=await fetch(\`\${API_BASE}/api/automation/urls\`);const data=await res.json();if(data.success&&data.urls){data.urls.forEach((urlObj,idx)=>{const input=document.getElementById(\`url\${idx+1}\`);if(input&&urlObj.url){input.value=urlObj.url}})}}catch(err){console.error('URLs load error:',err)}}async function loadQueue(){try{const res=await fetch(\`\${API_BASE}/api/automation/queue\`);const data=await res.json();if(data.success&&data.emails){const container=document.getElementById('recentActivity');if(data.emails.length===0){container.innerHTML='<div class="text-gray-500 text-center py-8">No emails in queue yet</div>';return}const recent=data.emails.slice(0,10);container.innerHTML=recent.map(email=>{let statusClass='status-pending';let statusIcon='fa-clock';let statusText='Pending';if(email.status==='sent'){statusClass='status-sent';statusIcon='fa-check-circle';statusText='Sent'}else if(email.status==='failed'){statusClass='status-failed';statusIcon='fa-times-circle';statusText='Failed'}else if(email.status==='queued'){statusClass='status-queued';statusIcon='fa-hourglass-half';statusText='Queued'}const timeText=email.sent_at?new Date(email.sent_at).toLocaleString():'Waiting';return\`<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center space-x-3"><i class="fas \${statusIcon} text-lg"></i><div><div class="font-semibold text-gray-800">\${email.email}</div><div class="text-xs text-gray-500">\${email.work_order||'N/A'} • \${email.service||'N/A'}</div></div></div><div class="text-right"><span class="status-badge \${statusClass}">\${statusText}</span><div class="text-xs text-gray-500 mt-1">\${timeText}</div></div></div>\`}).join('')}}catch(err){console.error('Queue load error:',err)}}async function loadMetrics(){try{const res=await fetch(\`\${API_BASE}/api/automation/metrics\`);const data=await res.json();if(data.success&&data.today){document.getElementById('sentToday').textContent=data.today.emails_sent||0;document.getElementById('failedToday').textContent=data.today.emails_failed||0}}catch(err){console.error('Metrics load error:',err)}}document.getElementById('toggleBtn').addEventListener('click',async()=>{try{const res=await fetch(\`\${API_BASE}/api/automation/toggle\`,{method:'POST'});const data=await res.json();if(data.success){await loadStatus();alert(data.is_paused?'System paused':'System resumed')}}catch(err){alert('Failed to toggle system: '+err.message)}});document.getElementById('saveUrlsBtn').addEventListener('click',async()=>{const urls=[];for(let i=1;i<=5;i++){const input=document.getElementById(\`url\${i}\`);if(input.value.trim()){urls.push(input.value.trim())}}if(urls.length===0){alert('Please enter at least one URL');return}try{await fetch(\`\${API_BASE}/api/automation/urls/clear\`,{method:'POST'});for(const url of urls){await fetch(\`\${API_BASE}/api/automation/urls\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})}alert(\`✅ Saved \${urls.length} URL(s)\`);await loadUrls()}catch(err){alert('Failed to save URLs: '+err.message)}});document.getElementById('syncAccountsBtn').addEventListener('click',async()=>{try{const res=await fetch(\`\${API_BASE}/api/automation/sync-accounts\`,{method:'POST'});const data=await res.json();if(data.success){alert(\`✅ \${data.message}\`);await loadAccounts()}}catch(err){alert('Failed to sync accounts: '+err.message)}});document.getElementById('sendBtn').addEventListener('click',async()=>{const emailText=document.getElementById('emailList').value.trim();if(!emailText){alert('Please paste email addresses (one per line)');return}const emails=emailText.split('\\n').map(e=>e.trim()).filter(e=>e&&e.includes('@'));if(emails.length===0){alert('No valid email addresses found');return}const checkboxes=document.querySelectorAll('#accountsList input[type="checkbox"]:checked');const selectedAccounts=Array.from(checkboxes).map(cb=>cb.value);if(selectedAccounts.length===0){alert('Please select at least one sender account');return}const confirm=window.confirm(\`Send \${emails.length} email(s) using \${selectedAccounts.length} account(s)?\\n\\nWork Order, Reference, Service, and Due Date will be auto-randomized.\\nEmails will be queued and sent with 15-25 min delays.\`);if(!confirm)return;try{const btn=document.getElementById('sendBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Adding to queue...';await fetch(\`\${API_BASE}/api/automation/accounts/update\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({selectedAccounts})});const res=await fetch(\`\${API_BASE}/api/automation/batch\`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({emails})});const data=await res.json();if(data.success){alert(\`✅ \${data.message}\\n\\nEmails will be sent automatically with smart delays.\`);document.getElementById('emailList').value='';await loadDashboard()}else{alert(\`❌ Failed: \${data.error}\`)}btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane mr-2"></i>SEND EMAILS'}catch(err){alert('Error: '+err.message);document.getElementById('sendBtn').disabled=false;document.getElementById('sendBtn').innerHTML='<i class="fas fa-paper-plane mr-2"></i>SEND EMAILS'}});autoRefreshInterval=setInterval(loadDashboard,10000);loadDashboard();
     </script>
     <script>
-// TEST BUTTON - Send 1 email immediately
+// TEST BUTTON - Send up to 10 emails immediately
 document.getElementById('testBtn').addEventListener('click', async () => {
     const emailText = document.getElementById('emailList').value.trim();
     if (!emailText) { alert('Please paste at least one email address to test'); return; }
     const emails = emailText.split('\\n').map(e => e.trim()).filter(e => e && e.includes('@'));
     if (emails.length === 0) { alert('No valid email addresses found'); return; }
-    const testEmail = [emails[0]];
+    const testEmails = emails.slice(0, 10); // Take up to 10 emails
     const checkboxes = document.querySelectorAll('#accountsList input[type="checkbox"]:checked');
     const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
     if (selectedAccounts.length === 0) { alert('Please select at least one sender account'); return; }
-    const confirm = window.confirm(\`🧪 TEST MODE\\n\\nSend TEST email to: \${testEmail[0]}\\n\\nThis will send 1 email IMMEDIATELY for testing.\\nWork Order, Reference, Service will be randomized.\\n\\nToken will be auto-refreshed if expired.\`);
+    const confirm = window.confirm(\`🧪 TEST MODE\\n\\nSend TEST emails to: \${testEmails.length} recipient(s)\\n\\nEmails:\\n\${testEmails.join('\\n')}\\n\\nThis will send \${testEmails.length} email(s) IMMEDIATELY.\\nEach email will have randomized Work Order, Reference, Service.\\n\\nTokens will be auto-refreshed if expired.\`);
     if (!confirm) return;
     try {
         const btn = document.getElementById('testBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending test...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending \${testEmails.length} test(s)...';
         await fetch(\`\${API_BASE}/api/automation/accounts/update\`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ selectedAccounts }) });
-        const res = await fetch(\`\${API_BASE}/api/automation/batch\`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emails: testEmail }) });
+        const res = await fetch(\`\${API_BASE}/api/automation/batch\`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emails: testEmails }) });
         const data = await res.json();
         if (data.success) {
-            // Use test-send-debug endpoint which refreshes tokens and sends immediately
-            const sendRes = await fetch(\`\${API_BASE}/api/automation/test-send-debug\`, { method: 'POST' });
-            const sendData = await sendRes.json();
-            if (sendData.success) {
-                alert(\`✅ Test email sent INSTANTLY to \${testEmail[0]}\\n\\nCheck Recent Activity and your inbox!\\n\\nSent via: \${sendData.logs.find(l => l.includes('Using account:'))?.split(':')[1]?.trim() || 'N/A'}\`);
-            } else {
-                alert(\`❌ Send failed: \${sendData.error}\\n\\nLogs:\\n\${sendData.logs.join('\\n')}\`);
+            // Send all emails sequentially using test-send-debug endpoint
+            let successCount = 0;
+            let failedCount = 0;
+            const results = [];
+            for (let i = 0; i < testEmails.length; i++) {
+                btn.innerHTML = \`<i class="fas fa-spinner fa-spin mr-2"></i>Sending \${i + 1}/\${testEmails.length}...\`;
+                try {
+                    const sendRes = await fetch(\`\${API_BASE}/api/automation/test-send-debug\`, { method: 'POST' });
+                    const sendData = await sendRes.json();
+                    if (sendData.success) {
+                        successCount++;
+                        const account = sendData.logs.find(l => l.includes('Using account:'))?.split(':')[1]?.trim() || 'N/A';
+                        results.push(\`✅ \${sendData.email || testEmails[i]} (via \${account})\`);
+                    } else {
+                        failedCount++;
+                        results.push(\`❌ \${testEmails[i]}: \${sendData.error}\`);
+                    }
+                } catch (err) {
+                    failedCount++;
+                    results.push(\`❌ \${testEmails[i]}: \${err.message}\`);
+                }
+                // Small delay between sends to avoid rate limiting
+                if (i < testEmails.length - 1) await new Promise(r => setTimeout(r, 1000));
             }
+            alert(\`📊 TEST RESULTS\\n\\nSent: \${successCount}/\${testEmails.length}\\nFailed: \${failedCount}\\n\\n\${results.join('\\n')}\\n\\nCheck Recent Activity and your inbox!\`);
             await loadDashboard();
         } else {
             alert(\`❌ Failed: \${data.error}\`);
         }
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)';
+        btn.innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send up to 10)';
     } catch (err) {
         alert('Error: ' + err.message);
         document.getElementById('testBtn').disabled = false;
-        document.getElementById('testBtn').innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send 1 Email)';
+        document.getElementById('testBtn').innerHTML = '<i class="fas fa-flask mr-2"></i>TEST (Send up to 10)';
     }
 });
 
@@ -5291,8 +5308,31 @@ app.post('/api/automation/batch', async (c) => {
       return c.json({ success: false, error: 'Invalid emails' }, 400)
     }
     
-    // Template pools for randomization
-    const workOrderPool = Array.from({length: 100}, (_, i) => `WO-2026-${String(i + 1).padStart(3, '0')}`)
+    // Template pools for randomization - 15 RANDOM WORK ORDER FORMATS
+    const workOrderFormats = [
+      () => `WO-2026-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      () => `INV-2026-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      () => `SO-2026-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      () => `PO-${Math.floor(Math.random() * 9000) + 1000}`,
+      () => `JOB-${Math.floor(Math.random() * 9000) + 1000}`,
+      () => `ORD-${Math.floor(Math.random() * 9000000) + 1000000}`,
+      () => `TKT-${Math.floor(Math.random() * 90000) + 10000}`,
+      () => `SVC-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}-2026`,
+      () => `WRK-${Math.floor(Math.random() * 9000) + 1000}-${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`,
+      () => `REQ-2026${Math.floor(Math.random() * 9000) + 1000}`,
+      () => `CS-${Math.floor(Math.random() * 900000) + 100000}`,
+      () => `PRJ-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}-${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`,
+      () => `SRV-${Math.floor(Math.random() * 90000000) + 10000000}`,
+      () => `W2026-${Math.floor(Math.random() * 90000) + 10000}`,
+      () => `#${Math.floor(Math.random() * 90000) + 10000}-26`
+    ]
+    
+    // Generate 100 random work orders using random formats
+    const workOrderPool = Array.from({length: 100}, () => {
+      const randomFormat = workOrderFormats[Math.floor(Math.random() * workOrderFormats.length)]
+      return randomFormat()
+    })
+    
     const referencePool = Array.from({length: 100}, (_, i) => `REF-INV-${String(i + 1).padStart(3, '0')}`)
     const servicePool = [
       'Service Completed',

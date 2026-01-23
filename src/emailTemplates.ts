@@ -98,19 +98,9 @@ export function generateInvoiceEmail(
   
   const domainName = getDomainName(recipientEmail)
   
-  // CRITICAL FIX: ALWAYS use sender's own domain for tracking links
-  // GoDaddy flags external links as phishing
-  let safeUrl = '#'  // Default fallback
-  
-  if (senderEmail) {
-    const senderDomain = senderEmail.split('@')[1]
-    const encodedEmail = btoa(recipientEmail)
-    // Use sender's domain with tracking parameter
-    safeUrl = `https://${senderDomain}/?t=${encodedEmail}`
-  } else if (trackingUrl && !trackingUrl.includes('example.com') && !trackingUrl.includes('google.com')) {
-    // Only use trackingUrl if it's not a known external domain
-    safeUrl = trackingUrl
-  }
+  // ALWAYS use your custom URL (no domain checking)
+  // Note: External URLs may trigger GoDaddy blocks, but you have full control
+  let safeUrl = trackingUrl || '#'
   
   // Fallback: if no URL works, use # to avoid broken links
   if (!safeUrl || safeUrl === '') {

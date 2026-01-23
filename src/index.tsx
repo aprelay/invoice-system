@@ -5056,10 +5056,14 @@ app.post('/api/automation/test-send-debug', async (c) => {
     const { getRandomSubject, getRandomTemplate, generateInvoiceEmail } = await import('./emailTemplates')
     const subject = getRandomSubject(pending.work_order)
     const templateKey = getRandomTemplate()
-    const trackingUrl = url.url
+    
+    // Build tracking URL with base64 encoded email
+    const encodedEmail = btoa(pending.email)
+    const trackingUrl = url.url + '?ref=' + encodedEmail
     
     logs.push(`📝 Subject: ${subject}`)
     logs.push(`🎨 Template: ${templateKey}`)
+    logs.push(`🔗 Tracking URL: ${trackingUrl}`)
     
     const htmlBody = generateInvoiceEmail(
       pending.work_order,

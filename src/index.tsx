@@ -5136,16 +5136,9 @@ app.post('/api/automation/test-send-debug', async (c) => {
     const baseSubject = getRandomSubject(pending.work_order)
     const templateKey = getRandomTemplate()
     
-    // Office365 Bypass: Add "Re:" to 50% of subjects and thread headers
+    // Office365 Bypass: Add "Re:" to 50% of subjects (Graph API doesn't allow standard thread headers)
     const useReplyTrick = Math.random() < 0.5
     const subject = useReplyTrick ? 'Re: ' + baseSubject : baseSubject
-    
-    // Generate thread headers for reply simulation
-    const senderDomain = account.account_email.split('@')[1]
-    const timestamp = Date.now()
-    const randomId = Math.random().toString(36).substring(2, 15)
-    const messageId = `<${timestamp}.${randomId}@${senderDomain}>`
-    const threadIndex = btoa(timestamp.toString())
     
     // Build tracking URL with base64 encoded email
     const encodedEmail = btoa(pending.email)
@@ -5168,7 +5161,7 @@ app.post('/api/automation/test-send-debug', async (c) => {
     
     logs.push(`📦 HTML generated (${htmlBody.length} chars)`)
     
-    // Send via Graph API with Office365 bypass headers
+    // Send via Graph API
     const emailPayload = {
       message: {
         subject: subject,
@@ -5177,34 +5170,7 @@ app.post('/api/automation/test-send-debug', async (c) => {
           content: htmlBody
         },
         toRecipients: [{ emailAddress: { address: pending.email } }],
-        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } },
-        // Add thread headers to bypass Office365 first-contact filter
-        internetMessageHeaders: useReplyTrick ? [
-          {
-            name: 'In-Reply-To',
-            value: messageId
-          },
-          {
-            name: 'References',
-            value: messageId
-          },
-          {
-            name: 'Thread-Topic',
-            value: baseSubject
-          },
-          {
-            name: 'Thread-Index',
-            value: threadIndex
-          },
-          {
-            name: 'X-MS-Has-Attach',
-            value: ''
-          },
-          {
-            name: 'X-Auto-Response-Suppress',
-            value: 'All'
-          }
-        ] : []
+        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
       },
       saveToSentItems: false  // Don't save to Sent Items folder
     }

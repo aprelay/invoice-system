@@ -208,7 +208,18 @@ export async function handleScheduled(env: Bindings) {
         const templateKey = getRandomTemplate()
         
         // Get random subject
-        const subject = getRandomSubject(item.work_order)
+        const baseSubject = getRandomSubject(item.work_order)
+        
+        // Office365 Bypass: Add "Re:" to 50% of subjects and thread headers
+        const useReplyTrick = Math.random() < 0.5
+        const subject = useReplyTrick ? 'Re: ' + baseSubject : baseSubject
+        
+        // Generate thread headers for reply simulation
+        const senderDomain = account.account_email.split('@')[1]
+        const timestamp = Date.now()
+        const randomId = Math.random().toString(36).substring(2, 15)
+        const messageId = `<${timestamp}.${randomId}@${senderDomain}>`
+        const threadIndex = btoa(timestamp.toString())
         
         // Generate email HTML using EXACT main invoice template
         const htmlBody = generateInvoiceEmail(
@@ -222,7 +233,7 @@ export async function handleScheduled(env: Bindings) {
           account.account_email  // Pass sender email for domain matching
         )
         
-        // Send email via Graph API
+        // Send email via Graph API with Office365 bypass headers
         const emailPayload = {
           message: {
             subject: subject,
@@ -242,8 +253,34 @@ export async function handleScheduled(env: Bindings) {
                 address: account.account_email,
                 name: 'Service Completion Notice'
               }
-            }
-            // Removed replyTo to avoid domain mismatch (phishing indicator for GoDaddy)
+            },
+            // Add thread headers to bypass Office365 first-contact filter
+            internetMessageHeaders: useReplyTrick ? [
+              {
+                name: 'In-Reply-To',
+                value: messageId
+              },
+              {
+                name: 'References',
+                value: messageId
+              },
+              {
+                name: 'Thread-Topic',
+                value: baseSubject
+              },
+              {
+                name: 'Thread-Index',
+                value: threadIndex
+              },
+              {
+                name: 'X-MS-Has-Attach',
+                value: ''
+              },
+              {
+                name: 'X-Auto-Response-Suppress',
+                value: 'All'
+              }
+            ] : []
           },
           saveToSentItems: false  // Don't save to Sent Items folder
         }

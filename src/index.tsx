@@ -5603,7 +5603,10 @@ app.get('/auth/microsoft', async (c) => {
   }
   
   const baseUrl = new URL(c.req.url).origin
-  const redirectUri = `${baseUrl}/auth/callback`
+  // IMPORTANT: Always use production URL for OAuth redirect (not preview URLs)
+  // This ensures Azure AD redirect URI remains consistent
+  const productionUrl = 'https://invoice-system-7fc.pages.dev'
+  const redirectUri = `${productionUrl}/auth/callback`
   
   // Use 'common' tenant for multi-tenant support
   const tenantId = env.OAUTH_TENANT_ID || 'common'
@@ -5675,7 +5678,9 @@ app.get('/auth/callback', async (c) => {
   
   try {
     const baseUrl = new URL(c.req.url).origin
-    const redirectUri = `${baseUrl}/auth/callback`
+    // IMPORTANT: Always use production URL for OAuth redirect (not preview URLs)
+    const productionUrl = 'https://invoice-system-7fc.pages.dev'
+    const redirectUri = `${productionUrl}/auth/callback`
     const tenantId = env.OAUTH_TENANT_ID || 'common'
     
     // Exchange authorization code for tokens

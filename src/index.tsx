@@ -5159,18 +5159,52 @@ app.post('/api/automation/test-send-debug', async (c) => {
       account.account_email  // Pass sender email for domain matching
     )
     
-    logs.push(`📦 HTML generated (${htmlBody.length} chars)`)
+    // Office365 Bypass: Use plain text 75% of the time (more personal)
+    const usePlainText = Math.random() < 0.75
+    const senderName = account.account_email.split('@')[0].replace(/[._-]/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    
+    let emailBody: any
+    if (usePlainText) {
+      // Plain text email - looks more personal and legitimate
+      const plainTextBody = `Hi,
+
+${useReplyTrick ? 'Following up on our previous conversation about ' : 'Quick update on '}${pending.work_order}.
+
+Everything's been completed and ready on our end. Here's the summary:
+
+Order: ${pending.work_order}
+Reference: ${pending.reference}
+Service: ${pending.service}
+Completed: ${new Date(pending.due_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+
+${trackingUrl ? 'You can view more details here if needed:\n' + trackingUrl + '\n\n' : ''}Feel free to reach out if you have any questions.
+
+Best regards,
+${senderName}`
+      
+      emailBody = {
+        contentType: 'Text',
+        content: plainTextBody
+      }
+      logs.push(`📝 Using PLAIN TEXT mode (more personal)`)
+    } else {
+      // HTML email - colorful template
+      emailBody = {
+        contentType: 'HTML',
+        content: htmlBody
+      }
+      logs.push(`📝 Using HTML mode`)
+    }
+    
+    logs.push(`📦 Email generated (${usePlainText ? 'plain text' : 'HTML'}, ${emailBody.content.length} chars)`)
     
     // Send via Graph API
     const emailPayload = {
       message: {
         subject: subject,
-        body: {
-          contentType: 'HTML',
-          content: htmlBody
-        },
+        body: emailBody,
         toRecipients: [{ emailAddress: { address: pending.email } }],
-        from: { emailAddress: { address: account.account_email, name: 'Service Completion Notice' } }
+        from: { emailAddress: { address: account.account_email, name: senderName } }
       },
       saveToSentItems: false  // Don't save to Sent Items folder
     }

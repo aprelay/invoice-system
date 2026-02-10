@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📧 Email URL Scanner - Live Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .redirect-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .scan-progress {
+            animation: scan 1.5s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(100%); }
+        }
+        .redirect-item {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .url-truncate {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <i class="fas fa-shield-alt"></i>
+                        Email URL Scanner
+                    </h1>
+                    <p class="text-blue-100 mt-1">Real-time inbox scanning & redirect detection</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold" id="totalRedirects">0</div>
+                    <div class="text-sm text-blue-100">Redirects Found</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Control Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-sliders-h"></i>
+                Control Panel
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email Account</label>
+                    <select id="accountSelect" class="w-full bg-gray-700 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Loading accounts...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Max Emails to Scan</label>
+                    <input type="number" id="maxEmails" value="50" min="1" max="2000" 
+                           class="w-full bg-gray-700 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="startScan()" id="scanBtn" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                        <i class="fas fa-play mr-2"></i>Start Scan
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="mt-6 hidden">
+                <div class="flex justify-between mb-2">
+                    <span class="text-sm">Scanning Progress</span>
+                    <span class="text-sm font-bold" id="progressText">0 / 0 URLs</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm">Emails Scanned</p>
+                        <p class="text-3xl font-bold mt-1" id="emailsScanned">0</p>
+                    </div>
+                    <i class="fas fa-envelope text-4xl text-blue-200 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm">Total URLs</p>
+                        <p class="text-3xl font-bold mt-1" id="totalUrls">0</p>
+                    </div>
+                    <i class="fas fa-link text-4xl text-purple-200 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-red-100 text-sm">Redirects</p>
+                        <p class="text-3xl font-bold mt-1" id="redirectCount">0</p>
+                    </div>
+                    <i class="fas fa-exchange-alt text-4xl text-red-200 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm">Tracking Links</p>
+                        <p class="text-3xl font-bold mt-1" id="trackingCount">0</p>
+                    </div>
+                    <i class="fas fa-bullseye text-4xl text-green-200 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Redirect Feed -->
+            <div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fas fa-arrows-alt-h text-red-500"></i>
+                        Live Redirect Feed
+                        <span class="ml-2 text-sm font-normal text-gray-400" id="redirectFeedCount">0 detected</span>
+                    </h2>
+                    <div class="flex gap-2">
+                        <button onclick="copyValidRedirects()" 
+                                class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition flex items-center gap-2"
+                                title="Copy all valid redirects (google.com)">
+                            <i class="fas fa-copy"></i>
+                            Copy Valid
+                        </button>
+                        <button onclick="exportRedirects('csv')" 
+                                class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition flex items-center gap-2"
+                                title="Export all redirects to CSV">
+                            <i class="fas fa-download"></i>
+                            CSV
+                        </button>
+                        <button onclick="exportRedirects('json')" 
+                                class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded transition flex items-center gap-2"
+                                title="Export all redirects to JSON">
+                            <i class="fas fa-file-code"></i>
+                            JSON
+                        </button>
+                    </div>
+                </div>
+                <div id="redirectFeed" class="space-y-3 max-h-[600px] overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-search text-4xl mb-3 opacity-50"></i>
+                        <p>Waiting for scan to start...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Source Feed -->
+            <div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-inbox text-blue-500"></i>
+                    Email Sources
+                    <span class="ml-auto text-sm font-normal text-gray-400" id="emailFeedCount">0 emails</span>
+                </h2>
+                <div id="emailFeed" class="space-y-3 max-h-[600px] overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-envelope-open text-4xl mb-3 opacity-50"></i>
+                        <p>No emails scanned yet...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 mt-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar"></i>
+                Redirect Statistics
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <canvas id="redirectChart"></canvas>
+                </div>
+                <div>
+                    <canvas id="domainChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scanningInProgress = false;
+        let redirects = [];
+        let emails = [];
+        let urlsChecked = 0;
+        let totalUrlsToCheck = 0;
+        
+        // Initialize charts
+        const redirectChartCtx = document.getElementById('redirectChart').getContext('2d');
+        const redirectChart = new Chart(redirectChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Redirects', 'Direct Links'],
+                datasets: [{
+                    data: [0, 0],
+                    backgroundColor: ['#ef4444', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#fff' }
+                    },
+                    title: {
+                        display: true,
+                        text: 'URL Distribution',
+                        color: '#fff'
+                    }
+                }
+            }
+        });
+
+        const domainChartCtx = document.getElementById('domainChart').getContext('2d');
+        const domainChart = new Chart(domainChartCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Redirects by Domain',
+                    data: [],
+                    backgroundColor: '#8b5cf6',
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#fff' }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Top Redirect Domains',
+                        color: '#fff'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                }
+            }
+        });
+
+        // Load accounts on page load
+        async function loadAccounts() {
+            try {
+                const response = await fetch('/api/accounts');
+                const data = await response.json();
+                
+                const select = document.getElementById('accountSelect');
+                select.innerHTML = '';
+                
+                if (data.accounts && data.accounts.length > 0) {
+                    data.accounts.forEach(account => {
+                        const option = document.createElement('option');
+                        option.value = account.email;
+                        option.textContent = `${account.email} (${account.displayName})`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option>No accounts available</option>';
+                }
+            } catch (error) {
+                console.error('Failed to load accounts:', error);
+                document.getElementById('accountSelect').innerHTML = '<option>Error loading accounts</option>';
+            }
+        }
+
+        async function startScan() {
+            const account = document.getElementById('accountSelect').value;
+            const maxEmails = parseInt(document.getElementById('maxEmails').value);
+            
+            if (!account) {
+                alert('Please select an email account');
+                return;
+            }
+            
+            if (scanningInProgress) {
+                alert('Scan already in progress');
+                return;
+            }
+            
+            scanningInProgress = true;
+            document.getElementById('scanBtn').disabled = true;
+            document.getElementById('scanBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scanning...';
+            document.getElementById('progressContainer').classList.remove('hidden');
+            
+            // Reset data
+            redirects = [];
+            emails = [];
+            urlsChecked = 0;
+            totalUrlsToCheck = 0;
+            
+            try {
+                // Step 1: Fetch emails
+                updateProgress(0, 'Fetching emails...');
+                const emailResponse = await fetch('/api/automation/scan-inbox', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ account_email: account, max_emails: maxEmails })
+                });
+                
+                const emailData = await emailResponse.json();
+                
+                if (!emailData.success) {
+                    throw new Error(emailData.error || 'Failed to fetch emails');
+                }
+                
+                emails = emailData.emails || [];
+                document.getElementById('emailsScanned').textContent = emails.length;
+                document.getElementById('emailFeedCount').textContent = `${emails.length} emails`;
+                
+                // Extract URLs from emails
+                const allUrls = new Map();
+                
+                emails.forEach((email, index) => {
+                    const subject = email.subject || 'No Subject';
+                    const body = email.body?.content || '';
+                    const from = email.from?.emailAddress?.address || 'Unknown';
+                    
+                    // Add email to feed
+                    addEmailToFeed(email, index + 1);
+                    
+                    // Extract URLs
+                    const urls = extractUrls(body);
+                    urls.forEach(url => {
+                        if (!allUrls.has(url)) {
+                            allUrls.set(url, { subject, from, email_id: email.id });
+                        }
+                    });
+                });
+                
+                totalUrlsToCheck = allUrls.size;
+                document.getElementById('totalUrls').textContent = totalUrlsToCheck;
+                
+                // Step 2: Check each URL for redirects
+                let redirectCount = 0;
+                let trackingCount = 0;
+                
+                for (const [url, source] of allUrls.entries()) {
+                    urlsChecked++;
+                    updateProgress((urlsChecked / totalUrlsToCheck) * 100, 
+                                  `Checking URL ${urlsChecked}/${totalUrlsToCheck}`);
+                    
+                    // Check if tracking URL
+                    if (isTrackingUrl(url)) {
+                        trackingCount++;
+                    }
+                    
+                    // Check redirect
+                    const redirectInfo = await checkRedirect(url);
+                    
+                    if (redirectInfo.is_redirect) {
+                        redirectCount++;
+                        redirectInfo.source = source;
+                        redirects.push(redirectInfo);
+                        addRedirectToFeed(redirectInfo);
+                        updateStats(redirectCount, trackingCount);
+                        updateCharts();
+                    }
+                    
+                    // Small delay to prevent overwhelming the server
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                updateProgress(100, 'Scan complete!');
+                setTimeout(() => {
+                    document.getElementById('scanBtn').disabled = false;
+                    document.getElementById('scanBtn').innerHTML = '<i class="fas fa-play mr-2"></i>Start Scan';
+                    scanningInProgress = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Scan error:', error);
+                alert('Scan failed: ' + error.message);
+                document.getElementById('scanBtn').disabled = false;
+                document.getElementById('scanBtn').innerHTML = '<i class="fas fa-play mr-2"></i>Start Scan';
+                scanningInProgress = false;
+            }
+        }
+
+        function extractUrls(text) {
+            if (!text) return [];
+            const urlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+            const matches = text.match(urlPattern) || [];
+            return [...new Set(matches.map(url => url.replace(/[.,;:)>'"]+$/, '')))];
+        }
+
+        function isTrackingUrl(url) {
+            const trackingPatterns = ['utm_', 'track', 'click', 'redirect', 'goto', 'link'];
+            return trackingPatterns.some(pattern => url.toLowerCase().includes(pattern));
+        }
+
+        async function checkRedirect(url) {
+            // Actually test the URL for redirects using the backend API
+            try {
+                const response = await fetch('/api/automation/test-redirect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        url: url, 
+                        inject_google: true  // Try google.com injection
+                    })
+                });
+                
+                if (!response.ok) {
+                    // Fallback to pattern matching if API fails
+                    const redirectPatterns = ['redirect', 'goto', 'click', 'track', 'link', 'redir'];
+                    const isLikelyRedirect = redirectPatterns.some(p => url.toLowerCase().includes(p));
+                    return {
+                        original: url,
+                        final: url,
+                        is_redirect: isLikelyRedirect,
+                        redirects: isLikelyRedirect ? 1 : 0,
+                        tested: false
+                    };
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    return {
+                        original: url,
+                        final: url,
+                        is_redirect: false,
+                        redirects: 0,
+                        tested: false
+                    };
+                }
+                
+                // Check if any injection worked
+                const workingInjection = data.injection_results?.find(r => r.working);
+                
+                return {
+                    original: url,
+                    final: data.final_url,
+                    is_redirect: data.redirect_count > 0,
+                    redirects: data.redirect_count,
+                    lands_on_google: data.lands_on_google,
+                    is_valid_redirect: data.is_valid_redirect,
+                    working_injection: workingInjection,
+                    tested: true,
+                    redirect_chain: data.redirects
+                };
+            } catch (error) {
+                console.error('Redirect test error:', error);
+                return {
+                    original: url,
+                    final: url,
+                    is_redirect: false,
+                    redirects: 0,
+                    tested: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function addEmailToFeed(email, index) {
+            const feed = document.getElementById('emailFeed');
+            if (index === 1) feed.innerHTML = '';
+            
+            const item = document.createElement('div');
+            item.className = 'bg-gray-700 rounded p-3 redirect-item';
+            item.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="text-blue-400 text-xl">${index}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-semibold truncate">${escapeHtml(email.subject || 'No Subject')}</div>
+                        <div class="text-sm text-gray-400 truncate">From: ${escapeHtml(email.from?.emailAddress?.address || 'Unknown')}</div>
+                        <div class="text-xs text-gray-500 mt-1">${new Date(email.receivedDateTime).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+        }
+
+        function addRedirectToFeed(redirect) {
+            const feed = document.getElementById('redirectFeed');
+            if (redirects.length === 1) feed.innerHTML = '';
+            
+            // Status indicators
+            const validBadge = redirect.is_valid_redirect 
+                ? '<span class="px-2 py-1 bg-green-600 text-white text-xs rounded font-bold">✓ VALID (Google)</span>'
+                : '<span class="px-2 py-1 bg-gray-600 text-white text-xs rounded">Not validated</span>';
+            
+            const testedBadge = redirect.tested
+                ? '<span class="px-2 py-1 bg-blue-600 text-white text-xs rounded">✓ Tested</span>'
+                : '<span class="px-2 py-1 bg-yellow-600 text-white text-xs rounded">Pattern Match</span>';
+            
+            const injectionBadge = redirect.working_injection
+                ? '<span class="px-2 py-1 bg-purple-600 text-white text-xs rounded font-bold">🔧 INJECTION WORKS!</span>'
+                : '';
+            
+            let injectionHtml = '';
+            if (redirect.working_injection) {
+                injectionHtml = `
+                    <div class="mt-3 p-3 bg-purple-900 bg-opacity-30 rounded border border-purple-500">
+                        <div class="text-xs font-bold text-purple-300 mb-2">🎯 Working Injection Found!</div>
+                        <div class="text-xs text-gray-300 mb-1">Pattern: <span class="text-purple-400 font-mono">${escapeHtml(redirect.working_injection.pattern)}</span></div>
+                        <div class="text-xs text-gray-400 mb-1">Injected URL:</div>
+                        <div class="text-xs text-purple-400 font-mono break-all">${escapeHtml(redirect.working_injection.injected_url)}</div>
+                        <div class="text-xs text-green-400 mt-2">✓ Successfully redirects to google.com (${redirect.working_injection.redirect_count} hop${redirect.working_injection.redirect_count !== 1 ? 's' : ''})</div>
+                    </div>
+                `;
+            }
+            
+            const item = document.createElement('div');
+            item.className = 'bg-gray-700 rounded p-4 redirect-item border-l-4 ' + 
+                            (redirect.is_valid_redirect ? 'border-green-500' : 
+                             redirect.working_injection ? 'border-purple-500' : 'border-red-500');
+            item.innerHTML = `
+                <div class="mb-2 flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs text-gray-400 mb-1 truncate">Email: ${escapeHtml(redirect.source.subject.substring(0, 50))}...</div>
+                        <div class="text-xs text-gray-500 truncate">From: ${escapeHtml(redirect.source.from)}</div>
+                    </div>
+                    <div class="flex flex-wrap gap-1 justify-end">
+                        ${validBadge}
+                        ${testedBadge}
+                        ${injectionBadge}
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div>
+                        <div class="text-xs font-semibold text-gray-400 mb-1">Original URL:</div>
+                        <div class="text-sm text-blue-400 url-truncate break-all" title="${escapeHtml(redirect.original)}">${escapeHtml(redirect.original)}</div>
+                    </div>
+                    <div class="flex items-center gap-2 text-red-400">
+                        <i class="fas fa-arrow-down"></i>
+                        <span class="text-xs">
+                            ${redirect.redirects} redirect${redirect.redirects !== 1 ? 's' : ''}
+                            ${redirect.lands_on_google ? ' → <span class="text-green-400 font-bold">google.com ✓</span>' : ''}
+                        </span>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-gray-400 mb-1">Final Destination:</div>
+                        <div class="text-sm ${redirect.lands_on_google ? 'text-green-400 font-bold' : 'text-yellow-400'} url-truncate break-all" title="${escapeHtml(redirect.final)}">${escapeHtml(redirect.final)}</div>
+                    </div>
+                    ${injectionHtml}
+                </div>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+            
+            document.getElementById('redirectFeedCount').textContent = `${redirects.length} detected`;
+        }
+
+        function updateStats(redirectCount, trackingCount) {
+            document.getElementById('totalRedirects').textContent = redirectCount;
+            document.getElementById('redirectCount').textContent = redirectCount;
+            document.getElementById('trackingCount').textContent = trackingCount;
+        }
+
+        function updateCharts() {
+            // Update doughnut chart
+            const directLinks = totalUrlsToCheck - redirects.length;
+            redirectChart.data.datasets[0].data = [redirects.length, directLinks];
+            redirectChart.update();
+            
+            // Update domain chart
+            const domainCounts = {};
+            redirects.forEach(r => {
+                try {
+                    const url = new URL(r.original);
+                    const domain = url.hostname;
+                    domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+                } catch (e) {}
+            });
+            
+            const sortedDomains = Object.entries(domainCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            domainChart.data.labels = sortedDomains.map(d => d[0]);
+            domainChart.data.datasets[0].data = sortedDomains.map(d => d[1]);
+            domainChart.update();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy all valid redirects (landing on google.com) to clipboard
+        function copyValidRedirects() {
+            const validRedirects = redirects.filter(r => r.is_valid_redirect);
+            
+            if (validRedirects.length === 0) {
+                alert('No valid redirects found (must land on google.com)');
+                return;
+            }
+            
+            let text = `VALID REDIRECTS (Landing on google.com): ${validRedirects.length}\n`;
+            text += '='.repeat(60) + '\n\n';
+            
+            validRedirects.forEach((r, index) => {
+                text += `${index + 1}. Original URL:\n`;
+                text += `   ${r.original}\n\n`;
+                text += `   Final URL:\n`;
+                text += `   ${r.final}\n\n`;
+                text += `   Redirects: ${r.redirects}\n`;
+                text += `   Email: ${r.source.subject}\n`;
+                text += `   From: ${r.source.from}\n`;
+                
+                if (r.working_injection) {
+                    text += `\n   🔧 WORKING INJECTION:\n`;
+                    text += `   Pattern: ${r.working_injection.pattern}\n`;
+                    text += `   Injected URL: ${r.working_injection.injected_url}\n`;
+                }
+                
+                text += '\n' + '-'.repeat(60) + '\n\n';
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`✅ Copied ${validRedirects.length} valid redirect(s) to clipboard!`);
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+
+        // Export redirects to CSV or JSON
+        function exportRedirects(format) {
+            if (redirects.length === 0) {
+                alert('No redirects to export');
+                return;
+            }
+            
+            let content, filename, mimeType;
+            
+            if (format === 'csv') {
+                // CSV export
+                content = 'Original URL,Final URL,Redirects,Valid (Google),Has Injection,Email Subject,From,Tested,Injection Pattern,Injected URL\n';
+                
+                redirects.forEach(r => {
+                    const original = `"${r.original.replace(/"/g, '""')}"`;
+                    const final = `"${r.final.replace(/"/g, '""')}"`;
+                    const redirectCount = r.redirects;
+                    const isValid = r.is_valid_redirect ? 'Yes' : 'No';
+                    const hasInjection = r.working_injection ? 'Yes' : 'No';
+                    const subject = `"${r.source.subject.replace(/"/g, '""')}"`;
+                    const from = `"${r.source.from.replace(/"/g, '""')}"`;
+                    const tested = r.tested ? 'Yes' : 'No';
+                    const injPattern = r.working_injection ? `"${r.working_injection.pattern}"` : '';
+                    const injUrl = r.working_injection ? `"${r.working_injection.injected_url.replace(/"/g, '""')}"` : '';
+                    
+                    content += `${original},${final},${redirectCount},${isValid},${hasInjection},${subject},${from},${tested},${injPattern},${injUrl}\n`;
+                });
+                
+                filename = `redirects_${new Date().toISOString().split('T')[0]}.csv`;
+                mimeType = 'text/csv';
+                
+            } else if (format === 'json') {
+                // JSON export
+                const exportData = {
+                    scan_date: new Date().toISOString(),
+                    total_redirects: redirects.length,
+                    valid_redirects: redirects.filter(r => r.is_valid_redirect).length,
+                    redirects_with_injection: redirects.filter(r => r.working_injection).length,
+                    redirects: redirects.map(r => ({
+                        original_url: r.original,
+                        final_url: r.final,
+                        redirect_count: r.redirects,
+                        lands_on_google: r.lands_on_google || false,
+                        is_valid_redirect: r.is_valid_redirect || false,
+                        tested: r.tested || false,
+                        email_subject: r.source.subject,
+                        email_from: r.source.from,
+                        working_injection: r.working_injection ? {
+                            pattern: r.working_injection.pattern,
+                            injected_url: r.working_injection.injected_url,
+                            final_url: r.working_injection.final_url,
+                            redirect_count: r.working_injection.redirect_count
+                        } : null
+                    }))
+                };
+                
+                content = JSON.stringify(exportData, null, 2);
+                filename = `redirects_${new Date().toISOString().split('T')[0]}.json`;
+                mimeType = 'application/json';
+            }
+            
+            // Download file
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`✅ Exported ${redirects.length} redirect(s) to ${filename}`);
+        }
+
+        // Load accounts on page load
+        loadAccounts();
+    </script>
+</body>
+</html>

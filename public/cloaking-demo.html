@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMO: Cloaking Techniques (Educational)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="max-w-6xl mx-auto py-12 px-4">
+        <!-- Warning Banner -->
+        <div class="bg-red-600 text-white p-6 rounded-lg mb-8 border-4 border-red-400">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-exclamation-triangle text-4xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold">⚠️ EDUCATIONAL DEMO ONLY ⚠️</h2>
+                    <p class="text-lg mt-2">This page demonstrates cloaking techniques used by attackers.</p>
+                    <p class="text-sm mt-1 opacity-90">DO NOT use these techniques for malicious purposes. For security research and education only.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-900 to-red-900 rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="text-center">
+                <div class="inline-block bg-red-500 p-4 rounded-full mb-4">
+                    <i class="fas fa-user-secret text-4xl text-white"></i>
+                </div>
+                <h1 class="text-4xl font-bold mb-3">
+                    🎭 Cloaking Techniques Demo
+                </h1>
+                <p class="text-xl opacity-90">
+                    See how attackers hide malicious content from security scanners
+                </p>
+            </div>
+        </div>
+
+        <!-- Your Detection Status -->
+        <div id="detectionStatus" class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-fingerprint text-yellow-400 mr-2"></i>
+                Your Detection Status
+            </h2>
+            <div id="statusContent" class="space-y-4"></div>
+        </div>
+
+        <!-- What You're Seeing -->
+        <div id="contentDisplay" class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-eye text-blue-400 mr-2"></i>
+                What Content Are You Seeing?
+            </h2>
+            <div id="displayedContent"></div>
+        </div>
+
+        <!-- Cloaking Techniques -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-code text-green-400 mr-2"></i>
+                Cloaking Techniques Explained
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- Technique 1 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-red-500">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">
+                        <i class="fas fa-robot mr-2"></i>
+                        1. User-Agent Detection
+                    </h3>
+                    <p class="text-gray-300 mb-4">Detect if visitor is a bot or real browser</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Check if visitor is a bot
+if (navigator.userAgent.includes('bot') || 
+    navigator.userAgent.includes('crawler') ||
+    navigator.userAgent.includes('spider')) {
+    // Show innocent content to bots
+    showInnocentContent();
+} else {
+    // Show phishing page to real users
+    showPhishingPage();
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 2 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-yellow-500">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-3">
+                        <i class="fas fa-robot mr-2"></i>
+                        2. WebDriver Detection
+                    </h3>
+                    <p class="text-gray-300 mb-4">Detect automated browsers (Selenium, Puppeteer)</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Check for automation tools
+if (navigator.webdriver || 
+    window.navigator.webdriver === true) {
+    // Automated browser detected
+    window.location = 'innocent-page.html';
+}
+
+// Check for headless browsers
+if (!navigator.plugins.length) {
+    // Likely headless browser
+    document.body.innerHTML = 'Under Construction';
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 3 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-blue-500">
+                    <h3 class="text-xl font-bold text-blue-400 mb-3">
+                        <i class="fas fa-clock mr-2"></i>
+                        3. Time-Based Cloaking
+                    </h3>
+                    <p class="text-gray-300 mb-4">Show different content after delay</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Show innocent content first
+document.body.innerHTML = 'Loading...';
+
+// Wait 3 seconds, then show malicious content
+setTimeout(() => {
+    if (!isBot()) {
+        document.body.innerHTML = maliciousContent;
+        // Bots usually don't wait this long
+    }
+}, 3000);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 4 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-purple-500">
+                    <h3 class="text-xl font-bold text-purple-400 mb-3">
+                        <i class="fas fa-mouse-pointer mr-2"></i>
+                        4. User Interaction Detection
+                    </h3>
+                    <p class="text-gray-300 mb-4">Only show content after user clicks/scrolls</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>let userInteracted = false;
+
+// Wait for real user interaction
+document.addEventListener('click', () => {
+    userInteracted = true;
+    showRealContent();
+});
+
+document.addEventListener('scroll', () => {
+    if (!userInteracted) {
+        userInteracted = true;
+        showRealContent();
+    }
+});
+
+// Bots don't click or scroll
+setTimeout(() => {
+    if (!userInteracted) {
+        // Still no interaction = likely bot
+        showSafeContent();
+    }
+}, 2000);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 5 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-pink-500">
+                    <h3 class="text-xl font-bold text-pink-400 mb-3">
+                        <i class="fas fa-fingerprint mr-2"></i>
+                        5. Advanced Fingerprinting
+                    </h3>
+                    <p class="text-gray-300 mb-4">Detect security tools and sandboxes</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>function detectSecurityTools() {
+    const checks = {
+        // Check for headless browser
+        noPlugins: navigator.plugins.length === 0,
+        
+        // Check for automation
+        webdriver: navigator.webdriver === true,
+        
+        // Check Chrome headless
+        chromeHeadless: /HeadlessChrome/.test(navigator.userAgent),
+        
+        // Check for low hardware
+        lowCPU: navigator.hardwareConcurrency < 2,
+        
+        // Check for missing features
+        noWebGL: !window.WebGLRenderingContext,
+        
+        // Check for suspicious screen size
+        weirdScreen: screen.width < 100 || screen.height < 100
+    };
+    
+    // Count red flags
+    const redFlags = Object.values(checks).filter(v => v).length;
+    
+    if (redFlags >= 2) {
+        // Likely security scanner
+        return true;
+    }
+    return false;
+}
+
+if (detectSecurityTools()) {
+    window.location = 'legitimate-looking-page.html';
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 6 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-orange-500">
+                    <h3 class="text-xl font-bold text-orange-400 mb-3">
+                        <i class="fas fa-globe mr-2"></i>
+                        6. IP-Based Cloaking
+                    </h3>
+                    <p class="text-gray-300 mb-4">Block known security company IPs</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Server-side check (PHP example)
+$visitor_ip = $_SERVER['REMOTE_ADDR'];
+
+// Known security scanner IPs
+$blocked_ips = [
+    '1.2.3.4',        // Security company
+    '5.6.7.8',        // Antivirus scanner
+    '10.0.0.0/8',     // Cloud scanners
+];
+
+// Check IP ranges
+foreach ($blocked_ips as $blocked) {
+    if (ip_match($visitor_ip, $blocked)) {
+        // Redirect to innocent page
+        header('Location: legitimate.html');
+        exit;
+    }
+}
+
+// Show phishing page to other IPs
+include 'phishing.html';</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 7 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-green-500">
+                    <h3 class="text-xl font-bold text-green-400 mb-3">
+                        <i class="fas fa-code mr-2"></i>
+                        7. Obfuscation & Encoding
+                    </h3>
+                    <p class="text-gray-300 mb-4">Hide malicious code using encoding</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Base64 encoded malicious content
+const encoded = 'PHNjcmlwdD5hbGVydCgicGhpc2hpbmciKTs8L3NjcmlwdD4=';
+
+// Decode and inject
+function loadContent() {
+    const decoded = atob(encoded);
+    document.body.innerHTML = decoded;
+}
+
+// Or use character code obfuscation
+const obfuscated = String.fromCharCode(60,115,99,114,105,112,116,62,97,108,101,114,116,40,34,112,104,105,115,104,105,110,103,34,41,59,60,47,115,99,114,105,112,116,62);
+
+// Static analysis can't easily detect this
+eval(obfuscated);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Technique 8 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-2 border-red-500">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">
+                        <i class="fas fa-link mr-2"></i>
+                        8. Referrer-Based Cloaking
+                    </h3>
+                    <p class="text-gray-300 mb-4">Show content based on where user came from</p>
+                    <div class="bg-black rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-green-400 text-sm"><code>// Check referrer
+const referrer = document.referrer;
+
+if (!referrer || referrer === '') {
+    // Direct visit (security scanner?)
+    window.location = 'error.html';
+} else if (referrer.includes('google.com')) {
+    // From Google search - show SEO page
+    showSEOOptimizedPage();
+} else if (referrer.includes('email')) {
+    // From email link - show phishing
+    showPhishingPage();
+} else {
+    // Unknown source
+    showGenericPage();
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Demo Controls -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-vial text-purple-400 mr-2"></i>
+                Live Demo - Test Cloaking Techniques
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <button onclick="testUserAgent()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-robot mr-2"></i>
+                    Test User-Agent Detection
+                </button>
+                
+                <button onclick="testWebDriver()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-car mr-2"></i>
+                    Test WebDriver Detection
+                </button>
+                
+                <button onclick="testTimeBased()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-clock mr-2"></i>
+                    Test Time-Based Cloaking
+                </button>
+                
+                <button onclick="testFingerprint()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-fingerprint mr-2"></i>
+                    Test Fingerprinting
+                </button>
+            </div>
+            
+            <div id="testResults" class="bg-gray-900 rounded-lg p-6 min-h-32"></div>
+        </div>
+
+        <!-- How to Bypass -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-shield-alt text-green-400 mr-2"></i>
+                How Security Researchers Bypass These
+            </h2>
+            
+            <div class="space-y-4 text-gray-300">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Use Real Browser Profiles</strong> - Copy real browser fingerprints
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Residential Proxies</strong> - Use real user IP addresses
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Wait for Delays</strong> - Let time-based cloaking trigger
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Simulate User Behavior</strong> - Click, scroll, move mouse
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Hide Automation Flags</strong> - Patch webdriver, add plugins
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check text-green-400 mt-1"></i>
+                    <div>
+                        <strong>Use Multiple Sources</strong> - Compare results from different methods
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detect user's browser/bot status
+        function detectUser() {
+            const ua = navigator.userAgent;
+            const checks = {
+                isBot: /bot|crawler|spider|scraper/i.test(ua),
+                isHeadless: /headless/i.test(ua) || !navigator.plugins.length,
+                hasWebDriver: navigator.webdriver === true,
+                lowCPU: navigator.hardwareConcurrency < 2,
+                suspiciousScreen: screen.width < 100 || screen.height < 100
+            };
+            
+            const redFlags = Object.values(checks).filter(v => v).length;
+            
+            return {
+                checks,
+                redFlags,
+                verdict: redFlags >= 2 ? 'SECURITY SCANNER/BOT' : redFlags === 1 ? 'SUSPICIOUS' : 'REAL USER'
+            };
+        }
+
+        // Display detection status
+        function displayStatus() {
+            const detection = detectUser();
+            const statusContent = document.getElementById('statusContent');
+            
+            const verdictColors = {
+                'REAL USER': 'text-green-400',
+                'SUSPICIOUS': 'text-yellow-400',
+                'SECURITY SCANNER/BOT': 'text-red-400'
+            };
+            
+            let html = `
+                <div class="p-6 bg-gray-900 rounded-lg border-2 ${detection.verdict === 'REAL USER' ? 'border-green-500' : detection.verdict === 'SUSPICIOUS' ? 'border-yellow-500' : 'border-red-500'}">
+                    <h3 class="text-2xl font-bold ${verdictColors[detection.verdict]} mb-4">
+                        Detection: ${detection.verdict}
+                    </h3>
+                    <div class="space-y-2 text-sm">
+            `;
+            
+            for (const [key, value] of Object.entries(detection.checks)) {
+                const icon = value ? '🚨' : '✅';
+                const color = value ? 'text-red-400' : 'text-green-400';
+                html += `<div class="${color}">${icon} ${key}: ${value ? 'DETECTED' : 'Normal'}</div>`;
+            }
+            
+            html += `
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded">
+                        <strong>Red Flags: ${detection.redFlags}/5</strong>
+                    </div>
+                </div>
+            `;
+            
+            statusContent.innerHTML = html;
+        }
+
+        // Show what content user sees
+        function displayContent() {
+            const detection = detectUser();
+            const contentDiv = document.getElementById('displayedContent');
+            
+            if (detection.verdict === 'SECURITY SCANNER/BOT') {
+                contentDiv.innerHTML = `
+                    <div class="p-8 bg-green-900 rounded-lg border-2 border-green-500 text-center">
+                        <i class="fas fa-hard-hat text-6xl text-green-400 mb-4"></i>
+                        <h3 class="text-3xl font-bold text-green-400 mb-2">Website Under Construction</h3>
+                        <p class="text-green-300">We're working on something amazing. Check back soon!</p>
+                        <p class="text-sm text-green-500 mt-4 opacity-75">This is what security scanners would see</p>
+                    </div>
+                `;
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="p-8 bg-red-900 rounded-lg border-2 border-red-500 text-center">
+                        <i class="fas fa-user-secret text-6xl text-red-400 mb-4"></i>
+                        <h3 class="text-3xl font-bold text-red-400 mb-2">Real User Content</h3>
+                        <p class="text-red-300">You're seeing the actual content because you appear to be a real user.</p>
+                        <p class="text-sm text-red-500 mt-4 opacity-75">In a real attack, this would be malicious content</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test functions
+        function testUserAgent() {
+            const ua = navigator.userAgent;
+            const isBot = /bot|crawler|spider/i.test(ua);
+            
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3 ${isBot ? 'text-red-400' : 'text-green-400'}">
+                    User-Agent Test: ${isBot ? 'BOT DETECTED' : 'Real Browser'}
+                </h3>
+                <p class="text-sm text-gray-400 mb-2">Your User-Agent:</p>
+                <div class="bg-black p-3 rounded text-green-400 text-xs overflow-x-auto">${ua}</div>
+                <p class="text-sm text-gray-400 mt-3">${isBot ? '🚨 Attackers would show you safe content' : '✅ Attackers would show you malicious content'}</p>
+            `;
+        }
+
+        function testWebDriver() {
+            const hasWebDriver = navigator.webdriver === true;
+            
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3 ${hasWebDriver ? 'text-red-400' : 'text-green-400'}">
+                    WebDriver Test: ${hasWebDriver ? 'AUTOMATION DETECTED' : 'Manual Browser'}
+                </h3>
+                <p class="text-sm text-gray-400">navigator.webdriver = ${hasWebDriver}</p>
+                <p class="text-sm text-gray-400 mt-3">${hasWebDriver ? '🚨 You are using automation (Selenium, Puppeteer)' : '✅ You are using a manual browser'}</p>
+            `;
+        }
+
+        function testTimeBased() {
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3 text-yellow-400">Time-Based Test: Running...</h3>
+                <p class="text-sm text-gray-400">Initial content (what bots see)</p>
+                <div class="bg-green-900 p-4 rounded mt-2 border border-green-500">
+                    <p class="text-green-300">✅ Legitimate looking content</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                document.getElementById('testResults').innerHTML = `
+                    <h3 class="text-xl font-bold mb-3 text-red-400">Time-Based Test: Content Changed!</h3>
+                    <p class="text-sm text-gray-400">After 3 seconds (what real users see)</p>
+                    <div class="bg-red-900 p-4 rounded mt-2 border border-red-500">
+                        <p class="text-red-300">🚨 Malicious content revealed</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Bots usually scan quickly and miss this</p>
+                `;
+            }, 3000);
+        }
+
+        function testFingerprint() {
+            const fp = {
+                plugins: navigator.plugins.length,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory || 'N/A',
+                webGL: !!window.WebGLRenderingContext,
+                screen: `${screen.width}x${screen.height}`
+            };
+            
+            const suspicious = fp.plugins === 0 || fp.hardwareConcurrency < 2 || !fp.webGL;
+            
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3 ${suspicious ? 'text-red-400' : 'text-green-400'}">
+                    Fingerprint Test: ${suspicious ? 'SUSPICIOUS' : 'Normal Browser'}
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div>Plugins: ${fp.plugins} ${fp.plugins === 0 ? '🚨' : '✅'}</div>
+                    <div>CPU Cores: ${fp.hardwareConcurrency} ${fp.hardwareConcurrency < 2 ? '🚨' : '✅'}</div>
+                    <div>Device Memory: ${fp.deviceMemory}</div>
+                    <div>WebGL: ${fp.webGL ? 'Yes ✅' : 'No 🚨'}</div>
+                    <div>Screen: ${fp.screen}</div>
+                </div>
+            `;
+        }
+
+        // Initialize on load
+        displayStatus();
+        displayContent();
+    </script>
+</body>
+</html>

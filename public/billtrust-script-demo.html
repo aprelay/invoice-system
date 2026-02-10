@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMO: Billtrust.cam Cloaking Script (Educational)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- WARNING BANNER -->
+    <div class="bg-red-700 text-white p-6 border-b-4 border-red-500">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-exclamation-triangle text-4xl animate-pulse"></i>
+                <div>
+                    <h2 class="text-2xl font-bold">⚠️ EDUCATIONAL DEMO - EXTRACTED FROM REAL PHISHING SITE ⚠️</h2>
+                    <p class="text-lg mt-1">This is the ACTUAL cloaking script from billtrust.cam</p>
+                    <p class="text-sm opacity-90">For security research and education only. DO NOT use for malicious purposes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto py-12 px-4">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-900 via-purple-900 to-blue-900 rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="text-center">
+                <div class="inline-block bg-red-600 p-4 rounded-full mb-4">
+                    <i class="fas fa-code text-4xl"></i>
+                </div>
+                <h1 class="text-4xl font-bold mb-3">
+                    🎭 Billtrust.cam Cloaking Script
+                </h1>
+                <p class="text-xl opacity-90 mb-2">
+                    ACTUAL code extracted from the phishing site
+                </p>
+                <p class="text-sm opacity-75">
+                    Site: <code class="bg-black/50 px-2 py-1 rounded">https://billtrust.cam/</code>
+                </p>
+            </div>
+        </div>
+
+        <!-- Live Detection Status -->
+        <div id="liveStatus" class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border-2 border-yellow-500">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-broadcast-tower text-yellow-400 mr-2"></i>
+                Live Detection: What Are You?
+            </h2>
+            <div id="detectionResult" class="space-y-4"></div>
+        </div>
+
+        <!-- Content Display -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Bot View -->
+            <div class="bg-gray-800 rounded-2xl shadow-xl p-8 border-2 border-blue-500">
+                <h3 class="text-2xl font-bold text-blue-400 mb-4">
+                    <i class="fas fa-robot mr-2"></i>
+                    What Bots See
+                </h3>
+                <div id="botContent" class="bg-gray-900 rounded-lg p-6"></div>
+            </div>
+
+            <!-- Human View -->
+            <div class="bg-gray-800 rounded-2xl shadow-xl p-8 border-2 border-red-500">
+                <h3 class="text-2xl font-bold text-red-400 mb-4">
+                    <i class="fas fa-user mr-2"></i>
+                    What Humans See
+                </h3>
+                <div id="humanContent" class="bg-gray-900 rounded-lg p-6"></div>
+            </div>
+        </div>
+
+        <!-- Original Script -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-file-code text-green-400 mr-2"></i>
+                Original Cloaking Script (From billtrust.cam)
+            </h2>
+            
+            <div class="bg-black rounded-lg p-6 overflow-x-auto mb-4">
+                <pre class="text-green-400 text-sm"><code id="originalScript">// ACTUAL CODE FROM billtrust.cam - Line 4 of HTML
+
+(function() {
+    // Bot Detection Regex - Checks User-Agent
+    if ((/bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i.test(navigator.userAgent)) === false 
+        && typeof(sessionStorage) != 'undefined' 
+        && sessionStorage.getItem('visited') !== 'y' 
+        && document.visibilityState) {
+        
+        // If NOT a bot, inject CSS to hide content
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '@media screen and (min-width: 980px) {' +
+            '.t-records {opacity: 0;}' +
+            '.t-records_animated {' +
+                '-webkit-transition: opacity ease-in-out .2s;' +
+                '-moz-transition: opacity ease-in-out .2s;' +
+                '-o-transition: opacity ease-in-out .2s;' +
+                'transition: opacity ease-in-out .2s;' +
+            '}' +
+            '.t-records.t-records_visible {opacity: 1;}' +
+        '}';
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+})();</code></pre>
+            </div>
+
+            <div class="flex space-x-3">
+                <button onclick="copyScript()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                    <i class="fas fa-copy mr-2"></i>
+                    Copy Script
+                </button>
+                <button onclick="explainScript()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                    <i class="fas fa-book mr-2"></i>
+                    Explain Step-by-Step
+                </button>
+            </div>
+        </div>
+
+        <!-- Step by Step Breakdown -->
+        <div id="stepByStep" class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 hidden">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-list-ol text-yellow-400 mr-2"></i>
+                Step-by-Step Breakdown
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- Step 1 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-l-4 border-red-500">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">
+                        Step 1: Check User-Agent
+                    </h3>
+                    <div class="bg-black rounded p-4 mb-3">
+                        <code class="text-green-400 text-sm">/bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i.test(navigator.userAgent)</code>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Tests if the User-Agent string contains any bot-related keywords.
+                        Returns <span class="text-green-400">TRUE</span> if bot, <span class="text-red-400">FALSE</span> if human.
+                    </p>
+                    <div class="mt-3 p-3 bg-yellow-900/30 rounded border border-yellow-500">
+                        <p class="text-yellow-300 text-xs">
+                            <strong>Attack Logic:</strong> If result is FALSE (not a bot), proceed to hide content
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-l-4 border-yellow-500">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-3">
+                        Step 2: Check Session Storage
+                    </h3>
+                    <div class="bg-black rounded p-4 mb-3">
+                        <code class="text-green-400 text-sm">typeof(sessionStorage) != 'undefined' && sessionStorage.getItem('visited') !== 'y'</code>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Checks if this is the FIRST visit. If user has visited before, don't apply cloaking.
+                    </p>
+                    <div class="mt-3 p-3 bg-yellow-900/30 rounded border border-yellow-500">
+                        <p class="text-yellow-300 text-xs">
+                            <strong>Why:</strong> Prevents re-scanning. Security tools that revisit will see normal content.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-l-4 border-blue-500">
+                    <h3 class="text-xl font-bold text-blue-400 mb-3">
+                        Step 3: Check Page Visibility
+                    </h3>
+                    <div class="bg-black rounded p-4 mb-3">
+                        <code class="text-green-400 text-sm">document.visibilityState</code>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Checks if the page is actually visible (not in background tab).
+                    </p>
+                    <div class="mt-3 p-3 bg-blue-900/30 rounded border border-blue-500">
+                        <p class="text-blue-300 text-xs">
+                            <strong>Why:</strong> Ensures real user interaction. Automated scanners might load in background.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-l-4 border-purple-500">
+                    <h3 class="text-xl font-bold text-purple-400 mb-3">
+                        Step 4: Inject Dynamic CSS
+                    </h3>
+                    <div class="bg-black rounded p-4 mb-3">
+                        <code class="text-green-400 text-sm">var style = document.createElement('style');
+style.innerHTML = '.t-records {opacity: 0;}';
+document.getElementsByTagName('head')[0].appendChild(style);</code>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Creates a new style element and injects CSS to hide content initially.
+                    </p>
+                    <div class="mt-3 p-3 bg-purple-900/30 rounded border border-purple-500">
+                        <p class="text-purple-300 text-xs">
+                            <strong>Result:</strong> Content starts invisible, then fades in. Bots see content immediately.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="bg-gray-900 rounded-lg p-6 border-l-4 border-green-500">
+                    <h3 class="text-xl font-bold text-green-400 mb-3">
+                        Step 5: Transition Animation
+                    </h3>
+                    <div class="bg-black rounded p-4 mb-3">
+                        <code class="text-green-400 text-sm">.t-records_animated {
+    -webkit-transition: opacity ease-in-out .2s;
+    transition: opacity ease-in-out .2s;
+}
+.t-records.t-records_visible {opacity: 1;}</code>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Adds smooth fade-in animation when content becomes visible.
+                    </p>
+                    <div class="mt-3 p-3 bg-green-900/30 rounded border border-green-500">
+                        <p class="text-green-300 text-xs">
+                            <strong>User Experience:</strong> Makes the cloaking less obvious. Looks like normal loading.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bot Detection Test -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-vial text-blue-400 mr-2"></i>
+                Test the Detection Logic
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <button onclick="testWithCurrentUA()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-fingerprint mr-2"></i>
+                    Test Your Browser
+                </button>
+                
+                <button onclick="testWithBotUA()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-robot mr-2"></i>
+                    Simulate Bot UA
+                </button>
+                
+                <button onclick="testSessionStorage()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-database mr-2"></i>
+                    Test Session Storage
+                </button>
+                
+                <button onclick="testVisibility()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg transition">
+                    <i class="fas fa-eye mr-2"></i>
+                    Test Visibility
+                </button>
+            </div>
+            
+            <div id="testResults" class="bg-gray-900 rounded-lg p-6 min-h-32"></div>
+        </div>
+
+        <!-- How Attackers Use This -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+                How Attackers Use This Script
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-900 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">
+                        1. Email Phishing Campaign
+                    </h3>
+                    <div class="space-y-2 text-gray-300 text-sm">
+                        <p>📧 Send emails: "Urgent: Billtrust Payment Required"</p>
+                        <p>🔗 Link: billtrust.cam (fake domain)</p>
+                        <p>👤 Victim clicks → Sees fake payment form</p>
+                        <p>🤖 Scanner checks → Sees innocent "Legal Services" page</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-3">
+                        2. Evade Security Scanners
+                    </h3>
+                    <div class="space-y-2 text-gray-300 text-sm">
+                        <p>🛡️ Google Safe Browsing → Sees clean content</p>
+                        <p>🔍 VirusTotal checks → All engines report "Safe"</p>
+                        <p>🚫 Email filters → Don't block the link</p>
+                        <p>✅ Real victims → See phishing page</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-purple-400 mb-3">
+                        3. Avoid Takedowns
+                    </h3>
+                    <div class="space-y-2 text-gray-300 text-sm">
+                        <p>⏰ First-visit check → Security re-scans see clean content</p>
+                        <p>📊 Abuse reports → Can't reproduce issue</p>
+                        <p>⚖️ Legal action → Harder to prove malicious intent</p>
+                        <p>⌛ Stay online longer → More victims affected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Detect This -->
+        <div class="bg-gray-800 rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-shield-alt text-green-400 mr-2"></i>
+                How to Detect This Cloaking
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-green-400">
+                        Detection Methods:
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <div class="text-sm">
+                                <strong>Multiple User-Agents:</strong> Test with bot and browser UAs
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <div class="text-sm">
+                                <strong>Clear Session Storage:</strong> Between tests
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <div class="text-sm">
+                                <strong>Wait for JS:</strong> Let all scripts execute
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <div class="text-sm">
+                                <strong>Compare Results:</strong> Look for differences
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <div class="text-sm">
+                                <strong>Check DOM Changes:</strong> Look for injected styles
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-blue-400">
+                        Tools to Use:
+                    </h3>
+                    <div class="space-y-3">
+                        <a href="/anti-cloaking" class="block bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition">
+                            <i class="fas fa-search mr-2"></i>
+                            Anti-Cloaking Checker
+                        </a>
+                        <a href="/cloaking-demo" class="block bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg transition">
+                            <i class="fas fa-vial mr-2"></i>
+                            Cloaking Techniques Demo
+                        </a>
+                        <a href="/billtrust-analysis.md" class="block bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg transition">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            Full Analysis Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ACTUAL DETECTION LOGIC FROM BILLTRUST.CAM
+        function runBilltrustDetection() {
+            const botRegex = /bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i;
+            const isBot = botRegex.test(navigator.userAgent);
+            const hasSessionStorage = typeof(sessionStorage) !== 'undefined';
+            const notVisitedBefore = !hasSessionStorage || sessionStorage.getItem('visited') !== 'y';
+            const isVisible = document.visibilityState === 'visible';
+            
+            const shouldApplyCloaking = !isBot && hasSessionStorage && notVisitedBefore && isVisible;
+            
+            return {
+                isBot,
+                hasSessionStorage,
+                notVisitedBefore,
+                isVisible,
+                shouldApplyCloaking,
+                userAgent: navigator.userAgent
+            };
+        }
+
+        // Display live status
+        function displayLiveStatus() {
+            const result = runBilltrustDetection();
+            const container = document.getElementById('detectionResult');
+            
+            const verdictClass = result.shouldApplyCloaking ? 'text-red-400' : 'text-green-400';
+            const verdictIcon = result.shouldApplyCloaking ? '🚨' : '✅';
+            const verdictText = result.shouldApplyCloaking ? 
+                'CLOAKING WOULD BE APPLIED' : 
+                'NORMAL CONTENT SHOWN';
+            
+            container.innerHTML = `
+                <div class="p-6 bg-gray-900 rounded-lg border-2 ${result.shouldApplyCloaking ? 'border-red-500' : 'border-green-500'}">
+                    <h3 class="text-2xl font-bold ${verdictClass} mb-4">
+                        ${verdictIcon} ${verdictText}
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas ${result.isBot ? 'fa-times text-red-400' : 'fa-check text-green-400'}"></i>
+                            <span>Is Bot: ${result.isBot ? 'Yes 🤖' : 'No 👤'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas ${result.hasSessionStorage ? 'fa-check text-green-400' : 'fa-times text-red-400'}"></i>
+                            <span>Has Session Storage: ${result.hasSessionStorage ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas ${result.notVisitedBefore ? 'fa-check text-green-400' : 'fa-times text-red-400'}"></i>
+                            <span>First Visit: ${result.notVisitedBefore ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas ${result.isVisible ? 'fa-check text-green-400' : 'fa-times text-red-400'}"></i>
+                            <span>Page Visible: ${result.isVisible ? 'Yes' : 'No'}</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-black rounded text-xs">
+                        <strong>Your UA:</strong> ${result.userAgent.substring(0, 100)}...
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display what each type sees
+        function displayContent() {
+            // Bot sees this
+            document.getElementById('botContent').innerHTML = `
+                <div class="text-center p-6">
+                    <i class="fas fa-briefcase text-6xl text-blue-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-blue-300 mb-2">Legal Zahirco</h3>
+                    <p class="text-blue-200 text-sm">Professional Legal Services</p>
+                    <p class="text-gray-400 text-xs mt-4">Clean, innocent content for scanners</p>
+                </div>
+            `;
+            
+            // Human sees this (phishing)
+            document.getElementById('humanContent').innerHTML = `
+                <div class="text-center p-6">
+                    <i class="fas fa-credit-card text-6xl text-red-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-red-300 mb-2">Billtrust Payment</h3>
+                    <p class="text-red-200 text-sm mb-4">Enter Payment Details</p>
+                    <div class="space-y-2 text-left">
+                        <input type="text" placeholder="Card Number" class="w-full bg-gray-800 border border-red-500 rounded px-3 py-2 text-sm" disabled>
+                        <input type="text" placeholder="CVV" class="w-full bg-gray-800 border border-red-500 rounded px-3 py-2 text-sm" disabled>
+                    </div>
+                    <p class="text-gray-400 text-xs mt-4">Phishing form after animation</p>
+                </div>
+            `;
+        }
+
+        // Test functions
+        function testWithCurrentUA() {
+            const result = runBilltrustDetection();
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3">Your Browser Test Results:</h3>
+                <div class="space-y-2 text-sm">
+                    <div>✓ User-Agent: ${result.userAgent}</div>
+                    <div>✓ Bot Detected: <strong class="${result.isBot ? 'text-red-400' : 'text-green-400'}">${result.isBot ? 'YES' : 'NO'}</strong></div>
+                    <div>✓ Would Apply Cloaking: <strong class="${result.shouldApplyCloaking ? 'text-red-400' : 'text-green-400'}">${result.shouldApplyCloaking ? 'YES' : 'NO'}</strong></div>
+                </div>
+            `;
+        }
+
+        function testWithBotUA() {
+            const botUA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+            const botRegex = /bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i;
+            const isBot = botRegex.test(botUA);
+            
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3 text-red-400">Simulated Bot Test:</h3>
+                <div class="space-y-2 text-sm">
+                    <div>✓ Simulated UA: <code class="text-xs bg-black px-2 py-1 rounded">${botUA}</code></div>
+                    <div>✓ Bot Detected: <strong class="text-red-400">YES 🤖</strong></div>
+                    <div>✓ Would Apply Cloaking: <strong class="text-green-400">NO</strong></div>
+                    <div class="mt-3 p-3 bg-green-900/30 rounded border border-green-500">
+                        <p class="text-green-300 text-xs">Result: Bot would see normal content (no hiding)</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function testSessionStorage() {
+            const hasStorage = typeof(sessionStorage) !== 'undefined';
+            const visited = sessionStorage.getItem('visited');
+            
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3">Session Storage Test:</h3>
+                <div class="space-y-2 text-sm">
+                    <div>✓ Session Storage Available: <strong class="${hasStorage ? 'text-green-400' : 'text-red-400'}">${hasStorage ? 'YES' : 'NO'}</strong></div>
+                    <div>✓ Visited Before: <strong>${visited === 'y' ? 'YES' : 'NO'}</strong></div>
+                </div>
+                <button onclick="sessionStorage.setItem('visited', 'y'); testSessionStorage();" class="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm">
+                    Mark as Visited
+                </button>
+                <button onclick="sessionStorage.removeItem('visited'); testSessionStorage();" class="mt-4 ml-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                    Clear Visit Flag
+                </button>
+            `;
+        }
+
+        function testVisibility() {
+            const state = document.visibilityState;
+            document.getElementById('testResults').innerHTML = `
+                <h3 class="text-xl font-bold mb-3">Page Visibility Test:</h3>
+                <div class="space-y-2 text-sm">
+                    <div>✓ Visibility State: <strong class="text-green-400">${state}</strong></div>
+                    <div class="mt-3 p-3 bg-blue-900/30 rounded border border-blue-500">
+                        <p class="text-blue-300 text-xs">Try switching tabs and coming back to see it change!</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyScript() {
+            const script = document.getElementById('originalScript').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert('✅ Script copied to clipboard!');
+            });
+        }
+
+        function explainScript() {
+            const element = document.getElementById('stepByStep');
+            element.classList.toggle('hidden');
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        displayLiveStatus();
+        displayContent();
+        
+        // Update every 2 seconds
+        setInterval(displayLiveStatus, 2000);
+    </script>
+</body>
+</html>

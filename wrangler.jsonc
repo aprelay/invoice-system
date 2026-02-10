@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "invoice-system",
+  "compatibility_date": "2026-01-15",
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "invoice-automation",
+      "database_id": "923b491e-5cc9-4e0b-82cf-1df59c9659e8"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "PDF_CACHE",
+      "id": "07c8386508f94337b24a634c62b5d680"
+    },
+    {
+      "binding": "INVOICE_IMAGE_CACHE",
+      "id": "431a64f33af9450b986ad3a25f0acfd3"
+    },
+    {
+      "binding": "OAUTH_TOKENS",
+      "id": "054cd27d2b434de3bf48d2acd1c3f8b0"
+    }
+  ]
+}

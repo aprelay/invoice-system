@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Extractor Extension</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="text-center">
+                <div class="inline-block bg-indigo-100 p-4 rounded-full mb-4">
+                    <i class="fas fa-envelope text-4xl text-indigo-600"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">
+                    Email Extractor Extension
+                </h1>
+                <p class="text-xl text-gray-600 mb-6">
+                    Automatically extract email addresses from any webpage as you scroll
+                </p>
+                <a href="/email-extractor-extension.zip" 
+                   class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-lg transition transform hover:scale-105">
+                    <i class="fas fa-download mr-2"></i>
+                    Download Extension (12 KB)
+                </a>
+                <p class="text-sm text-gray-500 mt-3">
+                    Version 1.0 • Compatible with Chrome, Edge, Brave
+                </p>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-star text-yellow-500 mr-3"></i>
+                Features
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Auto-Extraction</h3>
+                        <p class="text-gray-600 text-sm">Finds emails automatically as you scroll any webpage</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Real-Time Detection</h3>
+                        <p class="text-gray-600 text-sm">Instant visual feedback when emails are found</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Duplicate Prevention</h3>
+                        <p class="text-gray-600 text-sm">Only saves unique email addresses</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Export to CSV</h3>
+                        <p class="text-gray-600 text-sm">Download all emails as a spreadsheet</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Copy to Clipboard</h3>
+                        <p class="text-gray-600 text-sm">Quick copy functionality for all emails</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-800">100% Private</h3>
+                        <p class="text-gray-600 text-sm">All data stored locally in your browser</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installation Steps -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-book text-blue-500 mr-3"></i>
+                Installation Instructions
+            </h2>
+            <div class="space-y-6">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                        1
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">Download & Extract</h3>
+                        <p class="text-gray-600">Click the download button above and extract the ZIP file to a folder on your computer</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                        2
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">Open Extensions Page</h3>
+                        <p class="text-gray-600">Navigate to:</p>
+                        <ul class="text-sm text-gray-600 mt-2 space-y-1 ml-4">
+                            <li>• Chrome: <code class="bg-gray-100 px-2 py-1 rounded">chrome://extensions/</code></li>
+                            <li>• Edge: <code class="bg-gray-100 px-2 py-1 rounded">edge://extensions/</code></li>
+                            <li>• Brave: <code class="bg-gray-100 px-2 py-1 rounded">brave://extensions/</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                        3
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">Enable Developer Mode</h3>
+                        <p class="text-gray-600">Toggle the "Developer mode" switch in the top right corner</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                        4
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">Load the Extension</h3>
+                        <p class="text-gray-600">Click "Load unpacked" and select the extracted folder</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">
+                        ✓
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">Done!</h3>
+                        <p class="text-gray-600">The extension icon will appear in your toolbar. Click it to view extracted emails.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Use -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-play-circle text-purple-500 mr-3"></i>
+                How to Use
+            </h2>
+            <div class="space-y-4">
+                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                    <p class="text-gray-700"><span class="font-bold">Step 1:</span> Visit any webpage with email addresses</p>
+                </div>
+                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                    <p class="text-gray-700"><span class="font-bold">Step 2:</span> Scroll down the page</p>
+                </div>
+                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                    <p class="text-gray-700"><span class="font-bold">Step 3:</span> Watch for toast notifications when emails are found</p>
+                </div>
+                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                    <p class="text-gray-700"><span class="font-bold">Step 4:</span> Click the extension icon to view all extracted emails</p>
+                </div>
+                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                    <p class="text-gray-700"><span class="font-bold">Step 5:</span> Export to CSV or copy to clipboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-xl p-8 mb-8 border-2 border-green-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                Privacy & Security
+            </h2>
+            <div class="space-y-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-check text-green-600"></i>
+                    <p class="text-gray-700">All data stored <strong>locally</strong> in your browser</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-check text-green-600"></i>
+                    <p class="text-gray-700">No data sent to external servers</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-check text-green-600"></i>
+                    <p class="text-gray-700">No tracking or analytics</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-check text-green-600"></i>
+                    <p class="text-gray-700">Works completely offline (after installation)</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-check text-green-600"></i>
+                    <p class="text-gray-700">You control all data (can clear anytime)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download CTA -->
+        <div class="text-center bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
+            <h2 class="text-3xl font-bold mb-4">Ready to Extract Emails?</h2>
+            <p class="text-xl mb-6 opacity-90">Download the extension and start collecting emails instantly</p>
+            <a href="/email-extractor-extension.zip" 
+               class="inline-block bg-white text-indigo-600 hover:bg-gray-100 font-bold text-lg px-8 py-4 rounded-lg shadow-lg transition transform hover:scale-105">
+                <i class="fas fa-download mr-2"></i>
+                Download Now
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-600">
+            <p class="text-sm">
+                Created with <i class="fas fa-heart text-red-500"></i> • 
+                Version 1.0 • 
+                Last Updated: February 9, 2026
+            </p>
+        </div>
+    </div>
+</body>
+</html>

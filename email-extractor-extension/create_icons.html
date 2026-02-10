@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="canvas16" width="16" height="16"></canvas>
+<canvas id="canvas48" width="48" height="48"></canvas>
+<canvas id="canvas128" width="128" height="128"></canvas>
+<script>
+// Create simple icons with emoji
+['16', '48', '128'].forEach(size => {
+  const canvas = document.getElementById(`canvas${size}`);
+  const ctx = canvas.getContext('2d');
+  const s = parseInt(size);
+  
+  // Gradient background
+  const gradient = ctx.createLinearGradient(0, 0, s, s);
+  gradient.addColorStop(0, '#667eea');
+  gradient.addColorStop(1, '#764ba2');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, s, s);
+  
+  // Email icon (simplified)
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${s * 0.6}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('📧', s/2, s/2);
+  
+  // Download
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `icon${size}.png`;
+    a.click();
+  });
+});
+</script>
+</body>
+</html>

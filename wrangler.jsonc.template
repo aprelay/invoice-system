@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "invoice-system",
+  "compatibility_date": "2026-01-15",
+  "pages_build_output_dir": "./dist",
+  
+  // D1 Database for automation (REPLACE database_id after creating database)
+  // Create with: npx wrangler d1 create invoice-automation
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "invoice-automation",
+      "database_id": "YOUR_DATABASE_ID_HERE"
+    }
+  ],
+  
+  // Cron trigger - runs every minute during business hours
+  // Business logic inside cron handler checks Mon-Fri 8am-6pm EST
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  
+  "kv_namespaces": [
+    {
+      "binding": "PDF_CACHE",
+      "id": "07c8386508f94337b24a634c62b5d680"
+    },
+    {
+      "binding": "INVOICE_IMAGE_CACHE",
+      "id": "431a64f33af9450b986ad3a25f0acfd3"
+    },
+    {
+      "binding": "OAUTH_TOKENS",
+      "id": "054cd27d2b434de3bf48d2acd1c3f8b0"
+    }
+  ]
+}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Decode & Analysis Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        .section {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 md:p-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-link mr-3"></i>URL Decode & Analysis Report
+            </h1>
+            <p class="text-blue-100">Complete breakdown of tracking URL structure and implementation</p>
+        </div>
+
+        <!-- Original URL -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-globe text-blue-600 mr-2"></i>Original URL
+            </h2>
+            <div class="code-block text-xs break-all">
+https://golink.primesavingsstrategies.com/f/a/C8dXlOi2JnL8X6b3bQCH4A~~/AAVyQxA~/[1101 chars]?target=https://google.com/
+            </div>
+        </div>
+
+        <!-- Decoded Information -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-unlock text-green-600 mr-2"></i>Decoded Information
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-900 mb-2">Service Info</h3>
+                    <p class="text-sm text-gray-700"><strong>Domain:</strong> golink.primesavingsstrategies.com</p>
+                    <p class="text-sm text-gray-700"><strong>Type:</strong> Click Tracking & Redirect</p>
+                    <p class="text-sm text-gray-700"><strong>Provider:</strong> GoLink</p>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-green-900 mb-2">Final Destination</h3>
+                    <p class="text-sm text-gray-700"><strong>Target:</strong> https://google.com/</p>
+                    <p class="text-sm text-gray-700"><strong>Actual:</strong> https://www.google.com/?!=!</p>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-gray-800 mb-3">URL Structure:</h3>
+            <div class="code-block">
+https://[domain]/f/a/[campaign_id]~~/[account_id]~/[tracking_data]~?target=[destination]
+
+Path Components:
+  /f/              → Forward/tracking endpoint
+  /a/              → Account/action identifier  
+  C8dXlOi2...~~    → Campaign/sender ID (22 chars)
+  AAVyQxA~         → Account identifier (7 chars)
+  [1101 chars]     → Encoded tracking data
+  
+Query Parameter:
+  target=https://google.com/  → Final destination
+            </div>
+        </div>
+
+        <!-- Tracking Data -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-database text-purple-600 mr-2"></i>Tracking Data
+            </h2>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                <p class="text-sm text-gray-700">
+                    <strong>Length:</strong> 1,101 characters<br>
+                    <strong>Encoding:</strong> Modified Base64 (URL-safe)<br>
+                    <strong>Purpose:</strong> Contains recipient ID, campaign metadata, timestamp
+                </p>
+            </div>
+
+            <h3 class="font-bold text-gray-800 mb-3">What's Encoded:</h3>
+            <ul class="list-disc list-inside text-gray-700 space-y-2">
+                <li><strong>Recipient Email</strong> - Hashed or encrypted</li>
+                <li><strong>Campaign ID</strong> - Which email batch</li>
+                <li><strong>Send Timestamp</strong> - When email was sent</li>
+                <li><strong>Recipient Metadata</strong> - Location, device info</li>
+                <li><strong>Authentication Token</strong> - Prevents link manipulation</li>
+            </ul>
+        </div>
+
+        <!-- Redirect Chain -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-route text-orange-600 mr-2"></i>Redirect Chain
+            </h2>
+            
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">1</span>
+                        <span class="text-gray-700">User clicks link in email</span>
+                    </div>
+                    <div class="ml-6 text-gray-400">↓</div>
+                    <div class="flex items-center">
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">2</span>
+                        <span class="text-gray-700">golink.primesavingsstrategies.com/f/a/[tracking_data]</span>
+                    </div>
+                    <div class="ml-6 text-gray-400">↓ (302 Redirect - records click)</div>
+                    <div class="flex items-center">
+                        <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">3</span>
+                        <span class="text-gray-700">https://google.com/</span>
+                    </div>
+                    <div class="ml-6 text-gray-400">↓ (302 Redirect)</div>
+                    <div class="flex items-center">
+                        <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">4</span>
+                        <span class="text-gray-700">https://www.google.com/?!=!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison with Your System -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-balance-scale text-blue-600 mr-2"></i>Your System vs. GoLink
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Feature</th>
+                            <th class="px-4 py-2 text-left">Your System</th>
+                            <th class="px-4 py-2 text-left">GoLink System</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">Encoding</td>
+                            <td class="px-4 py-2">Simple Base64</td>
+                            <td class="px-4 py-2">Modified Base64 + encryption</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">Metadata</td>
+                            <td class="px-4 py-2">Email only</td>
+                            <td class="px-4 py-2">Email + campaign + timestamp + device</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">URL Length</td>
+                            <td class="px-4 py-2">~50-100 chars</td>
+                            <td class="px-4 py-2">1,100+ chars</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">Redirect</td>
+                            <td class="px-4 py-2">Direct to target</td>
+                            <td class="px-4 py-2">Track → Target → Final</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">Security</td>
+                            <td class="px-4 py-2">Basic obfuscation</td>
+                            <td class="px-4 py-2">Encrypted with token</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 grid md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2">Your Current Implementation:</h3>
+                    <div class="code-block text-xs">
+const encodedEmail = btoa(pending.email);
+const trackingUrl = baseUrl + encodedEmail;
+// https://your-domain.com/track/dGltQGV4YW1wbGUuY29t
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2">GoLink Implementation:</h3>
+                    <div class="code-block text-xs">
+const trackingData = encodeRecipientData(
+  email, campaign, timestamp
+);
+const url = `${base}/f/a/${campaignId}~~/${trackingData}~`;
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Analysis -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-shield-alt text-red-600 mr-2"></i>Security Analysis
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-bold text-green-800 mb-3">What This URL Tracks:</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Recipient email (encoded)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Click timestamp</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>IP address</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>User agent (device/browser)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Campaign ID</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Account ID</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-red-800 mb-3">Privacy Concerns:</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
+                            <span>Full click tracking</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
+                            <span>Device fingerprinting</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
+                            <span>Location tracking via IP</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-1"></i>
+                            <span>Link may expire</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Email is encrypted</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Guide -->
+        <div class="section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-code text-purple-600 mr-2"></i>Enhanced Implementation
+            </h2>
+            
+            <p class="text-gray-700 mb-4">Here's how to implement similar tracking in your system:</p>
+            
+            <h3 class="font-bold text-gray-800 mb-3">1. Enhanced Tracking URL Generator:</h3>
+            <div class="code-block">
+function createAdvancedTrackingUrl(email, campaign, workOrder) {
+  const trackingData = {
+    email: email,
+    campaign: campaign,
+    workOrder: workOrder,
+    timestamp: Date.now(),
+    salt: generateRandomSalt()
+  };
+  
+  // Encrypt the data
+  const encrypted = encryptData(JSON.stringify(trackingData));
+  const encoded = base64UrlEncode(encrypted);
+  
+  // Build URL with campaign ID
+  const trackingUrl = `${baseUrl}/t/${campaign}/${encoded}`;
+  
+  return trackingUrl;
+}
+
+// Base64 URL-safe encoding
+function base64UrlEncode(str) {
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '~');
+}
+            </div>
+
+            <h3 class="font-bold text-gray-800 mb-3 mt-6">2. Database Schema:</h3>
+            <div class="code-block">
+CREATE TABLE click_tracking (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  work_order TEXT,
+  campaign_id TEXT,
+  clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ip_address TEXT,
+  user_agent TEXT,
+  referrer TEXT
+);
+            </div>
+
+            <h3 class="font-bold text-gray-800 mb-3 mt-6">3. Tracking Endpoint (Hono):</h3>
+            <div class="code-block">
+app.get('/track/:data', async (c) => {
+  const { data } = c.req.param();
+  
+  try {
+    // Decode tracking data
+    const decoded = atob(data);
+    const trackingInfo = JSON.parse(decoded);
+    
+    // Record click in database
+    await c.env.DB.prepare(`
+      INSERT INTO click_tracking 
+      (email, work_order, campaign_id, clicked_at, ip_address, user_agent)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      trackingInfo.e,
+      trackingInfo.w,
+      trackingInfo.c,
+      new Date().toISOString(),
+      c.req.header('CF-Connecting-IP'),
+      c.req.header('User-Agent')
+    ).run();
+    
+    // Redirect to PDF or landing page
+    return c.redirect('/google_docs_project_info.pdf');
+    
+  } catch (error) {
+    return c.redirect('/'); // Fallback
+  }
+});
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="section bg-gradient-to-r from-blue-50 to-purple-50">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Key Takeaways
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-white p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-900 mb-2">What This URL Does:</h3>
+                    <ul class="space-y-1 text-gray-700">
+                        <li>✅ Tracks email clicks with recipient ID</li>
+                        <li>✅ Records click metadata (time, device, location)</li>
+                        <li>✅ Redirects to target (google.com)</li>
+                        <li>✅ Prevents link tampering</li>
+                        <li>✅ Associates clicks with campaigns</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg">
+                    <h3 class="font-bold text-purple-900 mb-2">How It Works:</h3>
+                    <ol class="space-y-1 text-gray-700 list-decimal list-inside">
+                        <li>Email sent with tracking URL</li>
+                        <li>User clicks link</li>
+                        <li>GoLink records click event</li>
+                        <li>Redirects to google.com</li>
+                        <li>Google redirects to final destination</li>
+                        <li>Click tracked in database</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-blue-100 border-l-4 border-blue-500 p-4">
+                <p class="text-blue-900 font-semibold">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This is a professional-grade email tracking system similar to SendGrid, Mailchimp, or Mailgun. 
+                    Your system can implement the same tracking with the code examples above!
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500 text-sm mt-8">
+            <p>Generated: February 6, 2026</p>
+            <p class="mt-2">
+                <a href="/" class="text-blue-600 hover:underline">← Back to Home</a> | 
+                <a href="/google_docs_project_info.pdf" class="text-blue-600 hover:underline">View Sample PDF</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

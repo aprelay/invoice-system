@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Cloaking Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="text-center">
+                <div class="inline-block bg-purple-100 p-4 rounded-full mb-4">
+                    <i class="fas fa-mask text-4xl text-purple-600"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">
+                    🎭 Anti-Cloaking Checker
+                </h1>
+                <p class="text-xl text-gray-600 mb-6">
+                    Detect if websites show different content to different visitors
+                </p>
+            </div>
+        </div>
+
+        <!-- URL Input -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-link text-blue-500 mr-2"></i>
+                Check URL for Cloaking
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Target URL:</label>
+                    <input type="text" id="targetUrl" 
+                           placeholder="https://example.com"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                </div>
+                
+                <button id="checkBtn" 
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition transform hover:scale-105">
+                    <i class="fas fa-search mr-2"></i>
+                    Check for Cloaking
+                </button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden space-y-6">
+            <!-- Detection Methods -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                    Detection Methods
+                </h2>
+                <div id="detectionMethods" class="space-y-4"></div>
+            </div>
+
+            <!-- Fingerprint Comparison -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-fingerprint text-orange-500 mr-2"></i>
+                    Browser Fingerprint Analysis
+                </h2>
+                <div id="fingerprintData" class="space-y-3"></div>
+            </div>
+
+            <!-- Content Comparison -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-code-compare text-red-500 mr-2"></i>
+                    Content Comparison
+                </h2>
+                <div id="contentComparison" class="space-y-3"></div>
+            </div>
+
+            <!-- Cloaking Indicators -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                    Cloaking Indicators Found
+                </h2>
+                <div id="cloakingIndicators" class="space-y-2"></div>
+            </div>
+
+            <!-- Final Verdict -->
+            <div id="verdict" class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl shadow-xl p-8 text-white">
+                <div class="text-center">
+                    <div id="verdictIcon" class="text-6xl mb-4"></div>
+                    <h2 class="text-3xl font-bold mb-2" id="verdictTitle"></h2>
+                    <p class="text-xl opacity-90" id="verdictMessage"></p>
+                    <div class="mt-6 bg-white/20 rounded-lg p-4">
+                        <p id="verdictScore" class="text-2xl font-bold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                What is Cloaking?
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-mask text-purple-600 mr-2"></i>
+                        Cloaking Techniques:
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>✓ <strong>User-Agent Detection</strong> - Checks if you're a bot</li>
+                        <li>✓ <strong>IP Blacklisting</strong> - Blocks security scanners</li>
+                        <li>✓ <strong>Behavioral Analysis</strong> - Detects automation</li>
+                        <li>✓ <strong>Browser Fingerprinting</strong> - Identifies tools</li>
+                        <li>✓ <strong>JavaScript Challenges</strong> - Requires execution</li>
+                        <li>✓ <strong>Time-based</strong> - Content changes over time</li>
+                        <li>✓ <strong>Geolocation</strong> - Different per country</li>
+                    </ul>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                        Anti-Cloaking Methods:
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>✓ <strong>Multiple User-Agents</strong> - Test different browsers</li>
+                        <li>✓ <strong>Proxy Rotation</strong> - Use different IPs</li>
+                        <li>✓ <strong>Fingerprint Spoofing</strong> - Look like real users</li>
+                        <li>✓ <strong>Headless Detection Bypass</strong> - Hide automation</li>
+                        <li>✓ <strong>Behavior Simulation</strong> - Act human-like</li>
+                        <li>✓ <strong>Content Comparison</strong> - Compare results</li>
+                        <li>✓ <strong>Timing Analysis</strong> - Check delays</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-cogs text-purple-500 mr-2"></i>
+                How This Tool Works
+            </h2>
+            
+            <div class="space-y-4 text-gray-700">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                    <div>
+                        <h3 class="font-bold">Fingerprint Collection</h3>
+                        <p>Analyzes your browser fingerprint (User-Agent, screen resolution, plugins, WebGL, etc.)</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                    <div>
+                        <h3 class="font-bold">Multiple Request Methods</h3>
+                        <p>Tests URL with different User-Agents (Chrome, Firefox, Bot, Mobile)</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                    <div>
+                        <h3 class="font-bold">Content Analysis</h3>
+                        <p>Compares HTML content, headers, redirects, and response codes</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                    <div>
+                        <h3 class="font-bold">Cloaking Detection</h3>
+                        <p>Identifies differences in responses and calculates cloaking score</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        // Collect browser fingerprint
+        function collectFingerprint() {
+            const fp = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory || 'N/A',
+                screenResolution: `${screen.width}x${screen.height}`,
+                screenColorDepth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: new Date().getTimezoneOffset(),
+                doNotTrack: navigator.doNotTrack,
+                cookieEnabled: navigator.cookieEnabled,
+                plugins: Array.from(navigator.plugins || []).map(p => p.name),
+                webdriver: navigator.webdriver,
+                vendor: navigator.vendor,
+                maxTouchPoints: navigator.maxTouchPoints
+            };
+            
+            return fp;
+        }
+        
+        // Check for cloaking
+        async function checkCloaking(url) {
+            const results = document.getElementById('results');
+            results.classList.remove('hidden');
+            
+            // Show loading
+            document.getElementById('detectionMethods').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i><p class="mt-4 text-gray-600 text-lg">Testing URL with multiple user agents...</p><p class="text-sm text-gray-500 mt-2">This may take 10-15 seconds</p></div>';
+            document.getElementById('contentComparison').innerHTML = '';
+            document.getElementById('cloakingIndicators').innerHTML = '';
+            document.getElementById('verdict').style.display = 'none';
+            
+            // Collect and display fingerprint
+            const fingerprint = collectFingerprint();
+            displayFingerprint(fingerprint);
+            
+            try {
+                // Call real API
+                const response = await fetch(`${API_BASE}/api/anti-cloaking/check`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display real results
+                displayRealDetectionMethods(data.results);
+                displayRealContentComparison(data.results);
+                displayRealIndicators(data.analysis.indicators);
+                displayRealVerdict(data.analysis);
+                
+            } catch (error) {
+                document.getElementById('detectionMethods').innerHTML = `
+                    <div class="text-center py-8 bg-red-50 rounded-lg">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
+                        <p class="text-red-800 font-bold">Error checking URL</p>
+                        <p class="text-red-600 text-sm mt-2">${error.message}</p>
+                        <p class="text-gray-600 text-xs mt-4">Make sure the URL is accessible and allows external requests</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayRealDetectionMethods(results) {
+            const html = Object.entries(results).map(([name, data]) => {
+                let statusIcon, statusColor, statusText;
+                
+                if (data.error) {
+                    statusIcon = 'fa-times-circle';
+                    statusColor = 'text-red-600';
+                    statusText = `Error: ${data.error}`;
+                } else {
+                    statusIcon = 'fa-check-circle';
+                    statusColor = 'text-green-600';
+                    statusText = `${data.status} ${data.statusText} • ${(data.contentLength / 1024).toFixed(1)} KB`;
+                }
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas ${statusIcon} ${statusColor} text-xl"></i>
+                            <div>
+                                <span class="font-semibold text-gray-700 capitalize">${name} User-Agent</span>
+                                ${data.redirected ? '<span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Redirected</span>' : ''}
+                            </div>
+                        </div>
+                        <span class="text-gray-600 text-sm">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('detectionMethods').innerHTML = html;
+        }
+        
+        function displayRealContentComparison(results) {
+            const entries = Object.entries(results).filter(([_, data]) => !data.error);
+            
+            if (entries.length === 0) {
+                document.getElementById('contentComparison').innerHTML = `
+                    <div class="text-center p-6 bg-red-50 rounded-lg">
+                        <p class="text-red-800">All requests failed - unable to compare content</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get content lengths
+            const lengths = entries.map(([_, data]) => data.contentLength);
+            const min = Math.min(...lengths);
+            const max = Math.max(...lengths);
+            const diff = max - min;
+            const diffPercent = ((diff / min) * 100).toFixed(1);
+            
+            let matchColor, matchIcon, matchText;
+            if (diff < 100) {
+                matchColor = 'bg-green-50 border-green-200';
+                matchIcon = 'fa-equals text-green-600';
+                matchText = 'text-green-800';
+            } else if (diff < 1000) {
+                matchColor = 'bg-yellow-50 border-yellow-200';
+                matchIcon = 'fa-exclamation-triangle text-yellow-600';
+                matchText = 'text-yellow-800';
+            } else {
+                matchColor = 'bg-red-50 border-red-200';
+                matchIcon = 'fa-times text-red-600';
+                matchText = 'text-red-800';
+            }
+            
+            const html = `
+                <div class="grid md:grid-cols-${Math.min(entries.length, 3)} gap-4 mb-4">
+                    ${entries.slice(0, 3).map(([name, data]) => `
+                        <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                            <h3 class="font-bold text-gray-800 mb-2 capitalize">
+                                <i class="fas fa-browser mr-2"></i>
+                                ${name}
+                            </h3>
+                            <div class="space-y-1 text-sm text-gray-700">
+                                <div>Status: <strong>${data.status}</strong></div>
+                                <div>Size: <strong>${(data.contentLength / 1024).toFixed(1)} KB</strong></div>
+                                <div>Type: <strong>${data.contentType || 'N/A'}</strong></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="p-4 ${matchColor} rounded-lg border-2">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas ${matchIcon} text-xl"></i>
+                        <h3 class="font-bold ${matchText}">Content Difference: ${diffPercent}%</h3>
+                    </div>
+                    <p class="${matchText} text-sm">
+                        Size range: ${(min / 1024).toFixed(1)} KB - ${(max / 1024).toFixed(1)} KB 
+                        (difference: ${(diff / 1024).toFixed(1)} KB)
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('contentComparison').innerHTML = html;
+        }
+        
+        function displayRealIndicators(indicators) {
+            if (!Array.isArray(indicators) || indicators.length === 0 || 
+                (indicators.length === 1 && typeof indicators[0] === 'string')) {
+                document.getElementById('cloakingIndicators').innerHTML = `
+                    <div class="text-center p-6 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-4xl text-green-600 mb-2"></i>
+                        <p class="text-green-800 font-semibold">No cloaking indicators detected!</p>
+                        <p class="text-green-600 text-sm mt-1">${indicators[0] || 'Website appears consistent'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = indicators.map(indicator => {
+                const colors = {
+                    high: 'bg-red-50 border-red-300 text-red-800',
+                    medium: 'bg-yellow-50 border-yellow-300 text-yellow-800',
+                    low: 'bg-blue-50 border-blue-300 text-blue-800'
+                };
+                
+                const icons = {
+                    high: 'fa-exclamation-circle text-red-600',
+                    medium: 'fa-exclamation-triangle text-yellow-600',
+                    low: 'fa-info-circle text-blue-600'
+                };
+                
+                return `
+                    <div class="p-4 border-2 rounded-lg ${colors[indicator.severity]}">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas ${icons[indicator.severity]} text-xl mt-1"></i>
+                            <div>
+                                <h3 class="font-bold">${indicator.title}</h3>
+                                <p class="text-sm mt-1">${indicator.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('cloakingIndicators').innerHTML = html;
+        }
+        
+        function displayRealVerdict(analysis) {
+            const verdictEl = document.getElementById('verdict');
+            verdictEl.style.display = 'block';
+            
+            let icon, color;
+            
+            if (analysis.cloakingScore >= 50) {
+                icon = '🚨';
+                color = 'from-red-600 to-pink-600';
+            } else if (analysis.cloakingScore >= 25) {
+                icon = '⚠️';
+                color = 'from-yellow-600 to-orange-600';
+            } else if (analysis.cloakingScore > 0) {
+                icon = 'ℹ️';
+                color = 'from-blue-600 to-cyan-600';
+            } else {
+                icon = '✅';
+                color = 'from-green-600 to-emerald-600';
+            }
+            
+            document.getElementById('verdictIcon').textContent = icon;
+            document.getElementById('verdictTitle').textContent = analysis.verdict;
+            document.getElementById('verdictMessage').textContent = analysis.message;
+            document.getElementById('verdictScore').innerHTML = `
+                <div class="mb-2">Cloaking Score: ${analysis.cloakingScore}/${analysis.maxScore}</div>
+                <div class="text-lg">${analysis.recommendation}</div>
+            `;
+            verdictEl.className = `bg-gradient-to-r ${color} rounded-2xl shadow-xl p-8 text-white`;
+        }
+        
+        function displayFingerprint(fp) {
+            const html = Object.entries(fp).map(([key, value]) => {
+                const displayValue = Array.isArray(value) ? value.join(', ') || 'None' : value;
+                return `
+                    <div class="flex justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">${formatKey(key)}:</span>
+                        <span class="text-gray-600 text-right ml-4">${displayValue}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('fingerprintData').innerHTML = html;
+        }
+        
+        function detectCloakingIndicators(fp) {
+            const indicators = [];
+            
+            // Check for headless browser
+            if (fp.webdriver) {
+                indicators.push({
+                    severity: 'high',
+                    title: 'WebDriver Detected',
+                    description: 'navigator.webdriver is true - common in automated browsers'
+                });
+            }
+            
+            // Check for suspicious plugins
+            if (fp.plugins.length === 0) {
+                indicators.push({
+                    severity: 'medium',
+                    title: 'No Browser Plugins',
+                    description: 'Real browsers usually have plugins installed'
+                });
+            }
+            
+            // Check for suspicious user agent
+            if (fp.userAgent.toLowerCase().includes('headless')) {
+                indicators.push({
+                    severity: 'high',
+                    title: 'Headless Browser',
+                    description: 'User-Agent contains "headless" keyword'
+                });
+            }
+            
+            // Check for bot indicators in UA
+            const botKeywords = ['bot', 'crawler', 'spider', 'scraper'];
+            if (botKeywords.some(keyword => fp.userAgent.toLowerCase().includes(keyword))) {
+                indicators.push({
+                    severity: 'high',
+                    title: 'Bot User-Agent',
+                    description: 'User-Agent contains bot-related keywords'
+                });
+            }
+            
+            // Check hardware concurrency
+            if (fp.hardwareConcurrency < 2) {
+                indicators.push({
+                    severity: 'low',
+                    title: 'Low Hardware Concurrency',
+                    description: 'Only 1 CPU core detected - unusual for modern systems'
+                });
+            }
+            
+            // Check touch points (mobile detection)
+            if (fp.maxTouchPoints === 0 && fp.userAgent.includes('Mobile')) {
+                indicators.push({
+                    severity: 'medium',
+                    title: 'Mobile UA without Touch',
+                    description: 'Claims to be mobile but has no touch points'
+                });
+            }
+            
+            return indicators;
+        }
+        
+        function displayIndicators(indicators) {
+            if (indicators.length === 0) {
+                document.getElementById('cloakingIndicators').innerHTML = `
+                    <div class="text-center p-6 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-4xl text-green-600 mb-2"></i>
+                        <p class="text-green-800 font-semibold">No cloaking indicators detected!</p>
+                        <p class="text-green-600 text-sm mt-1">Your browser appears normal</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = indicators.map(indicator => {
+                const colors = {
+                    high: 'bg-red-50 border-red-300 text-red-800',
+                    medium: 'bg-yellow-50 border-yellow-300 text-yellow-800',
+                    low: 'bg-blue-50 border-blue-300 text-blue-800'
+                };
+                
+                const icons = {
+                    high: 'fa-exclamation-circle text-red-600',
+                    medium: 'fa-exclamation-triangle text-yellow-600',
+                    low: 'fa-info-circle text-blue-600'
+                };
+                
+                return `
+                    <div class="p-4 border-2 rounded-lg ${colors[indicator.severity]}">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas ${icons[indicator.severity]} text-xl mt-1"></i>
+                            <div>
+                                <h3 class="font-bold">${indicator.title}</h3>
+                                <p class="text-sm mt-1">${indicator.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('cloakingIndicators').innerHTML = html;
+        }
+        
+        function displayDetectionMethods(url) {
+            const methods = [
+                { name: 'Standard Browser', status: 'checked', result: 'Response: 200 OK' },
+                { name: 'Mobile User-Agent', status: 'checked', result: 'Response: 200 OK' },
+                { name: 'Bot User-Agent', status: 'checking', result: 'Testing...' },
+                { name: 'Different IP Address', status: 'pending', result: 'Requires proxy' },
+                { name: 'JavaScript Disabled', status: 'pending', result: 'Not tested' }
+            ];
+            
+            const html = methods.map(method => {
+                const statusColors = {
+                    checked: 'text-green-600 fa-check-circle',
+                    checking: 'text-yellow-600 fa-spinner fa-spin',
+                    pending: 'text-gray-400 fa-clock'
+                };
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas ${statusColors[method.status]} text-xl"></i>
+                            <span class="font-semibold text-gray-700">${method.name}</span>
+                        </div>
+                        <span class="text-gray-600 text-sm">${method.result}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('detectionMethods').innerHTML = html;
+        }
+        
+        function displayContentComparison() {
+            const html = `
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                        <h3 class="font-bold text-green-800 mb-2">
+                            <i class="fas fa-desktop mr-2"></i>
+                            Desktop Browser
+                        </h3>
+                        <div class="space-y-2 text-sm text-green-700">
+                            <div>Status: <strong>200 OK</strong></div>
+                            <div>Content-Length: <strong>45.2 KB</strong></div>
+                            <div>Load Time: <strong>1.2s</strong></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                        <h3 class="font-bold text-green-800 mb-2">
+                            <i class="fas fa-mobile-alt mr-2"></i>
+                            Mobile Browser
+                        </h3>
+                        <div class="space-y-2 text-sm text-green-700">
+                            <div>Status: <strong>200 OK</strong></div>
+                            <div>Content-Length: <strong>45.2 KB</strong></div>
+                            <div>Load Time: <strong>1.3s</strong></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-equals text-blue-600 text-xl"></i>
+                        <h3 class="font-bold text-blue-800">Content Match: 100%</h3>
+                    </div>
+                    <p class="text-blue-700 text-sm">Both requests received identical content</p>
+                </div>
+            `;
+            
+            document.getElementById('contentComparison').innerHTML = html;
+        }
+        
+        function displayVerdict(indicatorCount) {
+            let verdict, icon, message, score, color;
+            
+            if (indicatorCount === 0) {
+                verdict = 'Low Risk';
+                icon = '✅';
+                message = 'No significant cloaking indicators detected';
+                score = 'Safety Score: 95/100';
+                color = 'from-green-600 to-emerald-600';
+            } else if (indicatorCount <= 2) {
+                verdict = 'Medium Risk';
+                icon = '⚠️';
+                message = 'Some cloaking indicators detected - proceed with caution';
+                score = `Safety Score: ${85 - (indicatorCount * 15)}/100`;
+                color = 'from-yellow-600 to-orange-600';
+            } else {
+                verdict = 'High Risk';
+                icon = '🚨';
+                message = 'Multiple cloaking indicators detected - high likelihood of content manipulation';
+                score = 'Safety Score: 45/100';
+                color = 'from-red-600 to-pink-600';
+            }
+            
+            document.getElementById('verdictIcon').textContent = icon;
+            document.getElementById('verdictTitle').textContent = verdict;
+            document.getElementById('verdictMessage').textContent = message;
+            document.getElementById('verdictScore').textContent = score;
+            document.getElementById('verdict').className = `bg-gradient-to-r ${color} rounded-2xl shadow-xl p-8 text-white`;
+        }
+        
+        function formatKey(key) {
+            return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        }
+        
+        // Event listener
+        document.getElementById('checkBtn').addEventListener('click', () => {
+            const url = document.getElementById('targetUrl').value.trim();
+            
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('URL must start with http:// or https://');
+                return;
+            }
+            
+            checkCloaking(url);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>75% Plain Text + 25% HTML Email System - Copy Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .code-box {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .code-box:hover .copy-btn {
+            opacity: 1;
+        }
+        .copied {
+            background-color: #10b981 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-envelope mr-3 text-blue-600"></i>
+                75% Plain Text + 25% HTML Email System
+            </h1>
+            <p class="text-gray-600 text-lg">
+                Click the <i class="fas fa-copy text-blue-600"></i> button in the top-right corner of each code box to copy
+            </p>
+        </div>
+
+        <!-- BOX 1 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">1</span>
+                Decide Email Type (75% Plain Text, 25% HTML)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code1')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code1" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const usePlainText = Math.random() < 0.75</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 2 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">2</span>
+                Generate Sender Name from Email
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code2')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code2" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const senderName = account.account_email.split('@')[0].replace(/[._-]/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 3 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">3</span>
+                Random Greetings (6 Options)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code3')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code3" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const greetings = [
+  'Hello',
+  'Hi there',
+  'Good morning',
+  'Good afternoon',
+  'Hi',
+  'Greetings'
+]
+const greeting = greetings[Math.floor(Math.random() * greetings.length)]</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 4 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-green-600 text-white px-3 py-1 rounded-full text-lg mr-2">4</span>
+                All 12 Plain Text Styles (75% of emails)
+            </h2>
+            <p class="text-gray-600 mb-4">Universal business inquiry templates that work for ANY industry</p>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code4')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code4" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto text-sm"><code>const inquiryStyles = [
+  // Style 1: General service inquiry
+  greeting + ',\n\n' +
+  'I\'m reaching out to inquire about your services. I\'d appreciate any information on availability, pricing, and what you offer.\n\n' +
+  'Please let me know the best way to proceed or if you need additional details from me.\n\n' +
+  'Thank you,\n' + senderName,
+  
+  // Style 2: Project-based
+  greeting + ',\n\n' +
+  'I\'m interested in discussing a potential project with your company. Could you provide information about your current availability and pricing structure?\n\n' +
+  'I\'d also like to know about typical timelines and what options you can accommodate.\n\n' +
+  'Looking forward to hearing from you.\n\n' +
+  'Best regards,\n' + senderName,
+  
+  // Style 3: Direct and brief
+  greeting + ',\n\n' +
+  'I\'m considering working with your company and would like to learn more about your services. What information would you need from me to provide a quote?\n\n' +
+  'Please advise on next steps and approximate timelines.\n\n' +
+  'Thanks,\n' + senderName,
+  
+  // Style 4: Detailed inquiry
+  greeting + ',\n\n' +
+  'I\'m writing to inquire about your services. I\'m particularly interested in understanding:\n\n' +
+  '- Current availability\n' +
+  '- Typical timelines\n' +
+  '- Pricing ranges and payment terms\n' +
+  '- Available options\n\n' +
+  'Please let me know how we can move forward with this discussion.\n\n' +
+  'Best,\n' + senderName,
+  
+  // Style 5: Personal approach
+  greeting + ',\n\n' +
+  'I came across your company and would like to learn more about what you offer. Would you be able to share information about your services and availability?\n\n' +
+  'I\'d appreciate learning about your process, pricing, and what you\'d need from me to get started.\n\n' +
+  'Thank you for your time.\n\n' +
+  senderName,
+  
+  // Style 6: Timeline focused
+  greeting + ',\n\n' +
+  'I\'m planning a project and wanted to reach out about your services. What are your current lead times?\n\n' +
+  'Also, could you provide information on pricing and what specifications you typically work with?\n\n' +
+  'Appreciate your help.\n\n' +
+  'Regards,\n' + senderName,
+  
+  // Style 7: Research phase
+  greeting + ',\n\n' +
+  'I\'m in the early stages of planning and gathering information from different providers. Could you share details about your services, including availability and pricing?\n\n' +
+  'Any information about your process and timelines would be helpful as well.\n\n' +
+  'Thanks in advance,\n' + senderName,
+  
+  // Style 8: Recommendation-based
+  greeting + ',\n\n' +
+  'I was referred to your company and would like to learn more about your current availability and what you offer.\n\n' +
+  'Could you provide information on pricing, options, and typical project timelines?\n\n' +
+  'Looking forward to your response.\n\n' +
+  senderName,
+  
+  // Style 9: Budget conscious
+  greeting + ',\n\n' +
+  'I\'m interested in your services and would like to understand your pricing structure and what\'s included. What information do you need from me to provide an estimate?\n\n' +
+  'Also curious about your availability.\n\n' +
+  'Thank you,\n' + senderName,
+  
+  // Style 10: Comparison shopping
+  greeting + ',\n\n' +
+  'I\'m comparing several providers and wanted to learn more about your company. Could you provide details on your services, availability, and pricing?\n\n' +
+  'I\'d also appreciate information about your offerings and timelines.\n\n' +
+  'Best regards,\n' + senderName,
+  
+  // Style 11: Ready to move forward
+  greeting + ',\n\n' +
+  'I\'m ready to move forward with a project and would like to discuss your services. What are your current lead times and availability?\n\n' +
+  'Please share information about pricing and what you\'d need from me to begin the process.\n\n' +
+  'Thanks,\n' + senderName,
+  
+  // Style 12: Exploratory
+  greeting + ',\n\n' +
+  'I\'m exploring options and would like to learn more about what you offer. Could you provide an overview of your services, including typical timelines and pricing ranges?\n\n' +
+  'I\'d also like to know what options and packages you have available.\n\n' +
+  'Appreciate your help.\n\n' +
+  'Regards,\n' + senderName
+]</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 5 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">5</span>
+                Pick Random Style
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code5')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code5" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const styleNum = Math.floor(Math.random() * inquiryStyles.length)
+const plainTextBody = inquiryStyles[styleNum]</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 6 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">6</span>
+                Create Plain Text Email Body (75%)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code6')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code6" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>emailBody = {
+  contentType: 'Text',
+  content: plainTextBody
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 7 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-purple-600 text-white px-3 py-1 rounded-full text-lg mr-2">7</span>
+                Create HTML Email Body (25%)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code7')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code7" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>emailBody = {
+  contentType: 'HTML',
+  content: htmlBody
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 8 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">8</span>
+                Generate Tracking URL (Base64 Encoded)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code8')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code8" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const encodedEmail = btoa(pending.email)
+const trackingUrl = baseUrl + encodedEmail</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 9 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">9</span>
+                Generate Subject Line (50% with "Re:")
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code9')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code9" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const baseSubject = getRandomSubject(pending.work_order)
+const useReplyTrick = Math.random() < 0.5
+const subject = useReplyTrick ? 'Re: ' + baseSubject : baseSubject</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 10 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">10</span>
+                Build Email Payload (Microsoft Graph API)
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code10')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code10" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const emailPayload = {
+  message: {
+    subject: subject,
+    body: emailBody,
+    toRecipients: [{ emailAddress: { address: pending.email } }],
+    from: { emailAddress: { address: account.account_email, name: senderName } }
+  },
+  saveToSentItems: false
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 11 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-red-600 text-white px-3 py-1 rounded-full text-lg mr-2">11</span>
+                Send Email via Microsoft Graph API
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code11')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code11" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>const response = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token.accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(emailPayload)
+})</code></pre>
+            </div>
+        </div>
+
+        <!-- BOX 12 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-lg mr-2">12</span>
+                Check Response
+            </h2>
+            <div class="code-box">
+                <button class="copy-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="copyCode(this, 'code12')">
+                    <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre id="code12" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto"><code>if (response.ok) {
+  console.log('✅ Email sent successfully!')
+} else {
+  const errorText = await response.text()
+  console.error('❌ Graph API error:', errorText)
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- COMPLETE FLOW -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 mb-6">
+            <h2 class="text-3xl font-bold text-white mb-4">
+                <i class="fas fa-code mr-3"></i>
+                Complete Flow - All Code Together
+            </h2>
+            <p class="text-white text-lg mb-4">Copy this complete working example:</p>
+            <div class="code-box">
+                <button class="copy-btn bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100" onclick="copyCode(this, 'codeComplete')">
+                    <i class="fas fa-copy mr-2"></i>Copy All
+                </button>
+                <pre id="codeComplete" class="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto text-sm"><code>// COMPLETE 75% PLAIN TEXT + 25% HTML EMAIL SYSTEM
+
+// Step 1: Decide email type
+const usePlainText = Math.random() < 0.75
+
+// Step 2: Generate sender name
+const senderName = account.account_email.split('@')[0].replace(/[._-]/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+
+// Step 3: Generate tracking URL
+const encodedEmail = btoa(pending.email)
+const trackingUrl = baseUrl + encodedEmail
+
+// Step 4: Generate email body
+let emailBody
+if (usePlainText) {
+  // PLAIN TEXT (75%)
+  const greetings = ['Hello', 'Hi there', 'Good morning', 'Good afternoon', 'Hi', 'Greetings']
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)]
+  
+  const inquiryStyles = [
+    greeting + ',\n\n' + 'I\'m reaching out to inquire about your services. I\'d appreciate any information on availability, pricing, and what you offer.\n\n' + 'Please let me know the best way to proceed or if you need additional details from me.\n\n' + 'Thank you,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m interested in discussing a potential project with your company. Could you provide information about your current availability and pricing structure?\n\n' + 'I\'d also like to know about typical timelines and what options you can accommodate.\n\n' + 'Looking forward to hearing from you.\n\n' + 'Best regards,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m considering working with your company and would like to learn more about your services. What information would you need from me to provide a quote?\n\n' + 'Please advise on next steps and approximate timelines.\n\n' + 'Thanks,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m writing to inquire about your services. I\'m particularly interested in understanding:\n\n' + '- Current availability\n' + '- Typical timelines\n' + '- Pricing ranges and payment terms\n' + '- Available options\n\n' + 'Please let me know how we can move forward with this discussion.\n\n' + 'Best,\n' + senderName,
+    greeting + ',\n\n' + 'I came across your company and would like to learn more about what you offer. Would you be able to share information about your services and availability?\n\n' + 'I\'d appreciate learning about your process, pricing, and what you\'d need from me to get started.\n\n' + 'Thank you for your time.\n\n' + senderName,
+    greeting + ',\n\n' + 'I\'m planning a project and wanted to reach out about your services. What are your current lead times?\n\n' + 'Also, could you provide information on pricing and what specifications you typically work with?\n\n' + 'Appreciate your help.\n\n' + 'Regards,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m in the early stages of planning and gathering information from different providers. Could you share details about your services, including availability and pricing?\n\n' + 'Any information about your process and timelines would be helpful as well.\n\n' + 'Thanks in advance,\n' + senderName,
+    greeting + ',\n\n' + 'I was referred to your company and would like to learn more about your current availability and what you offer.\n\n' + 'Could you provide information on pricing, options, and typical project timelines?\n\n' + 'Looking forward to your response.\n\n' + senderName,
+    greeting + ',\n\n' + 'I\'m interested in your services and would like to understand your pricing structure and what\'s included. What information do you need from me to provide an estimate?\n\n' + 'Also curious about your availability.\n\n' + 'Thank you,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m comparing several providers and wanted to learn more about your company. Could you provide details on your services, availability, and pricing?\n\n' + 'I\'d also appreciate information about your offerings and timelines.\n\n' + 'Best regards,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m ready to move forward with a project and would like to discuss your services. What are your current lead times and availability?\n\n' + 'Please share information about pricing and what you\'d need from me to begin the process.\n\n' + 'Thanks,\n' + senderName,
+    greeting + ',\n\n' + 'I\'m exploring options and would like to learn more about what you offer. Could you provide an overview of your services, including typical timelines and pricing ranges?\n\n' + 'I\'d also like to know what options and packages you have available.\n\n' + 'Appreciate your help.\n\n' + 'Regards,\n' + senderName
+  ]
+  
+  const styleNum = Math.floor(Math.random() * inquiryStyles.length)
+  const plainTextBody = inquiryStyles[styleNum]
+  
+  emailBody = {
+    contentType: 'Text',
+    content: plainTextBody
+  }
+} else {
+  // HTML (25%)
+  emailBody = {
+    contentType: 'HTML',
+    content: htmlBody
+  }
+}
+
+// Step 5: Generate subject
+const baseSubject = getRandomSubject(pending.work_order)
+const useReplyTrick = Math.random() < 0.5
+const subject = useReplyTrick ? 'Re: ' + baseSubject : baseSubject
+
+// Step 6: Build payload
+const emailPayload = {
+  message: {
+    subject: subject,
+    body: emailBody,
+    toRecipients: [{ emailAddress: { address: pending.email } }],
+    from: { emailAddress: { address: account.account_email, name: senderName } }
+  },
+  saveToSentItems: false
+}
+
+// Step 7: Send
+const response = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token.accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(emailPayload)
+})
+
+// Step 8: Check response
+if (response.ok) {
+  console.log('✅ Email sent successfully!')
+} else {
+  const errorText = await response.text()
+  console.error('❌ Graph API error:', errorText)
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-800 text-white rounded-lg shadow-lg p-6 text-center">
+            <h3 class="text-2xl font-bold mb-2">✅ Ready to Use!</h3>
+            <p class="text-gray-300">
+                Click any <i class="fas fa-copy text-blue-400"></i> button to copy code to clipboard
+            </p>
+            <p class="text-gray-400 text-sm mt-2">
+                75% Plain Text (12 styles) + 25% HTML + Tracking URLs + Subject Variations
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                // Change button to show success
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                button.classList.add('copied');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy code. Please select and copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>

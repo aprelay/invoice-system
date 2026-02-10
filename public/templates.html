@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Email Templates - All Templates</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .template-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f9fafb;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .copy-btn {
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+        .copy-success {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto p-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-xl p-8 mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-envelope-open-text mr-3"></i>
+                Master Email Templates
+            </h1>
+            <p class="text-blue-100">All HTML & Plain Text Templates - Copy with One Click</p>
+            <div class="mt-4 flex gap-4 text-sm">
+                <span class="bg-white/20 px-3 py-1 rounded-full">29 HTML Templates</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full">12 Plain Text Styles</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full">50 Subject Lines</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-lg mb-6">
+            <div class="flex border-b">
+                <button class="tab-button active" onclick="showTab('html')">
+                    <i class="fas fa-code mr-2"></i>HTML Templates (29)
+                </button>
+                <button class="tab-button" onclick="showTab('plaintext')">
+                    <i class="fas fa-file-alt mr-2"></i>Plain Text (12)
+                </button>
+                <button class="tab-button" onclick="showTab('subjects')">
+                    <i class="fas fa-heading mr-2"></i>Subject Lines (50)
+                </button>
+            </div>
+        </div>
+
+        <!-- HTML Templates Tab -->
+        <div id="html-tab" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-palette mr-2 text-blue-600"></i>
+                    HTML Invoice Templates (1-29)
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    29 unique color-themed HTML templates with randomized content. 
+                    Each template includes anti-spam features and looks like a legitimate business update.
+                </p>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>How it works:</strong> The system randomly picks one of these 29 color schemes, 
+                        randomizes greetings, openings, CTAs, and closings to create unique variations.
+                    </p>
+                </div>
+
+                <button onclick="copyHtmlTemplate()" 
+                        class="copy-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold mb-4">
+                    <i class="fas fa-copy mr-2"></i>Copy HTML Template Function
+                </button>
+
+                <div class="code-block" id="html-code">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Plain Text Tab -->
+        <div id="plaintext-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-file-alt mr-2 text-green-600"></i>
+                    Plain Text Templates (12 Styles)
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    12 natural, conversational home building inquiry emails. 75% of emails use plain text for maximum deliverability.
+                </p>
+
+                <div class="bg-green-50 border-l-4 border-green-600 p-4 mb-6">
+                    <p class="text-sm text-green-800">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <strong>Deliverability:</strong> Plain text emails have 75% usage rate. 
+                        These templates mimic legitimate business inquiries about home building services.
+                    </p>
+                </div>
+
+                <button onclick="copyPlainTextTemplates()" 
+                        class="copy-btn bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold mb-4">
+                    <i class="fas fa-copy mr-2"></i>Copy All 12 Plain Text Templates
+                </button>
+
+                <div class="code-block" id="plaintext-code">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Lines Tab -->
+        <div id="subjects-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-heading mr-2 text-purple-600"></i>
+                    Subject Lines (50 Variations)
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    50 unique subject line variations designed to bypass spam filters. 
+                    50% automatically get "Re:" prefix added for Office365 bypass.
+                </p>
+
+                <div class="bg-purple-50 border-l-4 border-purple-600 p-4 mb-6">
+                    <p class="text-sm text-purple-800">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        <strong>Anti-Spam Features:</strong> No financial words, no urgency language, 
+                        conversational tone, automatic "Re:" prefix for 50% of emails.
+                    </p>
+                </div>
+
+                <button onclick="copySubjects()" 
+                        class="copy-btn bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold mb-4">
+                    <i class="fas fa-copy mr-2"></i>Copy All 50 Subject Lines
+                </button>
+
+                <div class="code-block" id="subjects-code">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Footer -->
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg shadow-xl p-8 mt-8">
+            <h3 class="text-xl font-bold mb-4">
+                <i class="fas fa-chart-bar mr-2"></i>Template Statistics
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-blue-400">29</div>
+                    <div class="text-gray-300 text-sm">HTML Templates</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-green-400">12</div>
+                    <div class="text-gray-300 text-sm">Plain Text Styles</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-purple-400">50</div>
+                    <div class="text-gray-300 text-sm">Subject Lines</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-yellow-400">∞</div>
+                    <div class="text-gray-300 text-sm">Combinations</div>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm mt-6 text-center">
+                <i class="fas fa-clock mr-2"></i>Last Updated: January 26, 2026
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // HTML Template Code
+        const htmlTemplateCode = `// HTML TEMPLATE FUNCTION
+// Generates 29 unique color-themed email templates with randomized content
+
+export function generateInvoiceEmail(
+  workOrder: string,
+  reference: string,
+  service: string,
+  dueDate: string,
+  recipientEmail: string,
+  trackingUrl: string,
+  templateKey: string,
+  senderEmail?: string
+): string {
+  
+  const domainName = getDomainName(recipientEmail)
+  
+  let safeUrl = trackingUrl || '#'
+  if (!safeUrl || safeUrl === '') {
+    safeUrl = '#'
+  }
+  
+  // Randomized greetings
+  const greetings = [
+    \`Hi there,\`,
+    \`Hello,\`,
+    \`Good day,\`,
+    \`Hi,\`,
+    \`Hello team,\`,
+    \`Greetings,\`,
+    \`Hi \${domainName} team,\`,
+    \`Good afternoon,\`
+  ]
+  
+  // Casual openings
+  const openings = [
+    \`I wanted to give you a quick update on your recent project.\`,
+    \`Just following up on the work we completed for you.\`,
+    \`Here's a summary of what we finished up recently.\`,
+    \`Wanted to share some details about your completed service.\`,
+    \`Quick note about the project we wrapped up.\`,
+    \`Thought you'd like to see a summary of the work completed.\`,
+    \`Here are the details for the service we provided.\`,
+    \`Just wanted to confirm everything went smoothly with your order.\`
+  ]
+  
+  // Friendly closings
+  const closings = [
+    \`Let me know if you have any questions!\`,
+    \`Feel free to reach out if you need anything.\`,
+    \`Thanks for working with us.\`,
+    \`Hope everything looks good on your end.\`,
+    \`Please let me know if you need any clarification.\`,
+    \`Thanks again for choosing our services.\`,
+    \`Looking forward to working with you again soon.\`,
+    \`Don't hesitate to contact me if you have questions.\`
+  ]
+  
+  // CTA buttons (no financial words)
+  const ctaButtons = [
+    'View Details',
+    'See Summary',
+    'Check Status',
+    'Review Project',
+    'See Report',
+    'View Document',
+    'Check Details',
+    'Open Summary'
+  ]
+  
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)]
+  const opening = openings[Math.floor(Math.random() * openings.length)]
+  const closing = closings[Math.floor(Math.random() * closings.length)]
+  const ctaText = ctaButtons[Math.floor(Math.random() * ctaButtons.length)]
+  
+  const formattedDate = new Date(dueDate).toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  })
+  
+  // 29 COLOR SCHEMES
+  const colorSchemes: Record<string, any> = {
+    template1: { primary: '#4A90E2', secondary: '#357ABD', bg: '#F7FAFD', border: '#D4E5F7' },
+    template2: { primary: '#5CB85C', secondary: '#4CAE4C', bg: '#F5FAF5', border: '#D6EAD6' },
+    template3: { primary: '#E67E22', secondary: '#D35400', bg: '#FDF5F0', border: '#F8D7B8' },
+    template4: { primary: '#9B59B6', secondary: '#8E44AD', bg: '#F9F5FB', border: '#E1D4E8' },
+    template5: { primary: '#FF9800', secondary: '#F57C00', bg: '#FFF8F0', border: '#FFE0B2' },
+    template6: { primary: '#26A69A', secondary: '#00897B', bg: '#F0F8F7', border: '#B2DFDB' },
+    template7: { primary: '#7E57C2', secondary: '#673AB7', bg: '#F8F6FB', border: '#D1C4E9' },
+    template8: { primary: '#EC407A', secondary: '#D81B60', bg: '#FDF6F8', border: '#F8BBD0' },
+    template9: { primary: '#26C6DA', secondary: '#00ACC1', bg: '#F0FBFC', border: '#B2EBF2' },
+    template10: { primary: '#42A5F5', secondary: '#1E88E5', bg: '#F5F9FD', border: '#BBDEFB' },
+    template11: { primary: '#8D6E63', secondary: '#6D4C41', bg: '#F9F8F7', border: '#D7CCC8' },
+    template12: { primary: '#78909C', secondary: '#607D8B', bg: '#F7F8F9', border: '#CFD8DC' },
+    template13: { primary: '#FF7043', secondary: '#F4511E', bg: '#FFF7F5', border: '#FFCCBC' },
+    template14: { primary: '#29B6F6', secondary: '#039BE5', bg: '#F4FAFD', border: '#B3E5FC' },
+    template15: { primary: '#AB47BC', secondary: '#8E24AA', bg: '#FAF7FB', border: '#E1BEE7' },
+    template16: { primary: '#26C6DA', secondary: '#00BCD4', bg: '#F0FBFC', border: '#B2EBF2' },
+    template17: { primary: '#7CB342', secondary: '#689F38', bg: '#F7FAF5', border: '#DCEDC8' },
+    template18: { primary: '#FF5722', secondary: '#E64A19', bg: '#FFF6F5', border: '#FFCCBC' },
+    template19: { primary: '#5C6BC0', secondary: '#3F51B5', bg: '#F7F8FB', border: '#C5CAE9' },
+    template20: { primary: '#EC407A', secondary: '#E91E63', bg: '#FDF6F8', border: '#F8BBD0' },
+    template21: { primary: '#29B6F6', secondary: '#03A9F4', bg: '#F4FAFD', border: '#B3E5FC' },
+    template22: { primary: '#9CCC65', secondary: '#8BC34A', bg: '#F8FAF6', border: '#DCEDC8' },
+    template23: { primary: '#FFEB3B', secondary: '#FDD835', bg: '#FFFEF5', border: '#FFF9C4' },
+    template24: { primary: '#4FC3F7', secondary: '#03A9F4', bg: '#F5FBFD', border: '#B3E5FC' },
+    template25: { primary: '#9575CD', secondary: '#7E57C2', bg: '#F9F7FB', border: '#D1C4E9' },
+    template26: { primary: '#4DB6AC', secondary: '#26A69A', bg: '#F5FAF9', border: '#B2DFDB' },
+    template27: { primary: '#FFB74D', secondary: '#FFA726', bg: '#FFF9F5', border: '#FFE0B2' },
+    template28: { primary: '#90A4AE', secondary: '#78909C', bg: '#F8F9FA', border: '#CFD8DC' },
+    template29: { primary: '#64B5F6', secondary: '#42A5F5', bg: '#F6FAFD', border: '#BBDEFB' }
+  }
+  
+  const colors = colorSchemes[templateKey] || colorSchemes.template1
+  
+  // HTML EMAIL STRUCTURE
+  return \\\`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Update - \${workOrder}</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#fafafa;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#fafafa;">
+    <tr>
+      <td style="padding:30px 15px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border-radius:6px;">
+          
+          <tr>
+            <td style="padding:35px 45px 25px;border-bottom:2px solid \${colors.primary};">
+              <h2 style="margin:0;color:\${colors.primary};font-size:22px;font-weight:500;">Project Update</h2>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="padding:35px 45px;">
+              <p style="margin:0 0 18px;color:#2c3e50;font-size:15px;line-height:1.6;">\${greeting}</p>
+              
+              <p style="margin:0 0 25px;color:#34495e;font-size:15px;line-height:1.7;">\${opening}</p>
+              
+              <div style="background-color:\${colors.bg};border-left:3px solid \${colors.primary};padding:20px;margin-bottom:25px;border-radius:4px;">
+                <p style="margin:0 0 12px;color:#555;font-size:14px;line-height:1.6;">
+                  <strong style="color:#2c3e50;">Project ID:</strong> \${workOrder}
+                </p>
+                <p style="margin:0 0 12px;color:#555;font-size:14px;line-height:1.6;">
+                  <strong style="color:#2c3e50;">Reference:</strong> \${reference}
+                </p>
+                <p style="margin:0 0 12px;color:#555;font-size:14px;line-height:1.6;">
+                  <strong style="color:#2c3e50;">Service Type:</strong> \${service}
+                </p>
+                <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">
+                  <strong style="color:#2c3e50;">Completed:</strong> \${formattedDate}
+                </p>
+              </div>
+              
+              <p style="margin:0 0 25px;color:#34495e;font-size:15px;line-height:1.7;">
+                You can <a href="\${safeUrl}" style="color:\${colors.primary};text-decoration:none;border-bottom:1px solid \${colors.primary};">\${ctaText.toLowerCase()}</a> if you'd like to review everything.
+              </p>
+              
+              <p style="margin:0;color:#34495e;font-size:15px;line-height:1.7;">\${closing}</p>
+              
+              <p style="margin:25px 0 0;color:#7f8c8d;font-size:14px;line-height:1.5;">
+                Best regards,<br>
+                The Team
+              </p>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="padding:20px 45px;background-color:#f8f9fa;border-top:1px solid #e9ecef;border-radius:0 0 6px 6px;">
+              <p style="margin:0;color:#95a5a6;font-size:12px;line-height:1.5;text-align:center;">
+                This message was sent to \${recipientEmail}
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  \\\`.trim()
+}
+
+function getDomainName(email: string): string {
+  const domain = email.split('@')[1]?.split('.')[0] || ''
+  return domain.charAt(0).toUpperCase() + domain.slice(1)
+}`;
+
+        // Plain Text Templates Code
+        const plainTextCode = `// PLAIN TEXT TEMPLATES - 12 HOME BUILDING INQUIRY STYLES
+// Used 75% of the time for maximum deliverability
+
+const greetings = [
+  'Hello',
+  'Hi there',
+  'Good morning',
+  'Good afternoon',
+  'Hi',
+  'Greetings'
+]
+const greeting = greetings[Math.floor(Math.random() * greetings.length)]
+const senderName = account.account_email.split('@')[0].replace(/[._-]/g, ' ')
+  .split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+
+const inquiryStyles = [
+  // Style 1: Formal inquiry
+  greeting + ',\\n\\n' +
+  'I\\'m reaching out to inquire about home building from your company. I\\'d appreciate any information on availability, specifications, pricing, and lead times.\\n\\n' +
+  'Please let me know the best way to proceed or if you need additional details from me.\\n\\n' +
+  'Thank you,\\n' + senderName,
+  
+  // Style 2: Project-based inquiry
+  greeting + ',\\n\\n' +
+  'I\\'m interested in discussing a potential home building project with your company. Could you provide information about your current availability and pricing structure?\\n\\n' +
+  'I\\'d also like to know about typical timelines and what specifications you can accommodate.\\n\\n' +
+  'Looking forward to hearing from you.\\n\\n' +
+  'Best regards,\\n' + senderName,
+  
+  // Style 3: Direct and brief
+  greeting + ',\\n\\n' +
+  'I\\'m considering building a new home and would like to learn more about your services. What information would you need from me to provide a quote?\\n\\n' +
+  'Please advise on next steps and approximate lead times.\\n\\n' +
+  'Thanks,\\n' + senderName,
+  
+  // Style 4: Detailed inquiry
+  greeting + ',\\n\\n' +
+  'I\\'m writing to inquire about your home building services. I\\'m particularly interested in understanding:\\n\\n' +
+  '- Current availability for new projects\\n' +
+  '- Typical construction timelines\\n' +
+  '- Pricing ranges and payment terms\\n' +
+  '- Customization options\\n\\n' +
+  'Please let me know how we can move forward with this discussion.\\n\\n' +
+  'Best,\\n' + senderName,
+  
+  // Style 5: Personal approach
+  greeting + ',\\n\\n' +
+  'My family and I are looking to build a new home and came across your company. Would you be able to share information about your services and availability?\\n\\n' +
+  'I\\'d appreciate learning about your process, pricing, and what you\\'d need from us to get started.\\n\\n' +
+  'Thank you for your time.\\n\\n' +
+  senderName,
+  
+  // Style 6: Timeline focused
+  greeting + ',\\n\\n' +
+  'I\\'m planning a home building project and wanted to reach out about your services. What are your current lead times for new builds?\\n\\n' +
+  'Also, could you provide information on pricing and what specifications you typically work with?\\n\\n' +
+  'Appreciate your help.\\n\\n' +
+  'Regards,\\n' + senderName,
+  
+  // Style 7: Research phase
+  greeting + ',\\n\\n' +
+  'I\\'m in the early stages of planning a home build and gathering information from different builders. Could you share details about your services, including availability and pricing?\\n\\n' +
+  'Any information about your process and timelines would be helpful as well.\\n\\n' +
+  'Thanks in advance,\\n' + senderName,
+  
+  // Style 8: Recommendation-based
+  greeting + ',\\n\\n' +
+  'I was referred to your company for home building services. I\\'d like to learn more about your current availability and what you offer.\\n\\n' +
+  'Could you provide information on pricing, specifications, and typical project timelines?\\n\\n' +
+  'Looking forward to your response.\\n\\n' +
+  senderName,
+  
+  // Style 9: Budget conscious
+  greeting + ',\\n\\n' +
+  'I\\'m interested in building a home and would like to understand your pricing structure and what\\'s included. What information do you need from me to provide an estimate?\\n\\n' +
+  'Also curious about your availability for starting new projects.\\n\\n' +
+  'Thank you,\\n' + senderName,
+  
+  // Style 10: Comparison shopping
+  greeting + ',\\n\\n' +
+  'I\\'m comparing several home builders and wanted to learn more about your company. Could you provide details on your services, availability, and pricing?\\n\\n' +
+  'I\\'d also appreciate information about customization options and construction timelines.\\n\\n' +
+  'Best regards,\\n' + senderName,
+  
+  // Style 11: Ready to move forward
+  greeting + ',\\n\\n' +
+  'I\\'m ready to move forward with a home building project and would like to discuss your services. What are your current lead times and availability?\\n\\n' +
+  'Please share information about pricing and what you\\'d need from me to begin the process.\\n\\n' +
+  'Thanks,\\n' + senderName,
+  
+  // Style 12: Exploratory
+  greeting + ',\\n\\n' +
+  'I\\'m exploring options for building a new home. Could you provide an overview of your services, including typical timelines and pricing ranges?\\n\\n' +
+  'I\\'d also like to know what specifications and customization options you offer.\\n\\n' +
+  'Appreciate your help.\\n\\n' +
+  'Regards,\\n' + senderName
+]
+
+// Pick random style (1-12)
+const styleNum = Math.floor(Math.random() * inquiryStyles.length)
+const plainTextBody = inquiryStyles[styleNum]
+
+emailBody = {
+  contentType: 'Text',
+  content: plainTextBody
+}`;
+
+        // Subject Lines Code
+        const subjectsCode = `// 50 SUBJECT LINE VARIATIONS
+// System randomly picks one and replaces \${workOrder} with actual order number
+// 50% of emails get "Re:" prefix automatically added
+
+export function getRandomSubject(workOrder: string): string {
+  const subjects = [
+    // Casual check-in (no urgency)
+    \`Quick update on \${workOrder}\`,
+    \`\${workOrder} - Status update\`,
+    \`Re: \${workOrder} details\`,
+    \`Following up: \${workOrder}\`,
+    \`\${workOrder} completed successfully\`,
+    
+    // Professional but friendly
+    \`Update regarding \${workOrder}\`,
+    \`\${workOrder} - All set\`,
+    \`Confirmation: \${workOrder}\`,
+    \`\${workOrder} update for your records\`,
+    \`FYI: \${workOrder} status\`,
+    
+    // Conversational
+    \`Just wanted to update you on \${workOrder}\`,
+    \`\${workOrder} - Everything looks good\`,
+    \`\${workOrder} has been processed\`,
+    \`Quick note about \${workOrder}\`,
+    \`\${workOrder} - Here's what happened\`,
+    
+    // Business casual
+    \`\${workOrder} - Documentation attached\`,
+    \`\${workOrder} summary\`,
+    \`Your \${workOrder} is ready\`,
+    \`\${workOrder} - Next steps\`,
+    \`\${workOrder} wrap-up\`,
+    
+    // No financial words
+    \`\${workOrder} project update\`,
+    \`\${workOrder} service completed\`,
+    \`\${workOrder} - Task finished\`,
+    \`\${workOrder} work summary\`,
+    \`\${workOrder} - Job done\`,
+    
+    // Neutral tone
+    \`About \${workOrder}\`,
+    \`\${workOrder} information\`,
+    \`\${workOrder} details\`,
+    \`\${workOrder} confirmation\`,
+    \`\${workOrder} summary report\`,
+    
+    // Professional variations
+    \`\${workOrder} - Project complete\`,
+    \`\${workOrder} documentation\`,
+    \`\${workOrder} - Service report\`,
+    \`\${workOrder} update note\`,
+    \`\${workOrder} - Progress report\`,
+    
+    // Additional unique subjects
+    \`\${workOrder} - Work complete\`,
+    \`\${workOrder} status notification\`,
+    \`\${workOrder} - Task update\`,
+    \`\${workOrder} completion notice\`,
+    \`\${workOrder} - Service update\`,
+    \`\${workOrder} project summary\`,
+    \`\${workOrder} - Job complete\`,
+    \`\${workOrder} work notification\`,
+    \`\${workOrder} - Update for you\`,
+    \`\${workOrder} completion report\`,
+    \`\${workOrder} - All done\`,
+    \`\${workOrder} service notification\`,
+    \`\${workOrder} - Task completed\`,
+    \`\${workOrder} work update\`,
+    \`\${workOrder} - Project finished\`
+  ]
+  
+  return subjects[Math.floor(Math.random() * subjects.length)]
+}
+
+// Office365 Bypass: Add "Re:" to 50% of subjects
+const baseSubject = getRandomSubject(item.work_order)
+const useReplyTrick = Math.random() < 0.5
+const subject = useReplyTrick ? 'Re: ' + baseSubject : baseSubject`;
+
+        // Populate code blocks
+        document.getElementById('html-code').textContent = htmlTemplateCode;
+        document.getElementById('plaintext-code').textContent = plainTextCode;
+        document.getElementById('subjects-code').textContent = subjectsCode;
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.closest('.tab-button').classList.add('active');
+        }
+
+        // Copy functions
+        function copyToClipboard(text, buttonElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = buttonElement.innerHTML;
+                buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                buttonElement.classList.add('copy-success', 'bg-green-600');
+                
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalText;
+                    buttonElement.classList.remove('copy-success', 'bg-green-600');
+                }, 2000);
+            });
+        }
+
+        function copyHtmlTemplate() {
+            copyToClipboard(htmlTemplateCode, event.target);
+        }
+
+        function copyPlainTextTemplates() {
+            copyToClipboard(plainTextCode, event.target);
+        }
+
+        function copySubjects() {
+            copyToClipboard(subjectsCode, event.target);
+        }
+
+        // Expose functions globally
+        window.showTab = showTab;
+        window.copyHtmlTemplate = copyHtmlTemplate;
+        window.copyPlainTextTemplates = copyPlainTextTemplates;
+        window.copySubjects = copySubjects;
+    </script>
+</body>
+</html>

